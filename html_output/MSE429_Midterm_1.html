@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Midterm 1 — MSE429 Study Pages</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}], throwOnError: false});"></script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+  <main class="main-content">
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&gt;</span>
+      <a href="index.html#assessments">Assessments</a><span class="sep">&gt;</span>
+      Midterm 1
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Midterm 1</h1>
+    <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=1" target="_blank">PDF p.1</a>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 1                                                     -->
+    <!-- ============================================================ -->
+    <h2 id="problem-1">Problem 1: Forward Kinematics &mdash; DH Parameters and Transformation Matrices</h2>
+    <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=1" target="_blank">PDF p.1</a>
+    <span class="source-link" style="background: var(--warning-color); color: white; border-color: var(--warning-color); font-weight: 700; font-size: 0.85rem;">Point values detailed per step below</span>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Problem Statement</div>
+      <p>Given a robot manipulator (shown in the diagram), assign DH frames, derive the DH parameter table, compute individual transformation matrices ${}^{0}T_1$, ${}^{1}T_2$, ${}^{2}T_3$, ${}^{3}T_{ee}$, and find the overall forward kinematics ${}^{0}T_{ee}$.</p>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/mid1_p1.png" alt="Figure: A robot manipulator with 3 joints and an end-effector. The configuration shows:
+      
+        A base frame $\{0\}$ with $\hat{X}_0$ and $\hat{Z}_0$ at the bottom.
+        Joint 1 ($\theta_1$)" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> A robot manipulator with 3 joints and an end-effector. The configuration shows:
+      <ul style="font-style:normal; margin-top:0.5rem;">
+        <li>A base frame $\{0\}$ with $\hat{X}_0$ and $\hat{Z}_0$ at the bottom.</li>
+        <li>Joint 1 ($\theta_1$): revolute, rotating about $\hat{Z}_0$ (vertical). A vertical link of length $L_1$ extends upward.</li>
+        <li>Joint 2 ($\theta_2$): revolute, at the top of $L_1$. Frame $\{1\}$ is at this joint with $\hat{Z}_1$ along the horizontal direction (after 90&deg; twist). A link of length $L_2$ extends horizontally.</li>
+        <li>Joint 3 ($d_3$): prismatic, sliding along $\hat{Z}_3$.</li>
+        <li>End-effector frame $\{ee\}$ at the tip. A link of length $L_3$ extends from frame $\{3\}$ to $\{ee\}$.</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-label">Point Values</div>
+      <ul>
+        <li>0.5 pts for each frame origin, 0.75 pts for each frame axes</li>
+        <li>0.5 pts for zero elements, 0.75 pts for all nonzero and joint parameter elements in DH table</li>
+        <li>2 pts for each individual transformation matrix, 2 pts for the final answer</li>
+      </ul>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-mid-1">Show Solution</button>
+    <div id="sol-mid-1" class="solution-content">
+
+      <h4>Step 1: DH Parameter Table</h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=1" target="_blank">PDF p.1</a>
+      <table>
+        <thead>
+          <tr><th>$i-1$</th><th>$\alpha_{i-1}$</th><th>$a_{i-1}$</th><th>$\theta_i$</th><th>$d_i$</th><th>$i$</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>0</td><td>$\theta_1$</td><td>$L_1$</td><td>1</td></tr>
+          <tr><td>1</td><td>$90°$</td><td>0</td><td>$\theta_2$</td><td>0</td><td>2</td></tr>
+          <tr><td>2</td><td>$90°$</td><td>$L_2$</td><td>0</td><td>$d_3$</td><td>3</td></tr>
+          <tr><td>3</td><td>0</td><td>$L_3$</td><td>0</td><td>0</td><td>ee</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Step 2: General DH Transformation Matrix</h4>
+      <p>The standard DH transformation from frame $\{i-1\}$ to $\{i\}$ is:</p>
+      $${}^{i-1}T_i = \begin{bmatrix} \cos\theta_i & -\sin\theta_i & 0 & a_{i-1} \\ \sin\theta_i \cos\alpha_{i-1} & \cos\theta_i \cos\alpha_{i-1} & -\sin\alpha_{i-1} & -d_i \sin\alpha_{i-1} \\ \sin\theta_i \sin\alpha_{i-1} & \cos\theta_i \sin\alpha_{i-1} & \cos\alpha_{i-1} & d_i \cos\alpha_{i-1} \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+      <h4>Step 3: Compute ${}^{0}T_1$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=1" target="_blank">PDF p.1</a>
+      <p>Substituting $\alpha_0 = 0$, $a_0 = 0$, $\theta_1 = \theta_1$, $d_1 = L_1$:</p>
+      $${}^{0}T_1 = \begin{bmatrix} \cos\theta_1 & -\sin\theta_1 & 0 & 0 \\ \sin\theta_1 & \cos\theta_1 & 0 & 0 \\ 0 & 0 & 1 & L_1 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+      <h4>Step 4: Compute ${}^{1}T_2$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=2" target="_blank">PDF p.2</a>
+      <p>Substituting $\alpha_1 = 90°$, $a_1 = 0$, $\theta_2 = \theta_2$, $d_2 = 0$:</p>
+      $${}^{1}T_2 = \begin{bmatrix} \cos\theta_2 & -\sin\theta_2 & 0 & 0 \\ 0 & 0 & -1 & 0 \\ \sin\theta_2 & \cos\theta_2 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+      <h4>Step 5: Compute ${}^{2}T_3$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <p>Substituting $\alpha_2 = 90°$, $a_2 = L_2$, $\theta_3 = 0$, $d_3 = d_3$:</p>
+      $${}^{2}T_3 = \begin{bmatrix} 1 & 0 & 0 & L_2 \\ 0 & 0 & -1 & -d_3 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+      <h4>Step 6: Compute ${}^{3}T_{ee}$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <p>Substituting $\alpha_3 = 0$, $a_3 = L_3$, $\theta_{ee} = 0$, $d_{ee} = 0$:</p>
+      $${}^{3}T_{ee} = \begin{bmatrix} 1 & 0 & 0 & L_3 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+      <h4>Step 7: Overall Transformation ${}^{0}T_{ee} = {}^{0}T_1 \; {}^{1}T_2 \; {}^{2}T_3 \; {}^{3}T_{ee}$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=2" target="_blank">PDF p.2</a>
+      $${}^{0}T_{ee} = \begin{bmatrix} c_1 c_2 & s_1 & c_1 s_2 & c_1((L_2 + L_3)c_2 + d_3 s_2) \\ s_1 c_2 & -c_1 & s_1 s_2 & s_1((L_2 + L_3)c_2 + d_3 s_2) \\ s_2 & 0 & -c_2 & (L_2 + L_3)s_2 - d_3 c_2 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+      <p>where $c_i = \cos\theta_i$ and $s_i = \sin\theta_i$.</p>
+
+      <p><strong>Answer</strong>: The position of the end-effector in the base frame is:</p>
+      $${}^{0}P_{ee} = \begin{bmatrix} c_1((L_2 + L_3)c_2 + d_3 s_2) \\ s_1((L_2 + L_3)c_2 + d_3 s_2) \\ (L_2 + L_3)s_2 - d_3 c_2 \end{bmatrix}$$
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 2                                                     -->
+    <!-- ============================================================ -->
+    <h2 id="problem-2">Problem 2: Inverse Kinematics &mdash; Pieper's Method</h2>
+    <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=3" target="_blank">PDF p.3</a>
+    <span class="source-link" style="background: var(--warning-color); color: white; border-color: var(--warning-color); font-weight: 700; font-size: 0.85rem;">Point values detailed per step below</span>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Problem Statement</div>
+      <p>Using the DH parameters and forward kinematics from Problem 1, find the inverse kinematics (solve for $\theta_1$, $\theta_2$, and $d_3$) using Pieper's method.</p>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-mid-2">Show Solution</button>
+    <div id="sol-mid-2" class="solution-content">
+
+      <h4>Step 1: Identify the DH parameters for Pieper's method <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=3" target="_blank">PDF p.3</a>
+      <p>From the DH table:</p>
+      $$\alpha_1 = 90°, \; a_1 = 0, \; d_1 = L_1, \; \alpha_2 = 90°, \; a_2 = L_2, \; d_2 = 0, \; \theta_3 = 0, \; \alpha_3 = 0, \; a_3 = L_3, \; d_4 = 0$$
+
+      <h4>Step 2: Since $a_1 = 0$, use Pieper's method <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      $$r = k_3$$
+      <p>where:</p>
+      $$k_3 = f_1^2 + f_2^2 + f_3^2 + a_1^2 + d_2^2 + 2d_2 f_3$$
+
+      <h4>Step 3: Compute $f_1$, $f_2$, $f_3$ <span class="source-link" style="font-size:0.75rem;">[2 pts each]</span></h4>
+      <p>The general Pieper formulas are:</p>
+      $$f_1 = a_3 c_3 + d_4 s_{\alpha_3} s_3 + a_2$$
+      $$f_2 = a_3 c_{\alpha_2} s_3 - d_4 s_{\alpha_3} c_{\alpha_2} c_3 - d_4 s_{\alpha_2} c_{\alpha_3} - d_3 s_{\alpha_2}$$
+      $$f_3 = a_3 s_{\alpha_2} s_3 - d_4 s_{\alpha_3} s_{\alpha_2} c_3 + d_4 c_{\alpha_2} c_{\alpha_3} + d_3 c_{\alpha_2}$$
+
+      <h4>Step 4: Substitute the DH parameters</h4>
+      $$f_1 = L_3 \cdot 1 + 0 + L_2 = L_2 + L_3$$
+      $$f_2 = 0 - 0 - 0 - d_3 \cdot \sin(90°) = -d_3$$
+      $$f_3 = 0 - 0 + 0 + d_3 \cdot \cos(90°) = 0$$
+
+      <p><span class="source-link" style="font-size:0.75rem;">[2 pts for $k_3$]</span></p>
+      $$k_3 = (L_2 + L_3)^2 + d_3^2 + 0 + 0 + 0 + 0 = (L_2 + L_3)^2 + d_3^2$$
+
+      <h4>Step 5: Solve for $d_3$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=3" target="_blank">PDF p.3</a>
+      <p>We know $r = x^2 + y^2 + z^2$, therefore:</p>
+      $$d_3 = \pm\sqrt{x^2 + y^2 + z^2 - (L_2 + L_3)^2}$$
+
+      <h4>Step 6: Solve for $\theta_2$ <span class="source-link" style="font-size:0.75rem;">[2 pts for each $k$, 2 pts for $z$ equation]</span></h4>
+      <p>From Pieper's method:</p>
+      $$z = (k_1 s_2 - k_2 c_2) \sin\alpha_1 + k_4$$
+      <p>where:</p>
+      $$k_1 = f_1 = L_2 + L_3$$
+      $$k_2 = -f_2 = d_3$$
+      $$k_4 = f_3 \cos\alpha_1 + d_2 \cos\alpha_1 = 0$$
+      <p>Therefore:</p>
+      $$z = (L_2 + L_3) s_2 - d_3 c_2$$
+
+      <h4>Step 7: Tangent half-angle substitution <span class="source-link" style="font-size:0.75rem;">[4 pts]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=3" target="_blank">PDF p.3</a>
+      <p>Let $u = \tan\frac{\theta_2}{2}$, then:</p>
+      $$\cos\theta_2 = \frac{1 - u^2}{1 + u^2}, \quad \sin\theta_2 = \frac{2u}{1 + u^2}$$
+      <p>Substituting:</p>
+      $$z = (L_2 + L_3)\frac{2u}{1 + u^2} - d_3 \frac{1 - u^2}{1 + u^2}$$
+
+      <h4>Step 8: Form the quadratic equation <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=4" target="_blank">PDF p.4</a>
+      $$(z - d_3)u^2 - 2(L_2 + L_3)u + z + d_3 = 0$$
+
+      <h4>Step 9: Solve for $u$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      $$u = \frac{L_2 + L_3 \pm \sqrt{(L_2 + L_3)^2 - (z - d_3)(z + d_3)}}{(z - d_3)}$$
+      <p>Simplifying the discriminant:</p>
+      $$u = \frac{L_2 + L_3 \pm \sqrt{(L_2 + L_3)^2 + d_3^2 - z^2}}{(z - d_3)}$$
+
+      <h4>Step 10: Recover $\theta_2$ <span class="source-link" style="font-size:0.75rem;">[2 pts]</span></h4>
+      $$\theta_2 = 2\tan^{-1} u$$
+
+      <h4>Step 11: Solve for $\theta_1$ <span class="source-link" style="font-size:0.75rem;">[1 pt each equation, 2 pts each $g$, 2 pts for $\theta_1$]</span></h4>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=4" target="_blank">PDF p.4</a>
+      <p>From Pieper's method:</p>
+      $$c_1 g_1 - s_1 g_2 = x$$
+      $$s_1 g_1 + c_1 g_2 = y$$
+      <p>where:</p>
+      $$g_1 = c_2 f_1 - s_2 f_2 + a_1 = c_2(L_2 + L_3) + s_2 d_3$$
+      $$g_2 = s_2 c_{\alpha_1} f_1 + c_2 c_{\alpha_1} f_2 - s_{\alpha_1} f_3 - d_2 s_{\alpha_1} = 0$$
+      <p>Since $g_2 = 0$:</p>
+      $$x = c_1(c_2(L_2 + L_3) + s_2 d_3)$$
+      $$y = s_1(c_2(L_2 + L_3) + s_2 d_3)$$
+      <p>Therefore:</p>
+      $$\theta_1 = \text{atan2}(y, x)$$
+
+      <div class="callout callout-theorem">
+        <div class="callout-label">Final Answers</div>
+        <ul>
+          <li>$d_3 = \pm\sqrt{x^2 + y^2 + z^2 - (L_2 + L_3)^2}$</li>
+          <li>$\theta_2 = 2\tan^{-1}\!\left(\frac{L_2 + L_3 \pm \sqrt{(L_2 + L_3)^2 + d_3^2 - z^2}}{z - d_3}\right)$</li>
+          <li>$\theta_1 = \text{atan2}(y, x)$</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 3                                                     -->
+    <!-- ============================================================ -->
+    <h2 id="problem-3">Problem 3: Euler Angle Extraction and Rotation Matrix Computation</h2>
+    <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=5" target="_blank">PDF p.5</a>
+    <span class="source-link" style="background: var(--warning-color); color: white; border-color: var(--warning-color); font-weight: 700; font-size: 0.85rem;">Point values: (a) 5 pts, (b) 2.5 pts, (c) detailed below</span>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Problem Statement</div>
+      <p>This problem has three parts:</p>
+      <ul>
+        <li>a) Compute ${}^{3}R_6$ by multiplying three individual rotation matrices for joints 4, 5, and 6 (ZYZ Euler angle type wrist).</li>
+        <li>b) Given a specific ${}^{0}R_6$, compute its numerical value.</li>
+        <li>c) Given ${}^{0}R_3$ and ${}^{0}R_6$, find ${}^{3}R_6$ and extract the Euler angles $\theta_4$, $\theta_5$, $\theta_6$.</li>
+      </ul>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-mid-3">Show Solution</button>
+    <div id="sol-mid-3" class="solution-content">
+
+      <h3>Part (a) <span class="source-link" style="font-size:0.75rem;">[5 pts]</span></h3>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=5" target="_blank">PDF p.5</a>
+
+      <p>Step 1: Write the individual rotation matrices for joints 4, 5, 6 (ZYZ wrist):</p>
+      $${}^{3}R_6 = \begin{bmatrix} c_4 & -s_4 & 0 \\ s_4 & c_4 & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} c_5 & -s_5 & 0 \\ 0 & 0 & -1 \\ s_5 & c_5 & 0 \end{bmatrix} \begin{bmatrix} c_6 & -s_6 & 0 \\ 0 & 0 & 1 \\ -s_6 & -c_6 & 0 \end{bmatrix}$$
+
+      <p>Step 2: Multiply the three matrices:</p>
+      $${}^{3}R_6 = \begin{bmatrix} c_4 c_5 c_6 - s_4 s_6 & -c_4 c_5 s_6 - s_4 c_6 & -c_4 s_5 \\ s_4 c_5 c_6 + c_4 s_6 & -s_4 c_5 s_6 + c_4 c_6 & -s_4 s_5 \\ s_5 c_6 & -s_5 s_6 & c_5 \end{bmatrix}$$
+
+      <h3>Part (b) <span class="source-link" style="font-size:0.75rem;">[2.5 pts]</span></h3>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=5" target="_blank">PDF p.5</a>
+
+      <p>Step 1: Evaluate the given rotation matrix:</p>
+      $${}^{0}R_6 = \begin{bmatrix} 0 & -\cos 60° & \cos 30° \\ 0 & \sin 60° & \sin 30° \\ -1 & 0 & 0 \end{bmatrix} = \begin{bmatrix} 0 & -0.5 & 0.866 \\ 0 & 0.866 & 0.5 \\ -1 & 0 & 0 \end{bmatrix}$$
+
+      <h3>Part (c)</h3>
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=5" target="_blank">PDF p.5</a>
+
+      <p>Step 1: The rotation matrix ${}^{0}R_3$ is given as: <span class="source-link" style="font-size:0.75rem;">[1.5 pts]</span></p>
+      $${}^{0}R_3 = \begin{bmatrix} c_1 c_2 & s_1 & c_1 s_2 \\ s_1 c_2 & -c_1 & s_1 s_2 \\ s_2 & 0 & -c_2 \end{bmatrix}$$
+      <p>With numerical values:</p>
+      $${}^{0}R_3 = \begin{bmatrix} 0.5 & 0.5 & 0.707 \\ 0.707 & -0.707 & 0 \\ 0.5 & 0.5 & -0.707 \end{bmatrix}$$
+
+      <p>Step 2: Compute ${}^{0}R_3^{-1} = {}^{0}R_3^{T}$ (since rotation matrices are orthogonal):</p>
+      $${}^{0}R_3^{T} = \begin{bmatrix} 0.5 & 0.707 & 0.5 \\ 0.5 & -0.707 & 0.5 \\ 0.707 & 0 & -0.707 \end{bmatrix}$$
+
+      <p>Step 3: Compute ${}^{3}R_6 = {}^{0}R_3^{T} \; {}^{0}R_6$: <span class="source-link" style="font-size:0.75rem;">[1 pt]</span></p>
+      $${}^{3}R_6 = \begin{bmatrix} 0.5 & 0.707 & 0.5 \\ 0.5 & -0.707 & 0.5 \\ 0.707 & 0 & -0.707 \end{bmatrix} \begin{bmatrix} 0 & -0.5 & 0.866 \\ 0 & 0.866 & 0.5 \\ -1 & 0 & 0 \end{bmatrix}$$
+
+      $${}^{3}R_6 = \begin{bmatrix} -0.707 & 0.183 & 0.683 \\ 0 & -0.966 & 0.259 \\ 0.707 & 0.183 & 0.683 \end{bmatrix} = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}$$
+
+      <a class="source-link" href="../Slides/MSE 429 - Midterm 1.pdf#page=6" target="_blank">PDF p.6</a>
+
+      <p>Step 4: Extract $\theta_5$ from ${}^{3}R_6$. <span class="source-link" style="font-size:0.75rem;">[1 pt for $\sin\theta_5$, 4 pts each solution]</span></p>
+      <p>From the structure of ${}^{3}R_6$, we know $r_{33} = \cos\theta_5$ and $\sin\theta_5 = \pm\sqrt{r_{13}^2 + r_{23}^2}$.</p>
+      $$\theta_5 = \begin{cases} \text{atan2}\!\left(\sqrt{r_{13}^2 + r_{23}^2},\; r_{33}\right) = 47° \\ \text{atan2}\!\left(-\sqrt{r_{13}^2 + r_{23}^2},\; r_{33}\right) = -47° \end{cases}$$
+
+      <p>Step 5: Extract $\theta_6$. <span class="source-link" style="font-size:0.75rem;">[4 pts each solution]</span></p>
+      $$\theta_6 = \begin{cases} \text{atan2}(-r_{32},\; r_{31}) = -14.53° \\ \text{atan2}(r_{32},\; -r_{31}) = 165.5° \end{cases}$$
+
+      <p>Step 6: Extract $\theta_4$. <span class="source-link" style="font-size:0.75rem;">[4 pts each solution]</span></p>
+      $$\theta_4 = \begin{cases} \text{atan2}(-r_{23},\; -r_{13}) = 200.8° \\ \text{atan2}(r_{23},\; r_{13}) = 20.8° \end{cases}$$
+
+      <div class="callout callout-theorem">
+        <div class="callout-label">Final Answers &mdash; Two Solution Sets</div>
+        <ul>
+          <li><strong>Solution 1</strong>: $\theta_5 = 47°$, $\theta_6 = -14.53°$, $\theta_4 = 200.8°$</li>
+          <li><strong>Solution 2</strong>: $\theta_5 = -47°$, $\theta_6 = 165.5°$, $\theta_4 = 20.8°$</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED CHAPTERS                                              -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Chapters</h3>
+      <ul>
+        <li><a href="MSE429_Chapter_2.html">Chapter 2: Spatial Descriptions &amp; Transforms</a> &mdash; Rotation matrices, Euler angles, homogeneous transforms</li>
+        <li><a href="MSE492_Chapter_3.html">Chapter 3: Manipulator Kinematics (DH Parameters)</a> &mdash; DH convention, forward kinematics</li>
+        <li><a href="MSE492_Chapter_4.html">Chapter 4: Inverse Kinematics</a> &mdash; Pieper's method, closed-form solutions</li>
+      </ul>
+    </div>
+
+    <nav class="page-nav"></nav>
+  </main>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

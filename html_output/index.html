@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSE 429/492 — Advanced Kinematics for Robotics</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .hero { text-align: center; padding: 3rem 0 2rem; }
+    .hero h1 { font-size: 2.4rem; margin-bottom: 0.5rem; }
+    .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      background: var(--bg-secondary);
+      transition: box-shadow 0.15s, transform 0.15s;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+    }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .card-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .card-label-chapter { color: var(--accent); }
+    .card-label-tutorial { color: var(--theorem-color); }
+    .card-label-assessment { color: var(--example-color); }
+    .card h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .card p { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+    .stats { display: flex; gap: 2rem; justify-content: center; margin: 2rem 0; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 0.85rem; color: var(--text-secondary); }
+    .errata-banner {
+      background: var(--bg-secondary);
+      border: 1px solid var(--warning-color);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 2rem 0;
+    }
+    .errata-banner h3 { color: var(--warning-color); margin-top: 0; }
+  </style>
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+  <main class="main-content">
+
+    <div class="hero">
+      <h1>MSE 429/492</h1>
+      <p>Advanced Kinematics for Robotics — Interactive Study Pages</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label">Chapters</div></div>
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label">Tutorials</div></div>
+      <div class="stat"><div class="stat-num">2</div><div class="stat-label">Assignments</div></div>
+      <div class="stat"><div class="stat-num">1</div><div class="stat-label">Midterm</div></div>
+    </div>
+
+    <h2 id="chapters">Chapters</h2>
+    <div class="card-grid">
+      <a class="card" href="MSE429_Chapter_2.html">
+        <div class="card-label card-label-chapter">MSE429 &middot; Chapter 2</div>
+        <h3>Spatial Descriptions &amp; Transforms</h3>
+        <p>Position vectors, rotation matrices, homogeneous transforms, Euler angles, quaternions, angle-axis</p>
+      </a>
+      <a class="card" href="MSE492_Chapter_3.html">
+        <div class="card-label card-label-chapter">MSE492 &middot; Chapter 3</div>
+        <h3>Manipulator Kinematics</h3>
+        <p>DH parameters, link descriptions, frame assignment, forward kinematics</p>
+      </a>
+      <a class="card" href="MSE492_Chapter_4.html">
+        <div class="card-label card-label-chapter">MSE492 &middot; Chapter 4</div>
+        <h3>Inverse Kinematics</h3>
+        <p>Algebraic &amp; geometric solutions, Pieper's method, workspace, half-angle substitution</p>
+      </a>
+      <a class="card" href="MSE492_Chapter_5.html">
+        <div class="card-label card-label-chapter">MSE492 &middot; Chapter 5</div>
+        <h3>Jacobians, Velocities &amp; Static Forces</h3>
+        <p>Velocity propagation, Jacobian (2 methods), singularities, static forces, manipulability</p>
+      </a>
+    </div>
+
+    <h2 id="tutorials">Tutorials</h2>
+    <div class="card-grid">
+      <a class="card" href="MSE429_Tutorial_1.html">
+        <div class="card-label card-label-tutorial">Tutorial 1</div>
+        <h3>Transforms &amp; Rotations</h3>
+        <p>5 problems: rotation matrix properties, multi-frame mapping, transforms on a wedge, Euler angles</p>
+      </a>
+      <a class="card" href="MSE429_Tutorial_3.html">
+        <div class="card-label card-label-tutorial">Tutorial 3</div>
+        <h3>Forward &amp; Inverse Kinematics</h3>
+        <p>4 problems: 3-link IK, Pieper's method on 4R, Stanford FK &amp; IK</p>
+      </a>
+      <a class="card" href="MSE429_Tutorial_4.html">
+        <div class="card-label card-label-tutorial">Tutorial 4</div>
+        <h3>Velocity Analysis</h3>
+        <p>5 problems: end-effector velocity, rotating disc, velocity propagation for 3R and 3-DOF arms</p>
+      </a>
+      <a class="card" href="MSE429_Tutorial_5.html">
+        <div class="card-label card-label-tutorial">Tutorial 5</div>
+        <h3>Jacobians &amp; Forces</h3>
+        <p>6 problems: Stanford Jacobian (both methods), inverse velocity, degeneracies, inverse force</p>
+      </a>
+    </div>
+
+    <h2 id="assessments">Assessments</h2>
+    <div class="card-grid">
+      <a class="card" href="MSE429_Assignment_1.html">
+        <div class="card-label card-label-assessment">Assignment 1</div>
+        <h3>Transforms &amp; Orientations</h3>
+        <p>7 problems with solutions: homogeneous transforms, rotation matrices, Euler angles, camera frames</p>
+      </a>
+      <a class="card" href="MSE429_Assignment_2.html">
+        <div class="card-label card-label-assessment">Assignment 2</div>
+        <h3>DH Parameters &amp; Kinematics</h3>
+        <p>6 problems with rubric: frame assignment, DH tables, forward kinematics for various manipulators</p>
+      </a>
+      <a class="card" href="MSE429_Midterm_1.html">
+        <div class="card-label card-label-assessment">Midterm 1</div>
+        <h3>Comprehensive Exam</h3>
+        <p>3 problems: forward kinematics, Pieper's method IK, wrist rotation &amp; Euler angles</p>
+      </a>
+    </div>
+
+    <div class="errata-banner">
+      <h3>Errata Found in Original Slides</h3>
+      <p>This study tool's verification pipeline caught and corrected the following errors in the lecture slides:</p>
+      <ol>
+        <li><strong>Ch 2, p.24</strong>: Z-Y-Z Euler angles degenerate case ($\beta=180\degree$) — sign error in $\gamma$ formula</li>
+        <li><strong>Ch 4, p.25</strong>: Pieper's method z-equation — sign error in $k_2$ coefficient</li>
+        <li><strong>Ch 5, p.20</strong>: Jacobian ${}^3 J_3$ entry — $L_2 \sin\theta_2$ should be $L_1 \sin\theta_2$</li>
+      </ol>
+      <p>All corrections are documented in the respective chapter pages with links to the original PDF.</p>
+    </div>
+
+  </main>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

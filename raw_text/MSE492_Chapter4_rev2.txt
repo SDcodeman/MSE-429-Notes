@@ -1,0 +1,657 @@
+                 Chapter 4
+
+
+Inverse Manipulator Kinematics
+
+
+
+     MSE 429 – Advanced Kinematics for Robotics System   Ch4 - 1
+        Overview
+
+This chapter covers the following topics:
+
+•   Definition of inverse kinematics
+•   Workspace definition
+•   Algebraic vs. geometric
+•   Algebraic solution by reduction to polynomial
+•   The wrist-partitioned (Pieper’s) method
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System   Ch4 - 2
+         Definition of Inverse Kinematics
+
+The inverse kinematics computes the values of the joint variables that would result to a
+desired position or orientation of the end-effector.
+
+Generally, it is desired for the manipulator to follow a particular path. For example, pick
+up an object and place it elsewhere. Therefore, a numerical desired position and
+orientation of the end-effector must be established.
+
+In inverse kinematic calculations, given the numerical value of 𝑁𝑁0 𝑇𝑇, it is desired to find
+the set of joint translation/rotational displacements that will result in such numerical
+matrix.
+
+Each 𝑖𝑖−1𝑖𝑖𝑇𝑇, is a function of the 𝑞𝑞𝑖𝑖 joint displacement (𝜃𝜃𝑖𝑖 for revolute and 𝑑𝑑𝑖𝑖 for prismatic
+joints).
+                                 0      0       1         𝑛𝑛−1              𝑛𝑛
+                              𝑒𝑒.𝑒𝑒𝑇𝑇 = 1𝑇𝑇 𝑞𝑞1 2𝑇𝑇 𝑞𝑞2 …    𝑛𝑛𝑇𝑇(𝑞𝑞𝑛𝑛 ) 𝑒𝑒.𝑒𝑒𝑇𝑇
+
+Therefore, the problem of inverse kinematics lies in comparing each element of the
+matrices and solve for all the joint displacements, 𝑞𝑞𝑖𝑖 ’s.
+
+
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System                          Ch4 - 3
+        Definition of Inverse Kinematics
+
+Remarks:
+
+• The desired position/orientation to be calculated for inverse kinematics should be
+  with the workspace of the manipulator – which is based on the length of the links,
+  joint kinematic layout, and joint limits.
+
+• Redundant manipulators (more than 6-DoF) have an infinite number of solutions
+  (configurations).
+
+• Depending on the number of joints and the structure of the manipulator, the inverse
+  kinematics may have no solutions, one solution, or multiple solutions.
+
+• In the problem of inverse kinematics, normally, as set of nonlinear equations should
+  be solved, for which, special attention should be given to the existence of the
+  solution, number of solutions, and the method of solutions.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                Ch4 - 4
+        Manipulator Workspace
+
+The workspace of a robot manipulator is defined as the set of points that can be
+reached by its end‐effector.
+
+• The reachable workspace is a region that the manipulator can reach in at least one
+  orientation.
+
+• The dextrous workspace is a region that the manipulator can reach with all the
+  orientations.
+
+
+
+                                   𝑙𝑙2                                       𝜃𝜃 = 360𝑜𝑜
+
+                       𝑙𝑙1
+                              𝜃𝜃
+
+                  𝑙𝑙1 = 𝑙𝑙2                                                   𝑙𝑙1 = 𝑙𝑙2
+
+
+
+       Reachable workspace = 2𝑙𝑙1                  Dexterous workspace = single point, the origin
+
+
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System                            Ch4 - 5
+ Manipulator Workspace
+
+
+
+
+                                𝑙𝑙2                                        𝑙𝑙2
+
+                                                                  𝑙𝑙1
+                    𝑙𝑙1
+
+
+
+               𝑙𝑙1 ≠ 𝑙𝑙2
+                                                             𝑙𝑙1 ≠ 𝑙𝑙2
+
+
+
+   Reachable workspace (ring)
+
+
+
+
+Dexterous workspace = does not exist      Inside the reachable workspace, there are two
+                                             possible orientations of the end-effector
+
+
+
+
+              MSE 429 – Advanced Kinematics for Robotics System                           Ch4 - 6
+         Manipulator Workspace
+
+Examples of reachable workspace for 3-DoF manipulators;
+
+
+
+
+                    Cartesian manipulator                            Cylindrical manipulator
+
+
+
+
+  Illustrations from book: Modeling and control of robot manipulators, by L. Sciavicco and B. Siciliano
+
+                        MSE 429 – Advanced Kinematics for Robotics System                                 Ch4 - 7
+        Manipulator Workspace
+
+Examples of reachable workspace for 3-DoF manipulators (cont’d);
+
+
+
+
+            Spherical manipulator                                 SCARA manipulator
+
+
+
+
+                                    Anthropomorphic manipulator
+
+                    MSE 429 – Advanced Kinematics for Robotics System                 Ch4 - 8
+        Multiple Solutions
+
+A good choice would be the solution that minimizes the amount that each joint
+required to move. In practice, other dynamic considerations like the weight of the arms
+should be taken into account.
+
+• In the absence of the obstacle, the upper dashed configuration is preferred.
+
+• In the presence of an obstacle on the path of the preferred configuration, the farther
+  solution should be selected.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                 Ch4 - 9
+        Multiple Solutions
+
+Number of possible solutions to reach a point in reachable workspace of a PUMA 560
+robot;
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System            Ch4 - 10
+        Multiple Solutions
+
+Note: In general, the more nonzero link parameters there are, the more ways there will
+be to reach to certain point in reachable workspace. The more that are nonzero, the
+bigger is the maximum number of solutions.
+
+
+
+
+Note: For a completely generally rotary-jointed manipulator with six degrees of
+freedom, there are up to sixteen solutions possible.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System              Ch4 - 11
+        Multiple Solutions
+
+Classes of manipulators solutions:
+
+• Numerical solutions: Slow due their iterative nature. Not interested.
+
+• Closed-form solutions: A solution method based on analytical expressions or the
+  solution of a polynomial of degree 4 or less.
+
+     o Algebraic
+     o Geometric
+
+
+
+Note: A sufficient condition that a manipulator with six revolute joints have a closed-
+form solution is that three neighboring joint axes intersect at a point. (Pieper’s method,
+discussed later in this chapter).
+
+Almost every manipulator with 6-DoF built today has three intersecting axes.
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                 Ch4 - 12
+        4.4 Inverse Kinematics – Algebraic vs. Geometric
+
+Algebraic Solution
+
+Consider the three-link planar manipulator studied in Chapter 3 with the following link
+parameters.
+
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System              Ch4 - 13
+         4.4 Inverse Kinematics – Algebraic vs. Geometric
+
+Algebraic Solution – cont’d
+The goal point is a specification of the wrist frame relative to the base frame, that is
+
+
+
+
+Given the planar nature of motion for this manipulator, the goal point can be specified
+using 𝑥𝑥, 𝑦𝑦, and 𝜙𝜙 where 𝜙𝜙 is the orientation of link 3 in the plane (relative to the +𝑋𝑋�
+axis).
+
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                     Ch4 - 14
+         4.4 Inverse Kinematics – Algebraic vs. Geometric
+
+Algebraic Solution – cont’d
+Four nonlinear equations must be solved:
+
+
+
+
+Squaring and adding the last two equations gives:
+
+
+where we made use of
+
+
+Solving for 𝑐𝑐2
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System   Ch4 - 15
+         4.4 Inverse Kinematics – Algebraic vs. Geometric
+
+Algebraic Solution – cont’d
+Assuming the goal is in the workspace, for 𝑠𝑠2 we obtain
+
+
+
+Hence, 𝜃𝜃2 can be found.
+
+
+
+Having found 𝜃𝜃2 , 𝜃𝜃1 can be found,
+
+
+
+where,
+
+
+
+
+Performing a change of variable 𝑟𝑟 = + 𝑘𝑘12 + 𝑘𝑘22 and 𝛾𝛾 = Atan2(𝑘𝑘2 , 𝑘𝑘1 ),
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System           Ch4 - 16
+          4.4 Inverse Kinematics – Algebraic vs. Geometric
+
+Algebraic Solution – cont’d
+
+
+
+
+So,
+
+
+
+
+Using the two-argument arctangent,
+
+
+And so,
+
+
+Solving for the sum of 𝜃𝜃1 through 𝜃𝜃3 ,
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System   Ch4 - 17
+         4.4 Inverse Kinematics – Algebraic vs. Geometric
+
+Geometric Solution
+Applying the law of cosine
+
+
+
+Since, cos 180𝑜𝑜 + 𝜃𝜃2 = − cos(𝜃𝜃2 ),
+
+
+
+
+In order for the triangle to exist, 𝑥𝑥 2 + 𝑦𝑦 2 ≤ 𝑙𝑙1 + 𝑙𝑙2 - a condition that can be checked
+in a computational algorithm to check the existence of the solution.
+
+
+
+              𝛽𝛽 + 𝜓𝜓   , 𝜃𝜃2 < 0
+So, 𝜃𝜃1 = �
+              𝛽𝛽 − 𝜓𝜓   , 𝜃𝜃2 > 0
+
+For the orientation of the link,
+                                       𝜃𝜃1 + 𝜃𝜃2 + 𝜃𝜃3 = 𝜙𝜙
+                        MSE 429 – Advanced Kinematics for Robotics System                 Ch4 - 18
+            4.5 Algebraic Solution by Reduction to Polynomial
+
+Transcendental equations are difficult to solve. Following substitutions are often used.
+
+                               𝜃𝜃                  1 − 𝑢𝑢2                     2𝑢𝑢
+                      𝑢𝑢 = tan            cos 𝜃𝜃 =                sin 𝜃𝜃 =
+                               2                   1 + 𝑢𝑢2                   1 + 𝑢𝑢2
+
+Note: In mathematics, a transcendental function is an analytic function that does not
+satisfy a polynomial equation, in contrast to an algebraic function.
+
+Example: Convert the transcendental equation 𝑎𝑎 cos 𝜃𝜃 + 𝑏𝑏 sin 𝜃𝜃 = 𝑐𝑐 into a polynomial
+in the tangent of the half angle and solve for 𝜃𝜃.
+
+𝑎𝑎 1 − 𝑢𝑢2 + 2𝑏𝑏𝑏𝑏 = 𝑐𝑐 1 + 𝑢𝑢2
+
+ 𝑎𝑎 + 𝑐𝑐 𝑢𝑢2 − 2𝑏𝑏𝑏𝑏 + 𝑐𝑐 − 𝑎𝑎 = 0
+
+       𝑏𝑏± 𝑏𝑏2 +𝑎𝑎2 −𝑐𝑐 2
+𝑢𝑢 =        𝑎𝑎+𝑏𝑏
+
+
+           −1 𝑏𝑏± 𝑏𝑏2 +𝑎𝑎2 −𝑐𝑐 2
+𝜃𝜃 = 2 tan         𝑎𝑎+𝑐𝑐
+
+
+                            MSE 429 – Advanced Kinematics for Robotics System          Ch4 - 19
+            4.6 Pieper’s Solution when Three Axes Intersect
+
+Consider Puma serial robot. The last three axes intersect, the origin of link frames {4},
+{5}, and 6 , i.e. Wrist Bend, Swivel, and Roll, are all located at this point of
+intersection. Knowing x, y, and z and three orientations , i.e. α, θ, and γ of frame 6
+with respect to frame 0, the transformation matrix between the two frames from
+Chapter 2 is
+   0              0
+                        R6               0
+                                             P6ORG 
+       T6 =                                       
+            0          0          0          1 
+Where
+                 r11        r12       r13 
+                                                                                 1,2
+        0
+          R6 =  r21         r22       r23 
+                                           
+                r31        r32       r33 
+                                                                                           3
+Is the rotation matrix and
+               x
+                                                                                   0           P4,5,6ORG
+   0
+     P6ORG =  y 
+               
+              z 
+
+We know 0P6ORG and 0P4ORG are the same points in space
+
+
+                                       MSE 429 – Advanced Kinematics for Robotics System            Ch4 - 20
+             4.6 Pieper’s Solution when Three Axes Intersect
+
+
+From Chapter 3 we have
+
+   0          0           
+                   1 2 3 4 5
+                                              0
+                                                  R6        0
+                                                                P6ORG 
+       T6 = T T T T T T = 
+                  1 2 3 4 5 6                                         
+                          0                      0     0        1 
+
+Also
+
+   0          0   4   5         0
+                                     R4           0
+                                                      P4ORG  4 5        0
+                                                                              R6       0
+                                                                                           P6ORG 
+       T6 = T4 T5 T6 =                                        T T
+                                                             5 6 =                             
+                       0            0    0            1            0       0    0        1 
+
+
+We know
+
+        0
+            P4ORG = 0 P6ORG
+
+
+Therefore, for only matching the positions, we do not need to calculate the whole 0T6
+
+
+
+
+                              MSE 429 – Advanced Kinematics for Robotics System                      Ch4 - 21
+            4.6 Pieper’s Solution when Three Axes Intersect
+
+
+0
+    P4ORG =0 T11T2 2T33 P4ORG
+
+From Chapter 3, for any two adjacent joints we have
+           cθi       − sθi             0          ai −1 
+           sθ cα    cθi cα i −1     − sα i −1   −di sα i −1 
+i −1
+     Ti =  i i −1                                           
+           sθi sα 3 cθi sα i −1     cα i −1     di cα i −1 
+                                                            
+           0            0              0            1 
+Therefore
+        cθ 4         − sθ 4         0         a3 
+        sθ cα       cθ 4 cα 3     − sα 3    −d3 sα 3 
+3
+  T4 =  4 3                                          
+        sθ 4 sα 3   cθ 4 sα 3     cα 3      d3cα 3 
+                                                     
+        0               0           0         1 
+
+and                       a3 
+                          −d sα 
+               3
+                 P4ORG =  4 3 
+                          d 4 cα 3 
+                                   
+                          1 
+
+                           MSE 429 – Advanced Kinematics for Robotics System   Ch4 - 22
+      4.6 Pieper’s Solution when Three Axes Intersect
+
+
+The following relationship will give us 3 nonlinear equations which can be
+used to find θ1, θ2, and θ3
+
+                    a3   x 
+                    −d sα   y 
+0
+  P4ORG = T1 T2 T3  4 3  =  
+         0  1 2
+
+                    d 4 cα 3   z 
+                               
+                    1  1 
+
+A proper factorization can help us to define a process to calculate θ1, θ2, and θ3.
+Lets define f1, f2, and f3 as follows
+
+   f1     a3 
+  f       −d sα                        a3c3 + d 4 sα 3 s3 + a2
+                                        f1 =
+    = T3  4 3 
+     2   2
+
+   f3     d 4 cα 3                  f 2 =a3cα 2 s3 − d 4 sα 3cα 2 c3 − d 4 sα 2 cα 3 − d3 sα 2
+                                    f3 =a3 sα 2 s3 − d 4 sα 3 sα 2 c3 + d 4 cα 2 cα 3 + d3cα 2
+  1       1 
+
+ f1, f2, and f3 are only functions of θ3
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                               Ch4 - 23
+          4.6 Pieper’s Solution when Three Axes Intersect – cont’d
+
+Using 12𝑇𝑇 and 01𝑇𝑇,
+                           c1 g1 − s1 g 2   x 
+                          s g + c g   y 
+                0
+                  P4ORG =  1 1 1 2  =  
+                                 g3        z
+                                            
+where                            1         1 
+                g1 = c2 f1 − s2 f 2 + a1
+                g 2 = s2 cα1 f1 + c2 cα1 f 2 − sα1 f3 − d 2 sα1
+                g3 = s2 sα1 f1 + c2 sα1 f 2 + cα1 f3 + d 2 cα1
+
+
+g1, g2, and g3 are only functions of θ2 and θ3.
+
+Now, writing an expression for the squared of 0𝑃𝑃4𝑂𝑂𝑂𝑂𝑂𝑂
+                r = x2 + y 2 + z 2
+                 = (c1 g1 − s1 g 2 ) 2 + ( s1 g1 + c1 g 2 ) 2 + g32
+                 = g12 + g 2 2 + g32
+                 = f12 + f 2 2 + f32 + a12 + d 2 2 + 2d 2 f3 + 2a1 (c2 f1 − s2 f 2 )
+
+
+                        MSE 429 – Advanced Kinematics for Robotics System              Ch4 - 24
+         4.6 Pieper’s Solution when Three Axes Intersect – cont’d
+
+Let,
+             k1 = f1
+             k2 = − f 2
+             k3 = f12 + f 2 2 + f32 + a12 + d 2 2 + 2d 2 f3
+             k4 = f3cα1 + d 2 cα1
+We can rewrite equations for r and z as
+             r = (k1c2 + k2 s2 )2a1 + k3
+             z = (k1s2 + k2 c2 ) sα1 + k4
+
+These two equations are useful as they eliminate the dependence on 𝜃𝜃1 . Dependence on
+𝜃𝜃2 has taken a simple form.
+
+Consider three distinguish cases for the solution of 𝜃𝜃3 :
+
+1- If 𝑎𝑎1 = 0, then 𝑟𝑟 = 𝑘𝑘3 where 𝑟𝑟 is known. The right side (𝑘𝑘3 ) is a function of 𝜃𝜃3 only.
+                                                                     𝜃𝜃
+Using transcendental equations, the quadratic equation in tan 3 can be solved for 𝜃𝜃3 .
+                                                                      2
+
+2- If 𝑠𝑠𝛼𝛼1 = 0, then 𝑧𝑧 = 𝑘𝑘4, where 𝑧𝑧 is known. Using transcendental equations, the
+quadratic equation can be solved for 𝜃𝜃3 .
+
+                          MSE 429 – Advanced Kinematics for Robotics System                  Ch4 - 25
+        4.6 Pieper’s Solution when Three Axes Intersect – cont’d
+
+
+3- Otherwise,
+                r − k3
+                       = k1c2 + k2 s2
+                 2a1
+                z − k4
+                       = k1s2 + k2 c2
+                 sα1
+                         2              2
+                 r − k3   z − k 4    2     2
+                         +         k
+                                       =1 + k2
+                 2a1   sα1 
+
+This removes the dependency on 𝜃𝜃2 .
+
+Using transcendental equations, the above equation becomes of degree 4, that can be
+solved for 𝜃𝜃3 .
+
+
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System        Ch4 - 26
+          4.6 Pieper’s Solution when Three Axes Intersect – cont’d
+
+Next is to solve for 𝜃𝜃4 , 𝜃𝜃5 , and 𝜃𝜃6 .
+
+ The rotation portion of 06𝑅𝑅 can be used.
+
+                  r11           r12   r13 
+      3  0 −1 0  r                    r23 
+     =6R 3R
+          =   6R  21
+                                 r22
+                                            
+                  r31          r32   r33 
+
+                            c4 − s4 0  c5 − s5 0   c6           − s6   0
+      3        3 4   5      s    c4 0   0      0 −1  0           0     1
+    = 6R      4R5R
+               =     6R       4                                          
+                            0    0 1   s5 c5    0   − s6   −c6    0 
+          c4 c5c6 − s4 s6 −c4 c5 s6 − s4 c6 −c4 s5 
+     =  s4 c5c6 + c4 s6 − s4 c5 s6 + c4 c6 − s4 s5 
+                                                   
+              s5c6             − s5 s6       c5 
+
+
+ For many manipulators, these last three angles can be solved for by using the 𝑍𝑍 −
+  𝑌𝑌 − 𝑍𝑍 Euler angle solution (from chapter 2), applied to 36𝑅𝑅
+
+
+
+                        MSE 429 – Advanced Kinematics for Robotics System          Ch4 - 27
+           4.6 Pieper’s Solution when Three Axes Intersect – cont’d
+
+REMINDER: 2.8 Orientation - Euler Angles Z − Y − Z
+
+
+Forward problem: With the Euler angle representation, the rotation matrices are post-
+multiplied.
+                                𝑐𝑐𝛼𝛼𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐 − 𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠   −𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐 − 𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠   𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐   𝑟𝑟11   𝑟𝑟12   𝑟𝑟13
+  𝐴𝐴
+  𝐵𝐵𝑅𝑅𝑍𝑍𝑌𝑌 ′ 𝑍𝑍 ′′ 𝛼𝛼, 𝛽𝛽, 𝛾𝛾 = 𝑠𝑠𝑠𝑠𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐 + 𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐   −𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠 + 𝑐𝑐𝑐𝑐𝑐𝑐𝑐𝑐   𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠 = 𝑟𝑟21   𝑟𝑟22   𝑟𝑟23
+                                       −𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠                  𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠             𝑐𝑐𝑐𝑐     𝑟𝑟31   𝑟𝑟32   𝑟𝑟33
+You consider α, β, and γ as θ4, θ5, and θ6
+
+
+Inverse problem:
+                                                                2      2
+                                         θ2= Atan2           𝑟𝑟31 + 𝑟𝑟32 , 𝑟𝑟33
+
+                                          θ1 = Atan2 𝑟𝑟23 /𝑠𝑠𝑠𝑠, 𝑟𝑟13 /𝑠𝑠𝑠𝑠
+                                        θ3 = Atan2 𝑟𝑟32 /𝑠𝑠𝑠𝑠, −𝑟𝑟31 /𝑠𝑠𝑠𝑠
+
+
+
+
+                           MSE 429 – Advanced Kinematics for Robotics System                                   Ch4 - 28
+        4.11 Computational Considerations
+
+In many path-controlled schemes (Chapter 7), it is necessary to calculate the inverse
+kinematics of a manipulator at 30 Hz or faster. For computational efficiency, one may
+consider the followings:
+
+• Using a lookup-table for atan2 routine.
+
+• Structure of the computation of multiple solutions in parallel (rather than pursuing
+  them one after another serially).
+
+• Using fixed- over floating-point representation of the quantities involved in
+  calculation (it is possible since the variables do not have large dynamic range, and
+  the ranges are fairly well-known).
+
+• Factorization of equations to reduce the number of multiplications and additions –
+  this comes at the cost of creating local variables (good trade-off)
+
+• Avoid the computation of redundant kinematics, e.g., calculate only two columns of
+  rotation, then compute the third column using cross product.
+
+• For transcendental functions, they can be computed from a series expansion.
+
+                    MSE 429 – Advanced Kinematics for Robotics System                Ch4 - 29
+MSE 429 – Advanced Kinematics for Robotics System   Ch4 - 30
+

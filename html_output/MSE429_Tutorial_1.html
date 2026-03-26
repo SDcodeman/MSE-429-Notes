@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial 1 — MSE429 Study Pages</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}], throwOnError: false});"></script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+  <main class="main-content">
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&gt;</span>
+      <a href="index.html#tutorials">Tutorials</a><span class="sep">&gt;</span>
+      Tutorial 1
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Tutorial 1: Spatial Descriptions &amp; Transforms</h1>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 1.1                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 1.1</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorial 1 (Solutions).pdf#page=1" target="_blank">PDF p.1</a>
+      <p><strong>Problem:</strong> Check the properties of the following rotation matrix:</p>
+      $$R = \begin{bmatrix} 0.82364 & 0.1 & 0.5582 \\ 0.4755 & 0.41456 & -0.7759 \\ -0.30902 & 0.9045 & 0.2939 \end{bmatrix}$$
+
+      <button class="solution-toggle" data-target="sol-tut1-1">Show Solution</button>
+      <div class="solution-content" id="sol-tut1-1">
+
+        <h4>Property 1: Magnitude of Each Row Equals 1</h4>
+        <p><strong>Row 1:</strong></p>
+        $$\sqrt{(0.82364)^2 + (0.1)^2 + (0.5582)^2} = 1$$
+        <p><strong>Row 2:</strong></p>
+        $$\sqrt{(0.4755)^2 + (0.41456)^2 + (-0.7759)^2} \approx 1$$
+        <p><strong>Row 3:</strong></p>
+        $$\sqrt{(-0.30902)^2 + (0.9045)^2 + (0.2939)^2} \approx 1$$
+
+        <h4>Property 2: Magnitude of Each Column Equals 1</h4>
+        <p><strong>Column 1:</strong></p>
+        $$\sqrt{(0.82364)^2 + (0.4755)^2 + (-0.30902)^2} \approx 1$$
+        <p><strong>Column 2:</strong></p>
+        $$\sqrt{(0.1)^2 + (0.41456)^2 + (0.9045)^2} \approx 1$$
+        <p><strong>Column 3:</strong></p>
+        $$\sqrt{(0.5582)^2 + (-0.7759)^2 + (0.2939)^2} \approx 1$$
+
+        <h4>Property 3: Cross Products of Rows and Columns</h4>
+        <p><strong>Cross product of Row 1 and Row 2:</strong></p>
+        $$\{0.82364,\ 0.1,\ 0.5582\} \times \{0.4755,\ 0.41456,\ -0.7759\}$$
+        <p>Check: result should equal $\pm$ Row 3:</p>
+        $$= \{-0.301,\ 0.9045,\ 0.2939\} = \text{Row } 3$$
+        <p>Row 2 $\times$ Row 3 = Row 1</p>
+        <p>Row 3 $\times$ Row 1 = Row 2</p>
+        <p>Similarly for columns:</p>
+        <ul>
+          <li>Column 2 $\times$ Column 3 = Column 1</li>
+          <li>Column 1 $\times$ Column 3 = Column 2 (with sign consideration)</li>
+          <li>Column 3 $\times$ Column 1 = Column 2</li>
+        </ul>
+
+        <h4>Property 4: Dot Products of Rows and Columns Equal Zero</h4>
+        <p><strong>Row 1 $\cdot$ Row 2:</strong></p>
+        $$(0.82364)(0.4755) + (0.1)(0.41456) + (0.5582)(-0.7759) = 0$$
+        <p><strong>Row 2 $\cdot$ Row 3:</strong></p>
+        $$(0.4755)(-0.30902) + (0.41456)(0.9045) + (-0.7759)(0.2939) = 0$$
+        <p><strong>Row 3 $\cdot$ Row 1:</strong></p>
+        $$(-0.30902)(0.82364) + (0.9045)(0.1) + (0.2939)(0.5582) = 0$$
+        <p><strong>Column 1 $\cdot$ Column 2:</strong></p>
+        $$(0.82364)(0.1) + (0.4755)(0.41456) + (-0.30902)(0.9045) = 0$$
+        <p><strong>Column 2 $\cdot$ Column 3:</strong></p>
+        $$(0.1)(0.5582) + (0.41456)(-0.7759) + (0.9045)(0.2939) = 0$$
+        <p><strong>Column 1 $\cdot$ Column 3:</strong></p>
+        $$(0.82364)(0.5582) + (0.4755)(-0.7759) + (-0.30902)(0.2939) = 0$$
+
+        <h4>Property 5: Determinant of R</h4>
+        $$|R| = 0.99997 \approx 1$$
+        <p>This confirms $R$ is a proper rotation matrix (special orthogonal, $R \in SO(3)$).</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 1.2                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 1.2</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorial 1 (Solutions).pdf#page=2" target="_blank">PDF p.2</a>
+      <p><strong>Problem:</strong> Determine ${}^{A}P$, if the position vectors ${}^{A}P_{\text{BORG}}$, ${}^{B}P_{\text{CORG}}$, and ${}^{C}P$ and the rotation matrices ${}^{A}_{B}R$ and ${}^{B}_{C}R$ are known.</p>
+
+      <div class="figure">
+      <img src="assets/images/tut1_p2.png" alt="Figure: Three coordinate frames $\{A\}$, $\{B\}$, and $\{C\}$ are shown. Frame $\{A\}$ is at the bottom left, frame $\{B\}$ is at the bottom right, and frame $\{C\}$ is above and between them. Point $" loading="lazy">
+    </div>
+    <div class="figure-desc">
+        <strong>Figure:</strong> Three coordinate frames $\{A\}$, $\{B\}$, and $\{C\}$ are shown. Frame $\{A\}$ is at the bottom left, frame $\{B\}$ is at the bottom right, and frame $\{C\}$ is above and between them. Point $P$ is located above frame $\{C\}$. The position vectors ${}^{A}P_{\text{BORG}}$, ${}^{B}P_{\text{CORG}}$, and ${}^{C}P$ connect the origins and the point.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-tut1-2">Show Solution</button>
+      <div class="solution-content" id="sol-tut1-2">
+        <p>The position of point $P$ in frame $\{A\}$ can be found by tracing through the chain of frames:</p>
+        $${}^{A}P = {}^{A}P_{\text{BORG}} + {}^{A}_{B}R\ {}^{B}P_{\text{CORG}} + {}^{A}_{B}R\ {}^{B}_{C}R\ {}^{C}P$$
+        <p>This can be written more compactly as:</p>
+        $${}^{A}P = {}^{A}P_{\text{CORG}} + {}^{A}_{C}R\ {}^{C}P$$
+        <p>where:</p>
+        <ul>
+          <li>${}^{A}P_{\text{CORG}} = {}^{A}P_{\text{BORG}} + {}^{A}_{B}R\ {}^{B}P_{\text{CORG}}$ is the origin of frame $\{C\}$ expressed in frame $\{A\}$</li>
+          <li>${}^{A}_{C}R = {}^{A}_{B}R\ {}^{B}_{C}R$ is the composite rotation from $\{C\}$ to $\{A\}$</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 1.3                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 1.3</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorial 1 (Solutions).pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Problem:</strong> A manipulator requires to pick up a workpiece. Determine ${}^{EE}_{WP}T$ based on the other homogeneous transforms.</p>
+
+      <div class="figure">
+      <img src="assets/images/tut1_p3.png" alt="Figure: A robotic arm is shown with its base (frame $\{B\}$) on the left, end-effector (frame $\{EE\}$) at the tip, a worktable (frame $\{WT\}$) in the middle, and a workpiece (frame $\{WP\}$) on the " loading="lazy">
+    </div>
+    <div class="figure-desc">
+        <strong>Figure:</strong> A robotic arm is shown with its base (frame $\{B\}$) on the left, end-effector (frame $\{EE\}$) at the tip, a worktable (frame $\{WT\}$) in the middle, and a workpiece (frame $\{WP\}$) on the worktable. The known transforms are ${}^{B}_{EE}T$, ${}^{B}_{WT}T$, and ${}^{WT}_{WP}T$.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-tut1-3">Show Solution</button>
+      <div class="solution-content" id="sol-tut1-3">
+        <p>There are two ways of reaching the workpiece: via the worktable and via the end-effector.</p>
+        <p>The chain equations are:</p>
+        $${}^{B}_{EE}T \cdot {}^{EE}_{WP}T = {}^{B}_{WT}T \cdot {}^{WT}_{WP}T$$
+        <p>Pre-multiply both sides by $\left({}^{B}_{EE}T\right)^{-1}$:</p>
+        $$\left({}^{B}_{EE}T\right)^{-1} \left({}^{B}_{EE}T\right) \left({}^{EE}_{WP}T\right) = \left({}^{B}_{EE}T\right)^{-1} \left({}^{B}_{WT}T\right) \left({}^{WT}_{WP}T\right)$$
+        $$I \cdot {}^{EE}_{WP}T = \left({}^{B}_{EE}T\right)^{-1} \left({}^{B}_{WT}T\right) \left({}^{WT}_{WP}T\right)$$
+        <p>Since for homogeneous transforms, $\left({}^{B}_{EE}T\right)^{-1} = {}^{EE}_{B}T$:</p>
+        $$\boxed{{}^{EE}_{WP}T = {}^{EE}_{B}T \cdot {}^{B}_{WT}T \cdot {}^{WT}_{WP}T}$$
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 1.4                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 1.4</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorial 1 (Solutions).pdf#page=4" target="_blank">PDF p.4</a>
+      <p><strong>Problem:</strong> Determine the following homogeneous transforms of the frames attached to the corners of a wedge: ${}^{A}_{B}T$, ${}^{B}_{C}T$, ${}^{A}_{C}T$, and ${}^{C}_{A}T$.</p>
+
+      <div class="figure">
+      <img src="assets/images/tut1_p4.png" alt="Figure: A 3D wedge (triangular prism cross-section) with four coordinate frames at its corners: Frame $\{A\}$ at the bottom-left ($\hat{X}_A$ right, $\hat{Y}_A$ up, $\hat{Z}_A$ out of page), Frame $\{" loading="lazy">
+    </div>
+    <div class="figure-desc">
+        <strong>Figure:</strong> A 3D wedge (triangular prism cross-section) with four coordinate frames at its corners: Frame $\{A\}$ at the bottom-left ($\hat{X}_A$ right, $\hat{Y}_A$ up, $\hat{Z}_A$ out of page), Frame $\{B\}$ at the bottom-right (3 units right of $A$, $\hat{X}_B$ left, $\hat{Y}_B$ into page, $\hat{Z}_B$ up), and Frame $\{C\}$ at the top ($\hat{X}_C$ left along slope, $\hat{Y}_C$ up). Wedge dimensions: base = 3, height = 2, 30-degree angle at bottom-left.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-tut1-4">Show Solution</button>
+      <div class="solution-content" id="sol-tut1-4">
+
+        <h4>${}^{A}_{B}T$:</h4>
+        $${}^{A}_{B}T = \begin{bmatrix} {}^{A}_{B}R & {}^{A}P_{B_{\text{ORG}}} \\ 0\ 0\ 0 & 1 \end{bmatrix}$$
+        <p>The rotation from $\{B\}$ to $\{A\}$: examining the axis alignments,</p>
+        $${}^{A}_{B}T = \begin{bmatrix} -1 & 0 & 0 & 3 \\ 0 & -1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+        <h4>${}^{B}_{C}T$:</h4>
+        $${}^{B}_{C}T = \begin{bmatrix} {}^{B}_{C}R & {}^{B}P_{C_{\text{ORG}}} \\ 0\ 0\ 0 & 1 \end{bmatrix}$$
+        $${}^{B}_{C}T = \begin{bmatrix} 0 & \cos(60°) & -\cos(30°) & 0 \\ 0 & -\sin(60°) & -\sin(30°) & 0 \\ -1 & 0 & 0 & 2 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+        <h4>${}^{A}_{C}T$:</h4>
+        $${}^{A}_{C}T = \begin{bmatrix} {}^{A}_{C}R & {}^{A}P_{C_{\text{ORG}}} \\ 0\ 0\ 0 & 1 \end{bmatrix}$$
+        $${}^{A}_{C}T = \begin{bmatrix} 0 & -\cos(60°) & \cos(30°) & 3 \\ 0 & \sin(60°) & \sin(30°) & 0 \\ -1 & 0 & 0 & 2 \\ 0 & 0 & 0 & 1 \end{bmatrix} = {}^{A}_{B}T \cdot {}^{B}_{C}T$$
+
+        <h4>${}^{C}_{A}T$:</h4>
+        $${}^{C}_{A}T = \begin{bmatrix} 0 & 0 & -1 & 2 \\ -\cos(60°) & \cos(30°) & 0 & 3\cos(60°) \\ \cos(30°) & \cos(60°) & 0 & -3\sin(60°) \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        <p>Note: ${}^{C}_{A}T = \left({}^{A}_{C}T\right)^{-1}$.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 1.5                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 1.5</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorial 1 (Solutions).pdf#page=5" target="_blank">PDF p.5</a>
+      <p><strong>Problem:</strong> First rotate $\{B\}$ about $\hat{X}_A$ by an angle $\gamma = 30°$, then rotate $\{B\}$ about $\hat{Y}_A$ by an angle $\beta = -15°$, and then rotate $\{B\}$ about $\hat{Z}_A$ by an angle $\alpha = 120°$.</p>
+      <ul>
+        <li>Find the numerical rotation matrix.</li>
+        <li>What would be the values of the angles if the $Z$-$Y$-$Z$ Euler angle representation was used?</li>
+        <li>What would be the values of $\hat{K} = [k_x\ k_y\ k_z]$ and $\theta$ if equivalent angle-axis representation was used?</li>
+      </ul>
+
+      <button class="solution-toggle" data-target="sol-tut1-5">Show Solution</button>
+      <div class="solution-content" id="sol-tut1-5">
+
+        <h4>Part (a): Numerical Rotation Matrix</h4>
+        <p>This is the <strong>fixed angle representation</strong> $X$-$Y$-$Z$ (see slide 19).</p>
+        <p>Using the formula:</p>
+        $${}^{A}_{B}R_{XYZ}(\gamma, \beta, \alpha) = R_Z(\alpha)\, R_Y(\beta)\, R_X(\gamma)$$
+        $$= \begin{bmatrix} c\alpha\,c\beta & c\alpha\,s\beta\,s\gamma - s\alpha\,c\gamma & c\alpha\,s\beta\,c\gamma + s\alpha\,s\gamma \\ s\alpha\,c\beta & s\alpha\,s\beta\,s\gamma + c\alpha\,c\gamma & s\alpha\,s\beta\,c\gamma - c\alpha\,s\gamma \\ -s\beta & c\beta\,s\gamma & c\beta\,c\gamma \end{bmatrix}$$
+        <p>Substituting $\gamma = 30°$, $\beta = -15°$, $\alpha = 120°$:</p>
+        $$R = \begin{bmatrix} -0.4830 & -0.4933 & 0.5461 \\ 0.8365 & -0.3461 & 0.0511 \\ 0.2588 & 0.7981 & 0.8365 \end{bmatrix}$$
+        <p>with elements labeled as:</p>
+        $$R = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}$$
+
+        <h4>Part (b): $Z$-$Y$-$Z$ Euler Angle Representation</h4>
+        <p>Using the Euler angle extraction formulas (from slide 11):</p>
+        $$\beta = \text{Atan2}\left(\sqrt{r_{13}^2 + r_{23}^2},\ r_{33}\right) = \text{Atan2}\left(\sqrt{(0.5461)^2 + (0.0511)^2},\ 0.8365\right) = 33.12°$$
+        $$\alpha = \text{Atan2}(r_{23}/s\beta,\ r_{13}/s\beta) = \text{Atan2}\left(0.0511/s\beta,\ 0.5461/s\beta\right) = 5.35°$$
+        $$\gamma = \text{Atan2}(r_{32}/s\beta,\ -r_{31}/s\beta) = \text{Atan2}\left(0.7981/s\beta,\ -0.2588/s\beta\right) = 117.96°$$
+        <p>(Note: $s\beta = \sin(33.12°)$)</p>
+
+        <h4>Part (c): Equivalent Angle-Axis Representation</h4>
+        $$\theta = \arccos\left(\frac{r_{11} + r_{22} + r_{33} - 1}{2}\right) = \arccos\left(\frac{-0.4830 - 0.3461 + 0.8365 - 1}{2}\right) = 126.57°$$
+        $$\hat{K} = \frac{1}{2\sin\theta}\begin{bmatrix} r_{32} - r_{23} \\ r_{13} - r_{31} \\ r_{21} - r_{12} \end{bmatrix} = \frac{1}{2\sin(126.57°)}\begin{bmatrix} 0.7981 - 0.0511 \\ 0.5461 - 0.2588 \\ 0.8365 - (-0.4933) \end{bmatrix}$$
+        $$\hat{K} = \begin{bmatrix} 0.4641 \\ 0.1787 \\ 0.8269 \end{bmatrix}$$
+        <p>(Verify: $\|\hat{K}\| = 1$ to confirm this is a unit vector)</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED CHAPTERS                                              -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Chapter</h3>
+      <p>This tutorial covers material from <a href="MSE429_Chapter_2.html">Chapter 2: Spatial Descriptions &amp; Transforms</a>.</p>
+    </div>
+
+    <nav class="page-nav"></nav>
+  </main>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial 3 — MSE429 Study Pages</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}], throwOnError: false});"></script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+  <main class="main-content">
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&gt;</span>
+      <a href="index.html#tutorials">Tutorials</a><span class="sep">&gt;</span>
+      Tutorial 3
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Tutorial 3: Forward &amp; Inverse Kinematics</h1>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 3.1                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 3.1</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=1" target="_blank">PDF p.1</a>
+      <p><strong>Problem:</strong> Derive the inverse kinematics of the three-link planar manipulator shown. Consider that the desired orientation of the last link is known.</p>
+
+      <div class="figure">
+      <img src="assets/images/tut3_p1.png" alt="Figure: A three-link planar manipulator (3R) with link lengths $L_1$, $L_2$, $L_3$. The joints are $\theta_1$, $\theta_2$, $\theta_3$. The end-effector frame $\{3\}$ is at the tip. Frame $\{S\}$ (stat" loading="lazy">
+    </div>
+    <div class="figure-desc">
+        <strong>Figure:</strong> A three-link planar manipulator (3R) with link lengths $L_1$, $L_2$, $L_3$. The joints are $\theta_1$, $\theta_2$, $\theta_3$. The end-effector frame $\{3\}$ is at the tip. Frame $\{S\}$ (station/base) is at the base.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-tut3-1">Show Solution</button>
+      <div class="solution-content" id="sol-tut3-1">
+
+        <p>Given: ${}^{S}_{3}T$ is given (desired end-effector pose).</p>
+        $${}^{S}_{3}T = \begin{bmatrix} R_{11} & R_{12} & R_{13} & P_x \\ R_{21} & R_{22} & R_{23} & P_y \\ R_{31} & R_{32} & R_{33} & P_z \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+        <p>From forward kinematics, it can be shown:</p>
+        $${}^{0}_{3}T = \begin{bmatrix} C_1 C_{23} & -C_1 S_{23} & S_1 & C_1(C_2 L_2 + L_1) \\ S_1 C_{23} & -S_1 S_{23} & -C_1 & S_1(C_2 L_2 + L_1) \\ S_{23} & C_{23} & 0 & S_2 L_2 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        <p>where $C_{23} = \cos(\theta_2 + \theta_3)$, $S_{23} = \sin(\theta_2 + \theta_3)$, etc.</p>
+
+        <h4>Solving for $\theta_1$:</h4>
+        <p>Equate element (row 1, column 3) in ${}^{0}_{3}T$:</p>
+        $$S_1 = R_{13}$$
+        <p>Equate elements $(R_2, C_3)$:</p>
+        $$-C_1 = R_{23} \quad \Rightarrow \quad C_1 = -R_{23}$$
+        $$\tan(\theta_1) = \frac{R_{13}}{-R_{23}} \quad \Rightarrow \quad \boxed{\theta_1 = \text{Atan2}(R_{13}, -R_{23})}$$
+        <p><strong>Note:</strong> If both $R_{13} = 0$ and $R_{23} = 0$, the goal is unattainable.</p>
+
+        <h4>Solving for $\theta_2 + \theta_3$:</h4>
+        <p>Equate $(R_1, C_4)$: $P_x = C_1(C_2 L_2 + L_1)$</p>
+        <p>Equate $(R_2, C_4)$: $P_y = S_1(C_2 L_2 + L_1)$</p>
+        $$C_2 = \frac{1}{L_2}\left(\frac{P_x}{C_1} - L_1\right), \quad \text{if } C_1 \neq 0$$
+        $$C_2 = \frac{1}{L_2}\left(\frac{P_y}{S_1} - L_1\right), \quad \text{if } S_1 \neq 0$$
+        <p>Equate $(R_3, C_4)$: $P_z = S_2 L_2$</p>
+        $$S_2 = \frac{P_z}{L_2}$$
+        $$\theta_{2\text{(cand)}} = \text{Atan2}\left(\frac{P_y S_1}{L_2},\ C_2\right)$$
+        <p>Equate $(R_2, C_1)$: $\sin(\theta_2 + \theta_3) = R_{31}$</p>
+        <p>Equate $(R_3, C_1)$: $\cos(\theta_2 + \theta_3) = R_{32}$</p>
+        $$\theta_2 + \theta_3 = \text{Atan2}(R_{31}, R_{32})$$
+        $$\boxed{\theta_3 = \text{Atan2}(R_{31}, R_{32}) - \theta_2}$$
+        <p><strong>Note:</strong> If both $R_{31} = 0$ and $R_{32} = 0$, the goal is unattainable.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 3.2                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 3.2</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=2" target="_blank">PDF p.2</a>
+      <p><strong>Problem:</strong> A 4R manipulator is shown. The nonzero link parameters are $a_1 = 1$, $\alpha_1 = 45°$, $d_3 = \sqrt{2}$, and $a_3 = \sqrt{2}$. The mechanism is pictured in the configuration corresponding to $\Theta = [0, 90°, -90°, 0]^T$. Each joint has $\pm 180°$ as limits. Find all values of $\theta_3$ such that:</p>
+      $${}^{0}P_{\text{BORG}} = [1.1,\ 1.5,\ 1.707]^T$$
+
+      <div class="figure">
+      <img src="assets/images/tut3_p2.png" alt="Figure: A 4R manipulator with frames $\{0\}$ through $\{4\}$ labeled at each joint. The manipulator has a twist of 45 degrees between link 1 and link 2." loading="lazy">
+    </div>
+    <div class="figure-desc">
+        <strong>Figure:</strong> A 4R manipulator with frames $\{0\}$ through $\{4\}$ labeled at each joint. The manipulator has a twist of 45 degrees between link 1 and link 2.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-tut3-2">Show Solution</button>
+      <div class="solution-content" id="sol-tut3-2">
+
+        <p>Given: $\theta_3 = ?$</p>
+        <p>Parameters: $\alpha_1 = 45°$, $d_2 = 0$, $d_4 = 0$, $\alpha_2 = 0$</p>
+        <p>Using Slide 22 from Chapter 4, Item (2):</p>
+        <p>Since $\sin(\alpha_1) \neq 0$ (using Pieper's method):</p>
+
+        <div class="derivation-steps">
+          <div class="derivation-step visible">
+            <div class="step-label">Step 1: Set up the z-equation</div>
+            <p>The position of the origin of frame $\{4\}$:</p>
+            $$({}^{0}P_4)_z = a_3 \sin(\alpha_1) \sin(\theta_3) + d_3 \cos(\alpha_1)$$
+            <p>(Other terms are zero, see slide 21)</p>
+          </div>
+          <div class="derivation-step">
+            <div class="step-label">Step 2: Substitute values</div>
+            $$1.707 = \sqrt{2}\, \sin(45°)\, \sin(\theta_3) + \sqrt{2}\, \cos(45°)$$
+            $$= \sqrt{2} \cdot \frac{\sqrt{2}}{2}\, \sin(\theta_3) + \sqrt{2} \cdot \frac{\sqrt{2}}{2}$$
+          </div>
+          <div class="derivation-step">
+            <div class="step-label">Step 3: Simplify</div>
+            $$1.707 = \sin(\theta_3) + 1$$
+            $$\sin(\theta_3) = 0.707$$
+          </div>
+          <div class="derivation-step">
+            <div class="step-label">Step 4: Solve</div>
+            $$\theta_3 = \sin^{-1}(0.707)$$
+            $$\boxed{\theta_3 = 45° \quad \text{or} \quad \theta_3 = 135°}$$
+            <p>(Since $-180° < \theta_3 < 180°$)</p>
+          </div>
+          <div class="step-controls">
+            <button class="step-btn step-prev" disabled>Previous Step</button>
+            <span class="step-counter">Step 1 of 4</span>
+            <button class="step-btn step-next">Next Step</button>
+            <button class="step-btn step-show-all">Show All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 3.3                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 3.3</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Problem:</strong> Solve the forward kinematics of the Stanford manipulator, which has a $R \perp R \perp P \| (R \perp R \perp R)_{\text{sph}}$ layout.</p>
+
+      <div class="figure-desc">
+        <strong>Figure:</strong> The Stanford manipulator with 6 degrees of freedom. The first two joints are revolute (perpendicular), the third is prismatic (parallel to joint 2 axis), and the last three form a spherical wrist. Coordinate frames are shown at each joint.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-tut3-3">Show Solution</button>
+      <div class="solution-content" id="sol-tut3-3">
+
+        <h4>DH Parameters:</h4>
+        <table>
+          <thead>
+            <tr><th>$i$</th><th>$\alpha_{i-1}$</th><th>$a_{i-1}$</th><th>$d_i$</th><th>$\theta_i$</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>$\theta_1$</td></tr>
+            <tr><td>2</td><td>$-90°$</td><td>0</td><td>$d_2$</td><td>$\theta_2$</td></tr>
+            <tr><td>3</td><td>$90°$</td><td>0</td><td>$d_3$</td><td>$0$</td></tr>
+            <tr><td>4</td><td>$-90°$</td><td>0</td><td>0</td><td>$\theta_4$</td></tr>
+            <tr><td>5</td><td>$90°$</td><td>0</td><td>0</td><td>$\theta_5$</td></tr>
+            <tr><td>6</td><td>0</td><td>0</td><td>0</td><td>$\theta_6$</td></tr>
+          </tbody>
+        </table>
+        <p>Note: The link offset $d_2$ is a constant, and $d_3$ is the variable prismatic joint.</p>
+
+        <h4>Homogeneous Transforms:</h4>
+        $${}^{0}_{1}T = \begin{bmatrix} C_1 & -S_1 & 0 & 0 \\ S_1 & C_1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        $${}^{1}_{2}T = \begin{bmatrix} C_2 & -S_2 & 0 & 0 \\ 0 & 0 & 1 & d_2 \\ -S_2 & -C_2 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        $${}^{2}_{3}T = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 0 & -1 & 0 \\ 0 & 1 & 0 & d_3 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        $${}^{3}_{4}T = \begin{bmatrix} C_4 & -S_4 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ -S_4 & -C_4 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        $${}^{4}_{5}T = \begin{bmatrix} C_5 & -S_5 & 0 & 0 \\ 0 & 0 & -1 & 0 \\ S_5 & C_5 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        $${}^{5}_{6}T = \begin{bmatrix} C_6 & -S_6 & 0 & 0 \\ S_6 & C_6 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+        <h4>Forward Kinematics Result:</h4>
+        $${}^{0}_{6}T = {}^{0}_{1}T \cdot {}^{1}_{2}T \cdot {}^{2}_{3}T \cdot {}^{3}_{4}T \cdot {}^{4}_{5}T \cdot {}^{5}_{6}T$$
+
+        <p><strong>Position vector:</strong></p>
+        $$P_x = -C_1 S_2\, d_3$$
+        $$P_y = -S_1 S_2\, d_3$$
+        $$P_z = -C_2\, d_3$$
+        <p>(Simplified; full expressions include $d_2$ terms.)</p>
+
+        <p><strong>Rotation matrix elements:</strong></p>
+        $$r_{11} = C_1(C_2 C_4 C_5 C_6 - S_2 S_6) - S_1(S_4 C_5 C_6 + C_4 S_6) - C_1 S_2(S_5 C_6)$$
+        $$r_{12} = C_1(C_2 C_4 C_5(-S_6) - S_2 C_6) + S_1(-S_4 C_5 S_6 + C_4 C_6) + C_1 S_2(S_5 S_6)$$
+        $$r_{13} = C_1(C_2 C_4 S_5) + S_1(-S_4 S_5) - C_1 S_2 C_5$$
+        $$r_{21} = S_1(C_2 C_4 C_5 C_6 - S_2 S_6) + C_1(S_4 C_5 C_6) - S_1 S_2(S_5 C_6)$$
+        $$r_{22} = S_1 C_2(-C_4 C_5 S_6 - S_4 C_6) + C_1(-S_4 C_5 S_6 + C_4 C_6) - S_1 S_2(S_5 S_6)$$
+        $$r_{23} = S_1 C_2(C_4 S_5) + C_1(S_4 S_5) - S_1 S_2 C_5$$
+        $$r_{31} = S_2(C_4 C_5 C_6) + C_2(S_5 C_6)$$
+        $$r_{32} = S_2 C_4(-C_5 S_6) - C_2 S_5 S_6$$
+        $$r_{33} = S_2(C_4 S_5) + C_2 C_5$$
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 3.4                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 3.4</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=4" target="_blank">PDF p.4</a>
+      <p><strong>Problem:</strong> Solve the inverse kinematics of the Stanford manipulator, which has a $R \perp R \perp P \| (R \perp R \perp R)_{\text{sph}}$ layout.</p>
+
+      <button class="solution-toggle" data-target="sol-tut3-4">Show Solution</button>
+      <div class="solution-content" id="sol-tut3-4">
+
+        <p>Let ${}^{0}_{6}T$ be the numerical homogeneous transform given for this problem:</p>
+        $${}^{0}_{6}T = \begin{bmatrix} n_x & o_x & a_x & P_x \\ n_y & o_y & a_y & P_y \\ n_z & o_z & a_z & P_z \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+        <h4>Step 1: Finding the position of the wrist</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=4" target="_blank">PDF p.4</a>
+        <p>The wrist centre position $P'$ is:</p>
+        $$P'_x = P_x - a_x d_6, \quad P'_y = P_y - a_y d_6, \quad P'_z = P_z - a_z d_6$$
+        <p>Since there is a spherical group of joints at the wrist, the position of the wrist is defined by the first three joints ($\theta_1$, $\theta_2$, $d_3$).</p>
+
+        <h4>Step 2: Solving for $d_3$</h4>
+        <p>Equating the position vector from ${}^{0}_{3}T$:</p>
+        $$P'_x = -C_1 S_2\, d_3, \quad P'_y = -S_1 S_2\, d_3, \quad P'_z = C_2\, d_3$$
+        <p>Squaring and adding:</p>
+        $$(P'_x)^2 + (P'_y)^2 + (P'_z)^2 = d_3^2$$
+        $$\boxed{d_3 = \pm\sqrt{(P'_x)^2 + (P'_y)^2 + (P'_z)^2}}$$
+
+        <h4>Step 3: Solving for $\theta_2$</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=5" target="_blank">PDF p.5</a>
+        <p>In theory there are two solutions, but given $d_3$ is a distance, we consider $d_3 > 0$.</p>
+        $$C_2 = \frac{P'_z}{d_3}, \quad S_2 = \pm\sqrt{1 - C_2^2}$$
+        $$\boxed{\theta_2 = \text{Atan2}(S_2, C_2)}$$
+        <p><strong>Note:</strong> If $d_3 = 0$, the solution is uncertain.</p>
+
+        <h4>Step 4: Solving for $\theta_1$</h4>
+        $$C_1 = \frac{-P'_x}{S_2\, d_3}, \quad S_1 = \frac{-P'_y}{S_2\, d_3}$$
+        $$\boxed{\theta_1 = \text{Atan2}(S_1, C_1)}$$
+
+        <h4>Step 5: Solving for Wrist Angles ($\theta_4$, $\theta_5$, $\theta_6$)</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=5" target="_blank">PDF p.5</a>
+        <p>With solutions for $\theta_1$, $\theta_2$, and $d_3$, we compute ${}^{3}_{0}R$. We know:</p>
+        $${}^{3}_{6}R = {}^{0}_{3}R^{-1} \cdot {}^{0}_{6}R = {}^{3}_{0}R \cdot {}^{0}_{6}R = \begin{bmatrix} r'_{11} & r'_{12} & r'_{13} \\ r'_{21} & r'_{22} & r'_{23} \\ r'_{31} & r'_{32} & r'_{33} \end{bmatrix}$$
+
+        <p>Comparing with the symbolic rotation:</p>
+        $${}^{3}_{6}R = \begin{bmatrix} C_4 C_5 C_6 - S_4 S_6 & -C_4 C_5 S_6 - S_4 C_6 & -C_4 S_5 \\ S_4 C_5 C_6 + C_4 S_6 & -S_4 C_5 S_6 + C_4 C_6 & -S_4 S_5 \\ S_5 C_6 & -S_5 S_6 & C_5 \end{bmatrix}$$
+
+        <h4>Solving for $\theta_6$:</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=6" target="_blank">PDF p.6</a>
+        $$\boxed{\theta_6 = \text{Atan2}(-r'_{32}, r'_{31})}$$
+        <p>Two solutions: $\theta_6 = \text{Atan2}(-r'_{32}, r'_{31})$ and $\theta_6 = \text{Atan2}(r'_{32}, -r'_{31})$.</p>
+
+        <h4>Solving for $\theta_5$:</h4>
+        $$S_5 = r'_{31} C_6 - r'_{32} S_6 \quad \text{and} \quad C_5 = r'_{33}$$
+        $$\boxed{\theta_5 = \text{Atan2}(r'_{31} C_6 - r'_{32} S_6,\ r'_{33})}$$
+
+        <h4>Solving for $\theta_4$:</h4>
+        $$S_4 = -r'_{11} S_6 - r'_{12} C_6 \quad \text{and} \quad C_4 = r'_{21} S_6 + r'_{22} C_6$$
+        $$\boxed{\theta_4 = \text{Atan2}(-r'_{11} S_6 - r'_{12} C_6,\ r'_{21} S_6 + r'_{22} C_6)}$$
+
+        <h4>Summary: Total Number of Solutions</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 3 (Solutions).pdf#page=6" target="_blank">PDF p.6</a>
+        <p>There are a total of <strong>four solutions</strong> for this problem: 2 from $d_3$ ($\pm$) $\times$ 2 from $\theta_6$.</p>
+        <table>
+          <thead>
+            <tr><th></th><th>Solution 1</th><th>Solution 2</th><th>Solution 3</th><th>Solution 4</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>$\theta_1$</td><td>10.0000</td><td>10.0000</td><td>-170.0000</td><td>-170.0000</td></tr>
+            <tr><td>$\theta_2$</td><td>13.1895</td><td>30.0000</td><td>150.0000</td><td>166.8105</td></tr>
+            <tr><td>$d_3$</td><td>20.0000</td><td>-20.0000</td><td>20.0000</td><td>-20.0000</td></tr>
+            <tr><td>$\theta_4$</td><td>-13.1895</td><td>10.0000</td><td>-190.0000</td><td>-166.8105</td></tr>
+            <tr><td>$\theta_5$</td><td>5.0000</td><td>5.0000</td><td>-175.0000</td><td>-175.0000</td></tr>
+          </tbody>
+        </table>
+        <p>Note: $\theta_6$ values are not provided in the source solution table.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED CHAPTERS                                              -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Chapters</h3>
+      <ul>
+        <li><a href="MSE492_Chapter_3.html">Chapter 3: Manipulator Kinematics (DH Parameters)</a> &mdash; DH parameters, forward kinematics</li>
+        <li><a href="MSE492_Chapter_4.html">Chapter 4: Inverse Kinematics</a> &mdash; Pieper's method, closed-form IK solutions</li>
+      </ul>
+    </div>
+
+    <nav class="page-nav"></nav>
+  </main>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

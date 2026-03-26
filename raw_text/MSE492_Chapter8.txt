@@ -1,0 +1,450 @@
+                 Chapter 8
+
+
+Manipulator-mechanism Design
+
+
+
+     MSE 429 – Advanced Kinematics for Robotics System   Ch8 - 1
+         Overview
+
+In this chapter the following topics will be covered:
+
+•   Task-Based Design Requirements
+     –   Matching degrees of freedom to task needs
+     –   Impact of symmetric tools and workspace considerations
+
+
+•   Kinematic Configuration
+     –   Joint configurations: Cartesian, articulated, SCARA, spherical, cylindrical
+     –   Design of wrist mechanisms with orthogonal and nonorthogonal axes
+
+
+•   Quantitative Measures of Workspace Attributes
+     –   Efficiency of workspace design using structural length index 𝑄𝑄𝐿𝐿
+     –   Well-conditioned workspaces and manipulability measure 𝑤𝑤
+
+
+•   Redundant and Closed-Chain Structures
+     –   Applications and advantages of redundant manipulators
+     –   Closed-loop structures like the Stewart mechanism
+
+
+
+                        MSE 429 – Advanced Kinematics for Robotics System              Ch8 - 2
+        Introduction
+
+Influence on Kinematic and Dynamic Analysis: The structure of a manipulator affects
+both kinematic and dynamic analysis. Some configurations are easy to solve, while
+others lack closed-form solutions.
+
+Performance Limitations: Factors such as load capacity, speed, size of workspace, and
+repeatability limit a manipulator's performance.
+
+Rigid-Body Dynamics: Control of manipulators also depends on friction and flexibility of
+drive systems.
+
+Elements of a Robot System:
+1. The manipulator, including internal or proprioceptive sensors.
+2. The end-effector, or end-of-arm tooling.
+3. External sensors and effectors, such as vision systems and part feeders.
+4. The controller.
+
+
+Iterative Process: Designing a manipulator involves rethinking higher-level design
+decisions as new problems arise.
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                 Ch8 - 3
+         Basing the Design on Task Requirements
+
+Universally Programmable: Robots are designed to perform a variety of tasks but are
+often specialized for specific applications.
+
+Degrees of Freedom (DOF): The number of DOF should match the number required by
+the task. Not all tasks require a full six DOF.
+
+Example: Let a manipulator position a
+grinding tool in two different
+configurations. In this scenario, the
+orientation of the tool relative to its axis,
+𝑍𝑍̂ 𝑇𝑇 , is irrelevant because the grinding
+wheel rotates at several hundred RPM.
+Since the tool can be positioned in an
+infinite number of ways by rotating
+around 𝑍𝑍̂ 𝑇𝑇 , the robot is considered
+redundant for this task.
+
+Symmetric tools may reduce required DOF. Arc welding, spot welding, deburring,
+glueing, and polishing often employ end-effectors with at least one axis of symmetry.
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System              Ch8 - 4
+        Basing the Design on Task Requirements
+
+Symmetric-Tool Handling
+
+• Imagining an extra "fictitious" joint along the tool's axis of symmetry can simplify
+  positioning.
+• Normally requires six degrees of freedom, but with the fictitious joint, only five real
+  joints are needed.
+• Many industrial robots have five degrees of freedom (5-DOF) due to the prevalence
+  of symmetric tools.
+
+
+Tasks with Fewer than Six Degrees of Freedom
+
+• Example: Placing components on circuit boards requires three degrees of freedom
+  for planar movement (𝑥𝑥, 𝑦𝑦, rotation) and a fourth for lifting/inserting parts (𝑧𝑧).
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch8 - 5
+        Basing the Design on Task Requirements
+
+Active Positioning Devices
+Devices like tilt/roll platforms reduce the robot's required degrees of freedom.
+
+Example: Welding pipes with a tilt/roll platform accounts for two degrees of
+freedom, theoretically allowing a 3-DOF robot for symmetric-tool tasks.
+
+
+
+
+             A tilt/roll platform provides two degrees of freedom to the overall manipulator system.
+
+                     MSE 429 – Advanced Kinematics for Robotics System                                 Ch8 - 6
+        Basing the Design on Task Requirements
+
+Load capacity
+The load capacity of a manipulator depends upon the sizing of its structural
+members, power-transmission system, and actuators.
+
+The load placed on actuators and drive system is a function of the configuration of the
+robot, the percentage of time supporting a load, and dynamic loading due to inertial-
+and velocity-related forces.
+
+Speed
+An obvious goal in design has been for faster and faster manipulators.
+
+High speed offers advantages in many applications when a proposed robotic solution
+must compete on economic terms with hard automation or human workers. For some
+applications, however, the process itself limits the speed rather than the manipulator.
+This is the case with many welding and spray-painting applications.
+
+NOTE: the acceleration and deceleration phases take up most of the cycle time (for
+example in a pick-and-place scenario). Hence, acceleration capability, not just peak
+speed, is very important.
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                   Ch8 - 7
+        Kinematic Configuration
+
+Load capacity
+The load capacity of a manipulator depends upon the sizing of its structural
+members, power-transmission system, and actuators.
+
+The load placed on actuators and drive system is a function of the configuration of the
+robot, the percentage of time supporting a load, and dynamic loading due to inertial-
+and velocity-related forces.
+
+Speed
+An obvious goal in design has been for faster and faster manipulators.
+
+High speed offers advantages in many applications when a proposed robotic solution
+must compete on economic terms with hard automation or human workers. For some
+applications, however, the process itself limits the speed rather than the manipulator.
+This is the case with many welding and spray-painting applications.
+
+NOTE: the acceleration and deceleration phases take up most of the cycle time (for
+example in a pick-and-place scenario). Hence, acceleration capability, not just peak
+speed, is very important.
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                   Ch8 - 8
+        Basing the Design on Task Requirements
+
+Most manipulators are designed so that the last 𝑛𝑛 − 3 joints orient the end-effector and
+have axes that intersect at the wrist point, and the first three joints position this wrist
+point. Manipulators with this design could be said to be composed of a positioning
+structure followed by an orienting structure or wrist.
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch8 - 9
+         Basing the Design on Task Requirements
+
+Cartesian manipulator
+Joints 1 through 3 are prismatic, mutually orthogonal, and correspond to the 𝑋𝑋, 𝑌𝑌, and
+𝑍𝑍 Cartesian directions. The inverse kinematic solution for this configuration is trivial.
+
+• This configuration produces robots with very stiff structures. As a consequence, very
+  large robots can be built. These large robots, often called gantry robots, sometimes
+  manipulate entire automobiles or inspect entire aircraft.
+
+• The first three joints are decoupled. This makes them simpler to design and prevents
+  kinematic singularities due to the first three joints.
+
+
+
+
+                                   A Cartesian manipulator.
+
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch8 - 10
+         Basing the Design on Task Requirements
+
+Articulated manipulator
+Sometimes also called a jointed, elbow, or anthropomorphic manipulator, typically
+consists of two "shoulder" joints (one for rotation about a vertical axis and one for
+elevation out of the horizontal plane), an "elbow" joint (whose axis is usually parallel to
+the shoulder elevation joint), and two or three wrist joints at the end of the
+manipulator.
+
+• Articulated robots minimize the intrusion of the manipulator structure into the
+  workspace, making them capable of reaching into confined spaces.
+
+• They require much less overall structure than Cartesian robots, making them less
+  expensive for applications needing smaller workspaces.
+
+
+
+
+                                  An articulated manipulator.
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch8 - 11
+         Basing the Design on Task Requirements
+
+SCARA manipulator
+It has three parallel revolute joints (allowing it to move and orient in a plane), with a
+fourth prismatic joint for moving the end-effector normal to the plane.
+
+• The first three joints do not have to support any of the weight of the manipulator or
+  the load.
+
+• Link 0 can easily house the actuators for the first two joints. The actuators can be
+  made very large, so the robot can move very fast. One SCARA manipulator can move
+  at up to 30 feet per second, about 10 times faster than most articulated industrial
+  robots
+
+
+
+
+                                        A SCARA manipulator.
+
+                    MSE 429 – Advanced Kinematics for Robotics System                   Ch8 - 12
+         Basing the Design on Task Requirements
+
+Spherical manipulator
+It has many similarities to the articulated
+manipulator, but with the elbow joint
+replaced by a prismatic joint. This design is
+better suited to some applications than is the
+elbow design. The link that moves
+prismatically might telescope –
+or even "stick out the back" when retracted.
+                                                           A spherical manipulator.
+
+
+
+Cylindrical manipulator
+Consists of a prismatic joint for translating the
+arm vertically, a revolute joint with a vertical
+axis, another prismatic joint orthogonal to the
+revolute joint axis, and, finally, a wrist of some
+sort.
+
+
+                                                          A cylindrical manipulator.
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                 Ch8 - 13
+         Quantitative Measures of Workspace Attributes
+
+Efficiency of design in terms of generating workspace
+The length sum of a manipulator gives a rough measure of the "length" of the
+complete linkage. Let the length sum of a manipulator be defined as
+                                           𝑁𝑁
+
+                                     𝐿𝐿 = �(𝑎𝑎𝑖𝑖−1 + 𝑑𝑑𝑖𝑖 )
+                                          𝑖𝑖=1
+
+where 𝑎𝑎𝑖𝑖−1 and 𝑑𝑑𝑖𝑖 are the link length and joint offset as defined in Chapter 3.
+
+NOTE: for prismatic joints,𝑑𝑑𝑖𝑖 must here be interpreted as a constant equal to the length
+of travel between the joint-travel limits.
+
+The structural length index, 𝑄𝑄𝐿𝐿 , is defined as the ratio of the manipulator's
+length sum to the cube root of the workspace volume - that is,
+                                                     𝐿𝐿
+                                            𝑄𝑄𝐿𝐿 = 3
+                                                      𝑤𝑤
+
+where 𝑤𝑤 is the volume of the manipulator’s workspace.
+
+NOTE: Good designs have low 𝑄𝑄𝐿𝐿 .
+
+                     MSE 429 – Advanced Kinematics for Robotics System                Ch8 - 14
+         Quantitative Measures of Workspace Attributes
+
+Optimal Value for Cartesian Manipulator: the value of 𝑄𝑄𝐿𝐿 is minimized when all three
+joints have the same length of travel.
+This minimal value is 𝑄𝑄𝐿𝐿 = 3.
+
+                                                         1
+Optimal Value for articulated Manipulator: 𝑄𝑄𝐿𝐿 = 3             ≅ 0.62
+                                                        4𝜋𝜋/3
+
+
+Example: A SCARA manipulator has links 1 and 2 of equal length 𝑙𝑙/2, and
+the range of motion of the prismatic joint 3 is given by 𝑑𝑑3 . Assume for simplicity that
+the joint limits are absent, and find 𝑄𝑄𝐿𝐿 . What value of 𝑑𝑑3 minimizes 𝑄𝑄𝐿𝐿 and what is this
+minimal value?
+
+                            𝑙𝑙   𝑙𝑙
+• The length sum is: 𝐿𝐿 = + + 𝑑𝑑3 = 𝑙𝑙 + 𝑑𝑑3
+                           2   2
+• The workspace volume: is a right cylinder of radius 𝑙𝑙 and height 𝑑𝑑3 . Therefore:
+                                               𝑙𝑙 + 𝑑𝑑3
+                                      𝑄𝑄𝐿𝐿 = 3
+                                                  𝜋𝜋𝑙𝑙 2 𝑑𝑑3
+                                           𝑑𝑑                𝑙𝑙
+• Minimize 𝑄𝑄𝐿𝐿 as a function of the ratio 𝑙𝑙3 gives 𝑑𝑑3 = as optimal.
+                                                             2
+• The corresponding minimal value of 𝑄𝑄𝐿𝐿 is 1.29.
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                     Ch8 - 15
+        Quantitative Measures of Workspace Attributes
+
+Designing well-conditioned workspaces
+
+Singular Points:
+• A manipulator loses one or more degrees of freedom at singular points.
+• Certain tasks may not be performed effectively at these points.
+
+Neighborhood of Singular Points:
+• Actions of the manipulator near singular points may be poorly conditioned.
+• The manipulator's ability to move and apply forces uniformly is compromised.
+
+Distance from Singularities:
+• The farther the manipulator is from singular points, the better it can move uniformly
+   and apply forces in all directions.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System               Ch8 - 16
+        Quantitative Measures of Workspace Attributes
+
+Designing well-conditioned workspaces – cont’d
+
+Quantifying Effects:
+• Various measures have been suggested to quantify the effects of singularities. These
+  measures can help design a manipulator with a maximally large, well-conditioned
+  subspace of the workspace.
+• Measures like manipulability and inertia ellipsoids help evaluate workspace
+  conditioning.
+
+
+Design Time Considerations:
+• Using these measures during design can improve the manipulator's overall
+  performance by avoiding poorly conditioned regions.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System              Ch8 - 17
+        Quantitative Measures of Workspace Attributes
+
+Designing well-conditioned workspaces – cont’d
+
+Singular configurations:
+To find singular points,
+                                    det 𝑱𝑱 Θ   =0
+
+Manipulability measure: a measure of manipulator dexterity is defined as:
+
+
+                               𝓌𝓌 =    det 𝑱𝑱 Θ 𝑱𝑱⊤ Θ
+
+which, for nonredundant manipulators, reduces to
+                                𝓌𝓌 = det 𝑱𝑱 Θ
+
+NOTE: A good manipulator design has large areas of its workspace characterized by high
+values of 𝓌𝓌.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System              Ch8 - 18
+        Quantitative Measures of Workspace Attributes
+
+Manipulability measures based on acceleration analysis or force-application capability
+– Asada’s approach:
+
+This approach suggests to examine the eigenvalues of the Cartesian mass matrix
+
+                           𝑴𝑴𝑥𝑥 Θ = 𝑱𝑱−⊤ Θ 𝑴𝑴 Θ 𝑱𝑱−𝟏𝟏 Θ
+As a measure of how well the manipulator can accelerate in various Cartesian
+directions.
+
+A graphic representation of this measure, known as inertia ellipsoid, is given by:
+                                     𝑿𝑿⊤ 𝑴𝑴𝑥𝑥 Θ 𝑿𝑿 = 𝟏𝟏,
+• The above equation represents an 𝑛𝑛-dimensional ellipse, where 𝑛𝑛 is the dimension
+   of 𝑿𝑿.
+• The axes of the ellipsoid lie in the directions of the eigenvectors of 𝑴𝑴𝑥𝑥 Θ .
+• The reciprocals of square roots of the corresponding eigenvalues provide the length
+   of the axes of the ellipsoids.
+
+NOTE: Well-conditioned points in the manipulator workspace are characterized by
+inertia ellipsoids that are spherical (or nearly so).
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System              Ch8 - 19
+           Quantitative Measures of Workspace Attributes
+
+Manipulability measures based on acceleration analysis or force-application capability
+– Asada’s approach:
+
+Example: Consider a planar two-link RR manipulator. The inertia ellipsoid can be found
+as
+
+
+
+
+             Workspace of a 2-DOF planar arm, showing inertia ellipsoids [1]. Workspace of a 2-DOF planar arm, showing
+                                                 inertia ellipsoids, adapted from
+
+[1] Asada, Haruhiko. "Dynamic analysis and design of robot manipulators using inertia ellipsoids." Proceedings. 1984 IEEE
+International Conference on Robotics and Automation. Vol. 1. IEEE, 1984.
+
+                            MSE 429 – Advanced Kinematics for Robotics System                                               Ch8 - 20
+          Redundant and Closed-Chain Structures
+
+Redundant manipulators have more than six degrees of freedom and offer benefits like
+micromanipulation and avoiding singular configurations (Additional joints can also help
+a mechanism avoid singular configurations.)
+
+Closed-loop structures:
+•   Stewart Mechanism: A closed-loop alternative to the
+    serial 6-DOF manipulator that controls the position and
+    orientation of the end-effector using six linear actuators.
+•   Actuator Connections: Actuators are connected to the
+    base with two-degree-of-freedom universal joints and to
+    the end-effector with three-degree-of-freedom ball-and-
+    socket joints.
+•   Characteristics: The mechanism is very stiff due to its
+    closed-loop structure but has a more limited range of
+    motion compared to serial linkages.
+•   Kinematic Solutions: The inverse kinematic solution for
+    the Stewart mechanism is simple, whereas the forward
+    kinematic solution is complex and often lacks a closed-
+    form formulation.
+
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System           Ch8 - 21
+MSE 429 – Advanced Kinematics for Robotics System   Ch8 - 22
+

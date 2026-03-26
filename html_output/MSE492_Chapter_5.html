@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 5: Jacobians, Velocities &amp; Static Forces — MSE 492</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});"></script>
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+
+  <main class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&rsaquo;</span>
+      MSE492<span class="sep">&rsaquo;</span>
+      Chapter 5
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Ch 5: Jacobians, Velocities &amp; Static Forces
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=1" target="_blank">PDF p.1</a>
+    </h1>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <h2 id="overview">Overview
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=2" target="_blank">PDF p.2</a>
+    </h2>
+
+    <p>This chapter covers two methods for analyzing velocities and static forces:</p>
+    <ul>
+      <li>Velocity analysis of rigid bodies and velocity propagation</li>
+      <li>Forward velocity problem and Jacobian
+        <ul>
+          <li>Joint directions and derivatives</li>
+          <li>Joint directions and cross products</li>
+          <li>Velocity transformation matrix and simpler Jacobians</li>
+          <li>Inverse velocity problem and singularities</li>
+          <li>Force transformation matrices and inverse static problem</li>
+        </ul>
+      </li>
+    </ul>
+
+    <!-- ============================================================ -->
+    <!-- 5.1 INTRODUCTION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-1">5.1 Introduction
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=3" target="_blank">PDF p.3</a>
+    </h2>
+
+    <p>This chapter examines the notions of linear and angular velocities of rigid bodies. The notion of differentiation of position vectors and rotation matrices will be used to define the velocity terms for general motion (i.e., a motion that includes both translation and rotation).</p>
+    <p>A systematic analysis of the velocities of the links of a manipulator will be conducted from the base to the end-effector (velocity propagation).</p>
+    <p>The study of both velocities and the static forces acting on a rigid body leads to a matrix entity called the <strong><span class="tooltip-term" tabindex="0">Jacobian<span class="tooltip-content">In robotics, the Jacobian is a matrix that linearly maps joint velocities to end-effector (task-space) velocities. It is configuration-dependent and encodes how each joint contributes to end-effector motion at a given instant.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;5.6&ndash;5.7</span></span></span></strong>.</p>
+
+    <!-- Enrichment: Intro video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment &mdash; Video: Introduction to the Robot Jacobian</div>
+      <p>The Jacobian is one of the most important tools in robotics &mdash; it is the mathematical bridge between what the joints are doing (joint velocities) and what the end-effector is doing (Cartesian velocities).</p>
+      <p><strong>Recommended video</strong>: <em>Modern Robotics, Chapter 5: Velocity Kinematics and Statics</em> by Kevin Lynch (Northwestern University). This video series introduces the Jacobian, explains how it maps joint velocities to end-effector velocities, and covers singularities, manipulability, and the force ellipsoid.</p>
+      <ul>
+        <li><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/velocity-kinematics-and-statics/" target="_blank">Modern Robotics Chapter 5 &mdash; Velocity Kinematics and Statics</a></li>
+        <li><a href="https://modernrobotics.northwestern.edu/chapters/chapter5/" target="_blank">Full chapter page with all sub-topic videos</a></li>
+      </ul>
+      <p><strong>Why watch this</strong>: The Modern Robotics treatment uses screw theory (twists), which is a different but complementary perspective to the Craig-style approach used in our course.</p>
+    </div>
+
+    <!-- Enrichment: Physical intuition -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Physical Intuition for the Jacobian</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>Think of the Jacobian as a "gear ratio" matrix for a robot. Just as a gear ratio tells you how fast an output shaft spins given an input shaft speed, the Jacobian tells you how fast the end-effector moves given a set of joint velocities.</p>
+          <p><strong>Key intuitions:</strong></p>
+          <ol>
+            <li><strong>The Jacobian is configuration-dependent.</strong> Unlike a fixed gear ratio, the Jacobian changes as the robot moves.</li>
+            <li><strong>Each column of the Jacobian represents one joint's contribution.</strong> Column $i$ tells you: "If joint $i$ moves at unit speed and all other joints are stationary, what velocity does the end-effector experience?"</li>
+            <li><strong>The Jacobian is a $6 \times n$ matrix</strong> (for a robot with $n$ joints in 3D space), where the top 3 rows correspond to linear velocity and the bottom 3 rows correspond to angular velocity.</li>
+            <li><strong>The Jacobian connects two "spaces."</strong> Joint space is $n$-dimensional. Task space is 6-dimensional (3 translations + 3 rotations). The Jacobian is the linear map between them at any given instant.</li>
+          </ol>
+          <p><strong>Reference</strong>: <a href="https://studywolf.wordpress.com/2013/09/02/robot-control-jacobians-velocity-and-force/" target="_blank">Robot Control Part 2: Jacobians, Velocity, and Force &mdash; StudyWolf</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5.2 NOTATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-2">5.2 Notation</h2>
+
+    <h3 id="sec-5-2-1">5.2.1 Differentiation of Position Vector
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=4" target="_blank">PDF p.4</a>
+    </h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+
+      <p><strong>Derivative of a position vector</strong>: The derivative of position vector $\boldsymbol{Q}$ with respect to frame $\{B\}$ is:</p>
+      $$\frac{d}{dt} {}^{B}\boldsymbol{Q} = {}^{B}\boldsymbol{V}_Q$$
+
+      <p><strong>Velocity in another reference frame</strong>:</p>
+      $${}^{A}\!\left({}^{B}\boldsymbol{V}_Q\right) = \frac{{}^{A}d}{dt} {}^{B}\boldsymbol{Q}$$
+
+      <p><strong>Shorthand when frames match</strong>:</p>
+      $${}^{B}\!\left({}^{B}\boldsymbol{V}_Q\right) = {}^{B}\boldsymbol{V}_Q$$
+
+      <p><strong>Frame change via rotation matrix</strong>:</p>
+      $${}^{A}\!\left({}^{B}\boldsymbol{V}_Q\right) = {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{V}_Q$$
+
+      <p><strong>Velocity of a frame origin</strong>:</p>
+      $$\boldsymbol{v}_C = {}^{U}\boldsymbol{V}_{C_{ORG}}$$
+    </div>
+
+    <!-- 5.2.2 Train and Car Example -->
+    <h3 id="sec-5-2-2">5.2.2 Worked Example: Train and Car
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=5" target="_blank">PDF p.5</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example 1</div>
+      <p><strong>Setup</strong>: A fixed universe frame $\{U\}$, a frame attached to a train traveling at 100 mph $\{T\}$, and a frame attached to a car traveling at 30 mph $\{C\}$. Both vehicles heading in the $\hat{Y}$ direction of $\{U\}$.</p>
+      <p><strong>Given</strong>: The rotation matrices ${}^{U}_{T}\boldsymbol{R}$ and ${}^{U}_{C}\boldsymbol{R}$ are known and constant.</p>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch5-1">Show Solution</button>
+    <div id="sol-ch5-1" class="solution-content">
+      <p><strong>Find</strong> $\frac{{}^{U}d}{dt} {}^{U}\boldsymbol{P}_{C_{ORG}}$:</p>
+      $$\frac{{}^{U}d}{dt} {}^{U}\boldsymbol{P}_{C_{ORG}} = {}^{U}\boldsymbol{V}_{C_{ORG}} = \boldsymbol{v}_C = 30\,\hat{Y}$$
+
+      <p><strong>Find</strong> ${}^{C}\!\left({}^{U}\boldsymbol{V}_{T_{ORG}}\right)$:</p>
+      $${}^{C}\!\left({}^{U}\boldsymbol{V}_{T_{ORG}}\right) = {}^{C}\boldsymbol{v}_T = {}^{U}_{C}\boldsymbol{R}\;\boldsymbol{v}_T = {}^{U}_{C}\boldsymbol{R}\;100\hat{Y} = {}^{U}_{C}\boldsymbol{R}^{-1}\;100\hat{Y}$$
+
+      <p><strong>Find</strong> ${}^{C}\!\left({}^{T}\boldsymbol{V}_{C_{ORG}}\right)$:</p>
+      $${}^{C}\!\left({}^{T}\boldsymbol{V}_{C_{ORG}}\right) = {}^{C}_{T}\boldsymbol{R}\; {}^{T}\boldsymbol{V}_{C_{ORG}} = -{}^{U}_{C}\boldsymbol{R}^{-1}\;{}^{U}_{T}\boldsymbol{R}\;70\hat{Y}$$
+      <p><strong>Note</strong>: The relative velocity of the car w.r.t. the train is $30 - 100 = -70$ mph in the $\hat{Y}$ direction of $\{U\}$.</p>
+    </div>
+
+    <!-- 5.2.3 Angular Velocity Vector -->
+    <h3 id="sec-5-2-3">5.2.3 The Angular Velocity Vector
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=6" target="_blank">PDF p.6</a>
+    </h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p>The <span class="tooltip-term" tabindex="0">angular velocity<span class="tooltip-content">A vector quantity describing how fast and about which axis a rigid body is rotating. In 3D, angular velocity has three components. Unlike linear velocity, it does not depend on a reference point on the body &mdash; every point on a rigid body shares the same angular velocity.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;5.2; <a href="https://en.wikipedia.org/wiki/Angular_velocity" target="_blank">Wikipedia &mdash; Angular velocity</a></span></span></span> of frame $\{B\}$ relative to frame $\{A\}$ is the vector ${}^{A}\boldsymbol{\Omega}_B$.</p>
+      <p>Simplified notation for angular velocity relative to understood reference $\{U\}$:</p>
+      $$\boldsymbol{\omega}_C = {}^{U}\boldsymbol{\Omega}_C$$
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p6.png" alt="Figure (page 6): Frame $\{B\}$ rotating relative to frame $\{A\}$ with angular velocity vector ${}^{A}\boldsymbol{\Omega}_B$." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 6): Frame $\{B\}$ rotating relative to frame $\{A\}$ with angular velocity vector ${}^{A}\boldsymbol{\Omega}_B$.</div>
+
+    <!-- ============================================================ -->
+    <!-- 5.3 LINEAR AND ROTATIONAL VELOCITY -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-3">5.3 Linear and Rotational Velocity of Rigid Bodies</h2>
+
+    <h3 id="sec-5-3-1">5.3.1 <span class="tooltip-term" tabindex="0">Linear Velocity<span class="tooltip-content">The rate of change of a point's position in space, measured in metres per second. Unlike angular velocity, linear velocity depends on which point on a rigid body you are tracking. For a robot link, linear velocity typically refers to the velocity of the link frame's origin.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;5.3</span></span></span>
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=7" target="_blank">PDF p.7</a>
+    </h3>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p7.png" alt="Figure (page 7): Frame $\{A\}$ with origin, frame $\{B\}$ offset from $\{A\}$, and a point $Q$ with position vector ${}^{B}\boldsymbol{Q}$ in frame $\{B\}$." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 7): Frame $\{A\}$ with origin, frame $\{B\}$ offset from $\{A\}$, and a point $Q$ with position vector ${}^{B}\boldsymbol{Q}$ in frame $\{B\}$.</div>
+
+    <p>The absolute velocity of point $Q$ with respect to frame $\{A\}$ is found by differentiating:</p>
+    $$\frac{d\;{}^{A}\boldsymbol{Q}}{dt} = \frac{d\;{}^{A}\boldsymbol{P}_{B_{ORG}}}{dt} + \frac{d\;{}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{Q}}{dt}$$
+
+    <h3 id="sec-5-3-2">5.3.2 Constant Orientation Case
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=8" target="_blank">PDF p.8</a>
+    </h3>
+
+    <p>If the orientation of frame $\{B\}$ relative to $\{A\}$ does not change (${}^{A}_{B}\boldsymbol{R}$ constant):</p>
+    $$\frac{d\;{}^{A}\boldsymbol{Q}}{dt} = \frac{d\;{}^{A}\boldsymbol{P}_{B_{ORG}}}{dt} + {}^{A}_{B}\boldsymbol{R}\;\frac{d\;{}^{B}\boldsymbol{Q}}{dt}$$
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Velocity &mdash; Constant Orientation</div>
+      $$\boxed{{}^{A}\boldsymbol{V}_Q = {}^{A}\boldsymbol{V}_{B_{ORG}} + {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{V}_Q}$$
+    </div>
+
+    <h3 id="sec-5-3-3">5.3.3 Rotational Velocity
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=9" target="_blank">PDF p.9</a>
+    </h3>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p9.png" alt="Figure (page 9): Two coincident reference frames $\{A\}$ and $\{B\}$ sharing a common origin $O$. Angular velocity vector ${}^{A}\boldsymbol{\Omega}_B$ is shown, along with a point $Q$." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 9): Two coincident reference frames $\{A\}$ and $\{B\}$ sharing a common origin $O$. Angular velocity vector ${}^{A}\boldsymbol{\Omega}_B$ is shown, along with a point $Q$.</div>
+
+    <p>Position mapping: ${}^{A}\boldsymbol{Q} = {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{Q}$</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Velocity &mdash; Pure Rotation (Coincident Origins)</div>
+      $$\boxed{{}^{A}\boldsymbol{V}_Q = {}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{Q}}$$
+    </div>
+
+    <h3 id="sec-5-3-4">5.3.4 General Velocity Representation
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=10" target="_blank">PDF p.10</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; General Velocity Equation</div>
+      $$\boxed{{}^{A}\boldsymbol{V}_Q = {}^{A}\boldsymbol{V}_{B_{ORG}} + {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{V}_Q + {}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{Q}}$$
+      <p>This is the fundamental velocity equation combining:</p>
+      <ul>
+        <li>${}^{A}\boldsymbol{V}_{B_{ORG}}$: linear velocity of the origin of $\{B\}$ in $\{A\}$</li>
+        <li>${}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{V}_Q$: velocity of $Q$ relative to $\{B\}$, expressed in $\{A\}$</li>
+        <li>${}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{Q}$: velocity due to rotation of $\{B\}$ relative to $\{A\}$</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5.5 CONVENTION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-5">5.5 Convention &mdash; Motion of the Links of a Robot
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=11" target="_blank">PDF p.11</a>
+    </h2>
+
+    <ul>
+      <li>Link frame $\{0\}$ is used as the <strong>reference frame</strong></li>
+      <li>$v_i$ is the linear velocity of the origin of link frame $\{i\}$</li>
+      <li>$\omega_i$ is the angular velocity of link frame $\{i\}$</li>
+    </ul>
+
+    <!-- ============================================================ -->
+    <!-- 5.6 VELOCITY PROPAGATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-6">5.6 Velocity Propagation from Link to Link
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=12" target="_blank">PDF p.12</a>
+    </h2>
+
+    <p><strong>Concept:</strong> The velocity of each joint (joint rate) contributes to the linear and angular velocity of the links. The velocity of the links is a function of all the joint rates that precede the link &mdash; this is <strong>velocity propagation</strong>.</p>
+    <p>The linear and angular velocity of link $i+1$ can be described as the velocity of link $i$ plus the contribution of joint $i+1$.</p>
+
+    <!-- Enrichment: Velocity Propagation Video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment &mdash; Video: Velocity Propagation Through Robot Links</div>
+      <p>Velocity propagation is a recursive algorithm: you start at the base (where everything is zero) and "propagate" velocities outward, link by link.</p>
+      <p><strong>Recommended resources:</strong></p>
+      <ol>
+        <li><a href="https://robotacademy.net.au/lesson/velocity-of-2-joint-planar-robot-arm/" target="_blank">Robot Academy &mdash; Velocity of a 2-Joint Planar Robot Arm</a></li>
+        <li><a href="https://robotacademy.net.au/lesson/velocity-of-3-joint-planar-robot-arm/" target="_blank">Robot Academy &mdash; Velocity of a 3-Joint Planar Robot Arm</a></li>
+        <li><a href="https://mecharithm.com/learning/lesson/velocities-in-robotics-angular-velocities-twists-10" target="_blank">Mecharithm &mdash; Velocities in Robotics</a></li>
+      </ol>
+      <p><strong>Why this matters</strong>: Velocity propagation is NOT just a derivation technique &mdash; it is the actual algorithm used in real-time robot controllers (Newton-Euler inverse dynamics in Chapter 6 will build directly on this).</p>
+    </div>
+
+    <!-- Enrichment: Snowball Analogy -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Velocity Propagation &mdash; Building Intuition (Snowball Analogy)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>The "snowball" analogy</strong>: Imagine rolling a snowball downhill. As it moves from link to link, it picks up more "velocity" from each joint it passes through.</p>
+          <p>For a revolute joint, the key equations are:</p>
+          <ul>
+            <li><strong>Angular velocity</strong>: ${}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\;{}^{i}\boldsymbol{\omega}_i + \dot{\theta}_{i+1}\;{}^{i+1}\hat{Z}_{i+1}$<br>
+            <em>"Take the angular velocity of the previous link, rotate it into the current link's frame, and add the new joint's rotation."</em></li>
+            <li><strong>Linear velocity</strong>: ${}^{i+1}\boldsymbol{v}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}({}^{i}\boldsymbol{v}_i + {}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{i+1})$<br>
+            <em>"Take the linear velocity of the previous link, add the tangential velocity caused by the previous link's rotation, then rotate the whole thing."</em></li>
+          </ul>
+          <p>The cross product $\boldsymbol{\omega}_i \times \boldsymbol{P}_{i+1}$ is the tangential velocity due to rotation &mdash; like swinging a ball on a string.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 5.6.1 Revolute Joints -->
+    <h3 id="sec-5-6-1">5.6.1 Revolute Joints
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=13" target="_blank">PDF p.13</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Velocity Propagation &mdash; Revolute Joints</div>
+      <p><strong>Angular velocity</strong> of link $i+1$ (in frame $\{i+1\}$):</p>
+      $$\boxed{{}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\;{}^{i}\boldsymbol{\omega}_i + \dot{\theta}_{i+1}\;{}^{i+1}\hat{Z}_{i+1}}$$
+      <p>where $\dot{\theta}_{i+1}\;{}^{i+1}\hat{Z}_{i+1} = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_{i+1} \end{bmatrix}$</p>
+
+      <p><strong>Linear velocity</strong> of frame $\{i+1\}$:
+        <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=14" target="_blank">PDF p.14</a>
+      </p>
+      $$\boxed{{}^{i+1}\boldsymbol{v}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\left({}^{i}\boldsymbol{v}_i + {}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{i+1}\right)}$$
+    </div>
+
+    <!-- 5.6.2 Prismatic Joints -->
+    <h3 id="sec-5-6-2">5.6.2 Prismatic Joints
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=15" target="_blank">PDF p.15</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Velocity Propagation &mdash; Prismatic Joints</div>
+      <p><strong>Angular velocity</strong> (no contribution from prismatic joint):</p>
+      $$\boxed{{}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\;{}^{i}\boldsymbol{\omega}_i}$$
+
+      <p><strong>Linear velocity</strong>:</p>
+      $$\boxed{{}^{i+1}\boldsymbol{v}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\left({}^{i}\boldsymbol{v}_i + {}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{i+1}\right) + \dot{d}_{i+1}\;{}^{i+1}\hat{Z}_{i+1}}$$
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p15.png" alt="Figure (page 15): A prismatic joint showing link $i$ and link $i+1$ connected by a sliding joint along axis $\hat{Z}_{i+1}$." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 15): A prismatic joint showing link $i$ and link $i+1$ connected by a sliding joint along axis $\hat{Z}_{i+1}$.</div>
+
+    <!-- ============================================================ -->
+    <!-- 5.6.3 WORKED EXAMPLE: Two-Link Velocity Propagation -->
+    <!-- ============================================================ -->
+    <h3 id="sec-5-6-3">5.6.3 Worked Example: Two-Link Planar Manipulator &mdash; Velocity Propagation
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=16" target="_blank">PDF p.16</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example 2</div>
+      <p><strong>Problem</strong>: A two-link manipulator with revolute joints, link lengths $L_1$ and $L_2$. Calculate the velocity of the tip of the arm as a function of joint rates. Give the answer in terms of frame $\{3\}$ and frame $\{0\}$.</p>
+      <div class="figure">
+      <img src="assets/images/ch5_p16.png" alt="Figure (page 16): Two-link planar manipulator with revolute joints, link lengths $L_1$ and $L_2$, joint angles $\theta_1$ and $\theta_2$." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 16): Two-link planar manipulator with revolute joints, link lengths $L_1$ and $L_2$, joint angles $\theta_1$ and $\theta_2$.</div>
+      <p><strong>Homogeneous transforms:</strong></p>
+      $${}^{0}_{1}\boldsymbol{T} = \begin{bmatrix} c_1 & -s_1 & 0 & 0 \\ s_1 & c_1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{1}_{2}\boldsymbol{T} = \begin{bmatrix} c_2 & -s_2 & 0 & L_1 \\ s_2 & c_2 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{2}_{3}\boldsymbol{T} = \begin{bmatrix} 1 & 0 & 0 & L_2 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch5-2">Show Solution</button>
+    <div id="sol-ch5-2" class="solution-content">
+
+      <div class="derivation-steps" id="deriv-ch5-vel-prop">
+        <div class="derivation-step visible">
+          <div class="step-label">Step 1: Link 1 velocities</div>
+          <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=17" target="_blank">PDF p.17</a>
+          $${}^{1}\boldsymbol{\omega}_1 = {}^{1}_{0}\boldsymbol{R}\;{}^{0}\boldsymbol{\omega}_0 + \dot{\theta}_1\;{}^{1}\hat{Z}_1 = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix}$$
+          $${}^{1}\boldsymbol{v}_1 = {}^{1}_{0}\boldsymbol{R}\left({}^{0}\boldsymbol{v}_0 + {}^{0}\boldsymbol{\omega}_0 \times {}^{0}\boldsymbol{P}_1\right) = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}$$
+          <p><strong>Note</strong>: ${}^{0}\boldsymbol{\omega}_0 = \boldsymbol{0}$ and ${}^{0}\boldsymbol{v}_0 = \boldsymbol{0}$ (base frame is fixed). Also ${}^{0}\boldsymbol{P}_1 = \boldsymbol{0}$ since $\{1\}$ and $\{0\}$ share the same origin.</p>
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 2: Link 2 velocities</div>
+          $${}^{2}\boldsymbol{\omega}_2 = {}^{2}_{1}\boldsymbol{R}\;{}^{1}\boldsymbol{\omega}_1 + \dot{\theta}_2\;{}^{2}\hat{Z}_2 = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix}$$
+          <p>Computing ${}^{1}\boldsymbol{\omega}_1 \times {}^{1}\boldsymbol{P}_2$:</p>
+          $${}^{1}\boldsymbol{\omega}_1 \times {}^{1}\boldsymbol{P}_2 = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} L_1 \\ 0 \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ L_1\dot{\theta}_1 \\ 0 \end{bmatrix}$$
+          $${}^{2}\boldsymbol{v}_2 = \begin{bmatrix} c_2 & s_2 & 0 \\ -s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} 0 \\ L_1\dot{\theta}_1 \\ 0 \end{bmatrix} = \begin{bmatrix} L_1 s_2 \dot{\theta}_1 \\ L_1 c_2 \dot{\theta}_1 \\ 0 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 3: Link 3 (end-effector) velocities</div>
+          $${}^{3}\boldsymbol{\omega}_3 = {}^{3}_{2}\boldsymbol{R}\;{}^{2}\boldsymbol{\omega}_2 = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix}$$
+          <p><strong>Note</strong>: There is no joint 3; frame $\{3\}$ is a tool frame, so $\dot{\theta}_3 = 0$.</p>
+          <p>Computing ${}^{2}\boldsymbol{\omega}_2 \times {}^{2}\boldsymbol{P}_3$:</p>
+          $${}^{2}\boldsymbol{\omega}_2 \times {}^{2}\boldsymbol{P}_3 = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} \times \begin{bmatrix} L_2 \\ 0 \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ L_2(\dot{\theta}_1 + \dot{\theta}_2) \\ 0 \end{bmatrix}$$
+          $${}^{3}\boldsymbol{v}_3 = \begin{bmatrix} L_1 s_2 \dot{\theta}_1 \\ L_1 c_2 \dot{\theta}_1 + L_2(\dot{\theta}_1 + \dot{\theta}_2) \\ 0 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 4: Transform to base frame $\{0\}$</div>
+          <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=18" target="_blank">PDF p.18</a>
+          $${}^{0}_{3}\boldsymbol{R} = {}^{0}_{1}\boldsymbol{R}\;{}^{1}_{2}\boldsymbol{R}\;{}^{2}_{3}\boldsymbol{R} = \begin{bmatrix} c_{12} & -s_{12} & 0 \\ s_{12} & c_{12} & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+          $$\boxed{{}^{0}\boldsymbol{v}_3 = {}^{0}_{3}\boldsymbol{R}\;{}^{3}\boldsymbol{v}_3 = \begin{bmatrix} -L_1 s_1 \dot{\theta}_1 - L_2 s_{12}(\dot{\theta}_1 + \dot{\theta}_2) \\ L_1 c_1 \dot{\theta}_1 + L_2 c_{12}(\dot{\theta}_1 + \dot{\theta}_2) \\ 0 \end{bmatrix}}$$
+        </div>
+
+        <div class="step-controls">
+          <button class="step-btn step-prev" disabled>Previous Step</button>
+          <span class="step-counter">Step 1 of 4</span>
+          <button class="step-btn step-next">Next Step</button>
+          <button class="step-btn step-show-all">Show All</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>In velocity propagation from link $i$ to link $i+1$ for a revolute joint, the angular velocity of link $i+1$ is:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">${}^{i+1}\omega_{i+1} = {}^{i+1}_i R \; {}^{i}\omega_i + \dot{\theta}_{i+1} \; \hat{Z}_{i+1}$</button>
+        <button class="quiz-option" data-correct="false">${}^{i+1}\omega_{i+1} = {}^{i}\omega_i + \dot{\theta}_{i+1} \; \hat{Z}_i$</button>
+        <button class="quiz-option" data-correct="false">${}^{i+1}\omega_{i+1} = {}^{i+1}_i R \; {}^{i}\omega_i \times \dot{\theta}_{i+1} \; \hat{Z}_{i+1}$</button>
+        <button class="quiz-option" data-correct="false">${}^{i+1}\omega_{i+1} = \dot{\theta}_{i+1} \; \hat{Z}_{i+1}$</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The angular velocity of link $i$ is rotated into frame $\{i+1\}$ using ${}^{i+1}_i R$, then the new joint's contribution $\dot\theta_{i+1} \hat{Z}_{i+1}$ is added." data-incorrect="The angular velocity is inherited from the previous link (rotated into the current frame) plus the new joint's contribution. It's additive, not multiplicative."></div>
+    </div>
+
+    <div class="concept-check" data-concept="velocity-propagation">
+      <span class="concept-check-label">How well do you understand velocity propagation?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5.7 JACOBIANS -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-7">5.7 Jacobians and the Forward Velocity Problem</h2>
+
+    <h3 id="sec-5-7-1">5.7.1 Definition and Forward Velocity Problem
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=19" target="_blank">PDF p.19</a>
+    </h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition &mdash; Jacobian and Forward Velocity Problem</div>
+      <p>The <strong>Forward Velocity Problem</strong> determines the velocity (linear and angular) of the end-effector ${}^{0}\boldsymbol{V}_{e.e.}$ as a function of the joint rates $\dot{\boldsymbol{q}}$.</p>
+      <p>A <strong>Jacobian</strong> provides the linear mapping between time-varying variables:</p>
+      $$\boxed{{}^{0}\boldsymbol{V}_{e.e.} = {}^{0}\boldsymbol{J}_{e.e.}\;\dot{\boldsymbol{q}}}$$
+      <p>where:</p>
+      $${}^{0}\boldsymbol{V}_{e.e.} = \begin{bmatrix} {}^{0}\boldsymbol{v}_{e.e.} \\ {}^{0}\boldsymbol{\omega}_{e.e.} \end{bmatrix}$$
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p19.png" alt="Figure (page 19): Definition of the Jacobian matrix relating joint velocities to end-effector velocities." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 19): Definition of the Jacobian matrix and the forward velocity problem.</div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does the Jacobian relate joint velocities to Cartesian velocities?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>The end-effector position is a nonlinear function of the joint variables: $\boldsymbol{x} = f(\boldsymbol{q})$. Differentiating both sides with respect to time gives $\dot{\boldsymbol{x}} = \frac{\partial f}{\partial \boldsymbol{q}}\,\dot{\boldsymbol{q}}$. The matrix of partial derivatives $\frac{\partial f}{\partial \boldsymbol{q}}$ is exactly the Jacobian $\boldsymbol{J}(\boldsymbol{q})$.</p>
+        <p>This is a first-order (linear) approximation that is exact at each instant. It works because any smooth nonlinear function looks linear over infinitesimally small changes &mdash; this is the fundamental idea behind the total derivative from multivariable calculus.</p>
+        <p>Each column $j$ of $\boldsymbol{J}$ represents the end-effector velocity that would result from joint $j$ moving at unit speed with all other joints frozen. The full end-effector velocity is the superposition (sum) of all columns weighted by their respective joint rates.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;5.6&ndash;5.7 &middot; <a href="https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant" target="_blank">Wikipedia &mdash; Jacobian matrix</a></div>
+      </div></div>
+    </div>
+
+    <!-- 5.7.2 Jacobian from Two-Link Example -->
+    <h3 id="sec-5-7-2">5.7.2 Jacobian from the Two-Link Example
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=20" target="_blank">PDF p.20</a>
+    </h3>
+
+    <p><strong>With respect to frame $\{0\}$</strong> (linear velocity only):</p>
+    $${}^{0}\boldsymbol{v}_3 = \underbrace{\begin{bmatrix} -L_1 s_1 - L_2 s_{12} & -L_2 s_{12} \\ L_1 c_1 + L_2 c_{12} & L_2 c_{12} \end{bmatrix}}_{{}^{0}\boldsymbol{J}_3 \;(2\times 2)} \begin{bmatrix} \dot{\theta}_1 \\ \dot{\theta}_2 \end{bmatrix}$$
+
+    <p><strong>With respect to frame $\{3\}$</strong> (linear velocity only):</p>
+    $${}^{3}\boldsymbol{v}_3 = \underbrace{\begin{bmatrix} L_1 s_2 & 0 \\ L_1 c_2 + L_2 & L_2 \end{bmatrix}}_{{}^{3}\boldsymbol{J}_3 \;(2\times 2)} \begin{bmatrix} \dot{\theta}_1 \\ \dot{\theta}_2 \end{bmatrix}$$
+
+    <!-- WARNING: Slide Typo -->
+    <div class="callout callout-warning">
+      <div class="callout-label">Warning &mdash; Corrected Slide Typo (Slide 20)</div>
+      <p><strong>CONFIRMED TYPO IN ORIGINAL SLIDES (CORRECTED HERE)</strong>: On slide 20 of the original PDF (page 20), the expression for ${}^{3}\boldsymbol{v}_3$ contains $L_2 s_2$ in the (1,1) entry of the Jacobian. Tracing through the velocity propagation derivation, the x-component of ${}^{3}\boldsymbol{v}_3$ is $L_1 s_2 \dot{\theta}_1$ (not $L_2 s_2 \dot{\theta}_1$), making the correct (1,1) entry of ${}^{3}\boldsymbol{J}_3$ equal to $L_1 s_2$.</p>
+      <p><strong>Verification</strong>: From the velocity propagation result on page 17: ${}^{3}\boldsymbol{v}_3 = \begin{bmatrix} L_1 s_2 \dot{\theta}_1 \\ L_1 c_2 \dot{\theta}_1 + L_2(\dot{\theta}_1 + \dot{\theta}_2) \\ 0 \end{bmatrix}$. The first component is clearly $L_1 s_2 \dot{\theta}_1$.</p>
+      <p><a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=20" target="_blank">See original PDF p.20</a></p>
+    </div>
+
+    <p><strong>Including angular velocity</strong> (with respect to frame $\{0\}$):</p>
+    $$\begin{bmatrix} {}^{0}\boldsymbol{v}_3 \\ {}^{0}\omega_{z_3} \end{bmatrix} = \underbrace{\begin{bmatrix} -L_1 s_1 - L_2 s_{12} & -L_2 s_{12} \\ L_1 c_1 + L_2 c_{12} & L_2 c_{12} \\ 1 & 1 \end{bmatrix}}_{{}^{0}\boldsymbol{J}_3 \;(3\times 2)} \begin{bmatrix} \dot{\theta}_1 \\ \dot{\theta}_2 \end{bmatrix}$$
+
+    <p><strong>Including angular velocity</strong> (with respect to frame $\{3\}$):</p>
+    $$\begin{bmatrix} {}^{3}\boldsymbol{v}_3 \\ {}^{3}\omega_{z_3} \end{bmatrix} = \underbrace{\begin{bmatrix} L_1 s_2 & 0 \\ L_1 c_2 + L_2 & L_2 \\ 1 & 1 \end{bmatrix}}_{{}^{3}\boldsymbol{J}_3 \;(3\times 2)} \begin{bmatrix} \dot{\theta}_1 \\ \dot{\theta}_2 \end{bmatrix}$$
+
+    <!-- 5.7.3 Two Methods -->
+    <h3 id="sec-5-7-3">5.7.3 Two Methods for Determining the Jacobian
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=21" target="_blank">PDF p.21</a>
+    </h3>
+
+    <p>The Jacobian can be determined using two methods:</p>
+    <ol>
+      <li><strong>Joint Directions and Derivatives</strong></li>
+      <li><strong>Joint Directions and Cross Products</strong></li>
+    </ol>
+
+    <!-- Enrichment: Comparing methods -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Comparing the Two Jacobian Methods &mdash; When to Use Which</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Comparison</div>
+          <p>Both methods produce the <strong>same Jacobian</strong> &mdash; they are mathematically equivalent. The difference is purely practical:</p>
+          <table>
+            <thead>
+              <tr><th>Aspect</th><th>Method 1: Derivatives</th><th>Method 2: Cross Products</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>What you need</strong></td><td>Forward kinematics ${}^{0}\boldsymbol{P}_{ee}(\boldsymbol{q})$ in closed form</td><td>Homogeneous transforms ${}^{0}_{i}\boldsymbol{T}$ for each joint</td></tr>
+              <tr><td><strong>Linear velocity columns</strong></td><td>$\frac{\partial {}^{0}\boldsymbol{P}_{ee}}{\partial q_i}$</td><td>${}^{0}\hat{Z}_i \times {}^{0}\boldsymbol{P}_{i \to ee}$</td></tr>
+              <tr><td><strong>Angular velocity columns</strong></td><td>${}^{0}\hat{Z}_i$ (revolute) or $\boldsymbol{0}$ (prismatic)</td><td>Same</td></tr>
+              <tr><td><strong>Best for</strong></td><td>Simple robots where FK is easy to differentiate</td><td>Any robot, especially with DH transforms already computed</td></tr>
+              <tr><td><strong>Drawback</strong></td><td>Differentiation can be tedious for complex FK</td><td>Requires computing position vectors between joints</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Rule of thumb</strong>: For exam problems and simple planar robots, the derivatives method is often faster. For 6-DOF industrial robots with DH parameters, the cross-product method is more systematic.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- METHOD 1: Derivatives -->
+    <!-- ============================================================ -->
+    <h3 id="sec-5-7-4">5.7.4 Method 1: Joint Directions and Derivatives
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=22" target="_blank">PDF p.22</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Jacobian &mdash; Derivatives Method</div>
+      <p>Linear velocity of the end-effector:</p>
+      $${}^{0}\boldsymbol{v}_{e.e.} = \sum_{i=1}^{n} \frac{\partial\;{}^{0}\boldsymbol{P}_{ee}}{\partial q_i}\;\dot{q}_i$$
+      <p>Angular velocity of the end-effector:</p>
+      $${}^{0}\boldsymbol{\omega}_{e.e.} = \sum_{i=1}^{n} \dot{\theta}_i\;{}^{0}\hat{Z}_i$$
+      <p>Jacobian structure:
+        <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=23" target="_blank">PDF p.23</a>
+      </p>
+      $${}^{0}\boldsymbol{J}_{e.e.} = \begin{bmatrix} \cdots & \dfrac{\partial\;{}^{0}\boldsymbol{P}_{ee}}{\partial \theta_i} & \cdots & \dfrac{\partial\;{}^{0}\boldsymbol{P}_{ee}}{\partial d_j} & \cdots \\[10pt] \cdots & {}^{0}\hat{Z}_i & \cdots & \boldsymbol{0}_{3\times 1} & \cdots \end{bmatrix}$$
+      <p>Top row = Linear Velocity. Bottom row = Angular Velocity. Left columns = Revolute joints. Right columns = Prismatic joints.</p>
+    </div>
+
+    <p><strong>Key points:</strong></p>
+    <ul>
+      <li>The joint direction ${}^{0}\hat{Z}_i$ can be obtained by extracting the <strong>third column</strong> of ${}^{0}_{i}\boldsymbol{T}$.</li>
+      <li>The position vector ${}^{0}\boldsymbol{P}_{ee}$ is extracted from the <strong>last column</strong> of ${}^{0}_{ee}\boldsymbol{T}$.</li>
+    </ul>
+
+    <!-- 5.7.5 Worked Example: Derivatives Method -->
+    <h3 id="sec-5-7-5">5.7.5 Worked Example: Jacobian via Derivatives (Two-Link)
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=24" target="_blank">PDF p.24</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example 3 &mdash; Jacobian via Derivatives</div>
+      <p>Apply Method 1 to the two-link planar manipulator.</p>
+      <p><strong>Jacobian structure:</strong></p>
+      $${}^{0}\boldsymbol{J}_3 = \begin{bmatrix} \dfrac{\partial\;{}^{0}\boldsymbol{P}_3}{\partial \theta_1} & \dfrac{\partial\;{}^{0}\boldsymbol{P}_3}{\partial \theta_2} \\[10pt] {}^{0}\hat{Z}_1 & {}^{0}\hat{Z}_2 \end{bmatrix}$$
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch5-3">Show Solution</button>
+    <div id="sol-ch5-3" class="solution-content">
+
+      <div class="derivation-steps" id="deriv-ch5-jac-deriv">
+        <div class="derivation-step visible">
+          <div class="step-label">Step 1: Compound transform and position vector</div>
+          $${}^{0}_{3}\boldsymbol{T} = \begin{bmatrix} c_{12} & -s_{12} & 0 & L_1 c_1 + L_2 c_{12} \\ s_{12} & c_{12} & 0 & L_1 s_1 + L_2 s_{12} \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+          <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=25" target="_blank">PDF p.25</a>
+          $${}^{0}\boldsymbol{P}_3 = \begin{bmatrix} L_1 c_1 + L_2 c_{12} \\ L_1 s_1 + L_2 s_{12} \\ 0 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 2: Partial derivatives</div>
+          $$\frac{\partial\;{}^{0}\boldsymbol{P}_3}{\partial \theta_1} = \begin{bmatrix} -L_1 s_1 - L_2 s_{12} \\ L_1 c_1 + L_2 c_{12} \\ 0 \end{bmatrix}, \quad \frac{\partial\;{}^{0}\boldsymbol{P}_3}{\partial \theta_2} = \begin{bmatrix} -L_2 s_{12} \\ L_2 c_{12} \\ 0 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 3: Joint directions</div>
+          $${}^{0}\hat{Z}_1 = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}, \quad {}^{0}\hat{Z}_2 = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 4: Resulting Jacobian</div>
+          $${}^{0}\boldsymbol{J}_3 = \begin{bmatrix} -L_1 s_1 - L_2 s_{12} & -L_2 s_{12} \\ L_1 c_1 + L_2 c_{12} & L_2 c_{12} \\ 0 & 0 \\ 0 & 0 \\ 0 & 0 \\ 1 & 1 \end{bmatrix}$$
+        </div>
+
+        <div class="step-controls">
+          <button class="step-btn step-prev" disabled>Previous Step</button>
+          <span class="step-counter">Step 1 of 4</span>
+          <button class="step-btn step-next">Next Step</button>
+          <button class="step-btn step-show-all">Show All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- METHOD 2: Cross Products -->
+    <!-- ============================================================ -->
+    <h3 id="sec-5-7-6">5.7.6 Method 2: Joint Directions and Cross Products
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=26" target="_blank">PDF p.26</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Jacobian &mdash; Cross-Product Method</div>
+      <p><strong>Revolute Joint $i$</strong>:</p>
+      <ul>
+        <li>Angular velocity contribution: ${}^{ref}\boldsymbol{\omega}_i = \dot{\theta}_i\;{}^{ref}\hat{Z}_i$</li>
+        <li>Linear velocity contribution: ${}^{ref}\boldsymbol{v}_i = \dot{\theta}_i\;{}^{ref}\hat{Z}_i \times {}^{ref}\boldsymbol{P}_{i \to ee}$</li>
+      </ul>
+      <p><strong>Prismatic Joint $j$</strong>:
+        <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=27" target="_blank">PDF p.27</a>
+      </p>
+      <ul>
+        <li>Angular velocity contribution: ${}^{ref}\boldsymbol{\omega}_j = \boldsymbol{0}_{3\times 1}$</li>
+        <li>Linear velocity contribution: ${}^{ref}\boldsymbol{v}_j = \dot{d}_j\;{}^{ref}\hat{Z}_j$</li>
+      </ul>
+      <p><strong>Jacobian structure</strong> (with $ref = \{0\}$):
+        <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=28" target="_blank">PDF p.28</a>
+      </p>
+      $${}^{0}\boldsymbol{J}_{e.e.} = \begin{bmatrix} \cdots & {}^{0}\hat{Z}_i \times {}^{0}\boldsymbol{P}_{i\to ee} & \cdots & {}^{0}\hat{Z}_j & \cdots \\[6pt] \cdots & {}^{0}\hat{Z}_i & \cdots & \boldsymbol{0}_{3\times 1} & \cdots \end{bmatrix}$$
+      <p>Top row = Linear Velocity. Bottom row = Angular Velocity. Left columns = Revolute joints. Right columns = Prismatic joints.</p>
+      <p>Position difference: ${}^{0}\boldsymbol{P}_{i\to ee} = {}^{0}\boldsymbol{P}_{ee} - {}^{0}\boldsymbol{P}_i$</p>
+    </div>
+
+    <!-- 5.7.7 Worked Example: Cross-Product Method -->
+    <h3 id="sec-5-7-7">5.7.7 Worked Example: Jacobian via Cross Products (Two-Link)
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=29" target="_blank">PDF p.29</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example 4 &mdash; Jacobian via Cross Products</div>
+      <p>Apply Method 2 to the two-link planar manipulator.</p>
+      <p><strong>Jacobian structure:</strong></p>
+      $${}^{0}\boldsymbol{J}_3 = \begin{bmatrix} {}^{0}\hat{Z}_1 \times {}^{0}\boldsymbol{P}_{1\to 3} & {}^{0}\hat{Z}_2 \times {}^{0}\boldsymbol{P}_{2\to 3} \\ {}^{0}\hat{Z}_1 & {}^{0}\hat{Z}_2 \end{bmatrix}$$
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch5-4">Show Solution</button>
+    <div id="sol-ch5-4" class="solution-content">
+
+      <div class="derivation-steps" id="deriv-ch5-jac-cross">
+        <div class="derivation-step visible">
+          <div class="step-label">Step 1: Position vectors from transforms</div>
+          $${}^{0}\boldsymbol{P}_1 = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}, \quad {}^{0}\boldsymbol{P}_2 = \begin{bmatrix} L_1 c_1 \\ L_1 s_1 \\ 0 \end{bmatrix}, \quad {}^{0}\boldsymbol{P}_3 = \begin{bmatrix} L_1 c_1 + L_2 c_{12} \\ L_1 s_1 + L_2 s_{12} \\ 0 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 2: Position difference vectors</div>
+          <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=30" target="_blank">PDF p.30</a>
+          $${}^{0}\boldsymbol{P}_{1\to 3} = {}^{0}\boldsymbol{P}_3 - {}^{0}\boldsymbol{P}_1 = \begin{bmatrix} L_1 c_1 + L_2 c_{12} \\ L_1 s_1 + L_2 s_{12} \\ 0 \end{bmatrix}$$
+          $${}^{0}\boldsymbol{P}_{2\to 3} = {}^{0}\boldsymbol{P}_3 - {}^{0}\boldsymbol{P}_2 = \begin{bmatrix} L_2 c_{12} \\ L_2 s_{12} \\ 0 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 3: Cross products</div>
+          $${}^{0}\hat{Z}_1 \times {}^{0}\boldsymbol{P}_{1\to 3} = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \times \begin{bmatrix} L_1 c_1 + L_2 c_{12} \\ L_1 s_1 + L_2 s_{12} \\ 0 \end{bmatrix} = \begin{bmatrix} -L_1 s_1 - L_2 s_{12} \\ L_1 c_1 + L_2 c_{12} \\ 0 \end{bmatrix}$$
+          $${}^{0}\hat{Z}_2 \times {}^{0}\boldsymbol{P}_{2\to 3} = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \times \begin{bmatrix} L_2 c_{12} \\ L_2 s_{12} \\ 0 \end{bmatrix} = \begin{bmatrix} -L_2 s_{12} \\ L_2 c_{12} \\ 0 \end{bmatrix}$$
+        </div>
+
+        <div class="derivation-step">
+          <div class="step-label">Step 4: Resulting Jacobian (confirms Method 1)</div>
+          <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=31" target="_blank">PDF p.31</a>
+          $${}^{0}\boldsymbol{J}_3 = \begin{bmatrix} -L_1 s_1 - L_2 s_{12} & -L_2 s_{12} \\ L_1 c_1 + L_2 c_{12} & L_2 c_{12} \\ 0 & 0 \\ 0 & 0 \\ 0 & 0 \\ 1 & 1 \end{bmatrix}$$
+          <p><strong>Both methods produce the same Jacobian, confirming the result.</strong></p>
+        </div>
+
+        <div class="step-controls">
+          <button class="step-btn step-prev" disabled>Previous Step</button>
+          <span class="step-counter">Step 1 of 4</span>
+          <button class="step-btn step-next">Next Step</button>
+          <button class="step-btn step-show-all">Show All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enrichment: RoboGrok Video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment &mdash; Video: Angela Sodemann (RoboGrok) &mdash; Finding the Jacobian</div>
+      <p>Angela Sodemann's RoboGrok robotics course includes clear, step-by-step video lectures on computing the Jacobian matrix.</p>
+      <ul>
+        <li><a href="https://www.robogrok.com/Robotics_1.php" target="_blank">RoboGrok University-Level Robotics 1</a></li>
+        <li><a href="https://www.udemy.com/user/angelasodemann/" target="_blank">Angela Sodemann &mdash; Udemy Courses</a></li>
+      </ul>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>The Jacobian matrix $J$ relates joint velocities $\dot{\theta}$ to end-effector velocity $v$ as:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">$\dot{\theta} = J \cdot v$</button>
+        <button class="quiz-option" data-correct="true">$v = J \cdot \dot{\theta}$</button>
+        <button class="quiz-option" data-correct="false">$v = J^T \cdot \dot{\theta}$</button>
+        <button class="quiz-option" data-correct="false">$v = J^{-1} \cdot \dot{\theta}$</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The Jacobian maps joint-space velocities to task-space (end-effector) velocities: $v = J\dot\theta$." data-incorrect="The Jacobian maps FROM joint velocities TO end-effector velocities: $v = J\dot\theta$. The inverse maps the other way (when it exists)."></div>
+    </div>
+
+    <div class="concept-check" data-concept="jacobian">
+      <span class="concept-check-label">How well do you understand the Jacobian?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5.7.8 WRIST JACOBIAN -->
+    <!-- ============================================================ -->
+    <h3 id="sec-5-7-8">5.7.8 Jacobian Remarks &mdash; Wrist Jacobian
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=32" target="_blank">PDF p.32</a>
+    </h3>
+
+    <p>Finding the Jacobian of a point at the tip of the end-effector can be tedious. Determining singularities involves computing the determinant of a $6 \times 6$ matrix. As an alternative, determine the <strong>Jacobian with respect to the wrist</strong>, ${}^{0}\boldsymbol{J}_w$:</p>
+
+    $${}^{0}\boldsymbol{V}_w = {}^{0}\boldsymbol{J}_w\;\dot{\boldsymbol{q}}$$
+
+    <p>The wrist Jacobian has block structure:</p>
+    $${}^{0}\boldsymbol{J}_w = \begin{bmatrix} A_{3\times 3} & \boldsymbol{0}_{3\times 3} \\ B_{3\times 3} & C_{3\times 3} \end{bmatrix}$$
+
+    <p>Resulting in a much simpler determinant:</p>
+    $$|{}^{0}\boldsymbol{J}_w| = |A_{3\times 3}|\;|C_{3\times 3}|$$
+
+    <!-- ============================================================ -->
+    <!-- VELOCITY TRANSFORMATIONS -->
+    <!-- ============================================================ -->
+    <h3 id="sec-5-7-9">5.7.9 Velocity Transformation $TV_{b\to a}$ (Same Reference Frame)
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=33" target="_blank">PDF p.33</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; Velocity Transformation (Same Frame)</div>
+      <p>For two points $a$ and $b$ on the same rigid body, with velocity of $a$ known in frame $\{r_1\}$:</p>
+      $${}^{r_1}\boldsymbol{v}_b = {}^{r_1}\boldsymbol{v}_a + {}^{r_1}\hat{\boldsymbol{P}}_{b\to a}\;{}^{r_1}\boldsymbol{\omega}$$
+      <p>where ${}^{r_1}\hat{\boldsymbol{P}}_{b\to a}$ is the skew-symmetric matrix of the position vector:</p>
+      $${}^{r_1}\hat{\boldsymbol{P}}_{b\to a} = \begin{bmatrix} 0 & -P_{b\to a_z} & P_{b\to a_y} \\ P_{b\to a_z} & 0 & -P_{b\to a_x} \\ -P_{b\to a_y} & P_{b\to a_x} & 0 \end{bmatrix}$$
+      <p><strong>Matrix form:</strong></p>
+      $$\boxed{\begin{bmatrix} {}^{r_1}\boldsymbol{v}_b \\ {}^{r_1}\boldsymbol{\omega} \end{bmatrix} = \underbrace{\begin{bmatrix} \boldsymbol{I}_{3\times 3} & {}^{r_1}\hat{\boldsymbol{P}}_{b\to a} \\ \boldsymbol{0}_{3\times 3} & \boldsymbol{I}_{3\times 3} \end{bmatrix}}_{TV_{b\to a}} \begin{bmatrix} {}^{r_1}\boldsymbol{v}_a \\ {}^{r_1}\boldsymbol{\omega} \end{bmatrix}}$$
+      <p><strong>Note</strong>: The angular velocity ${}^{r_1}\boldsymbol{\omega}$ is the same for both points since they are on the same rigid body.</p>
+    </div>
+
+    <!-- 5.7.10 Wrist to End-Effector -->
+    <h3 id="sec-5-7-10">5.7.10 Velocity Transformation $TV_{ee\to w}$ &mdash; Wrist to End-Effector
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=34" target="_blank">PDF p.34</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; Wrist to End-Effector Velocity Transformation</div>
+      $$\boxed{\begin{bmatrix} {}^{0}\boldsymbol{v}_{ee} \\ {}^{0}\boldsymbol{\omega} \end{bmatrix} = \underbrace{\begin{bmatrix} \boldsymbol{I}_{3\times 3} & {}^{0}\hat{\boldsymbol{P}}_{ee\to w} \\ \boldsymbol{0}_{3\times 3} & \boldsymbol{I}_{3\times 3} \end{bmatrix}}_{TV_{ee\to w}} \begin{bmatrix} {}^{0}\boldsymbol{v}_w \\ {}^{0}\boldsymbol{\omega} \end{bmatrix}}$$
+    </div>
+
+    <!-- 5.7.11 Wrist Jacobian Formulas -->
+    <h3 id="sec-5-7-11">5.7.11 Wrist Jacobian Formulas (${}^{0}\boldsymbol{J}_w$)
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=35" target="_blank">PDF p.35</a>
+    </h3>
+
+    <p><strong>Joint Directions and Derivatives:</strong></p>
+    $${}^{0}\boldsymbol{J}_w = \begin{bmatrix} \cdots & \dfrac{\partial\;{}^{0}\boldsymbol{P}_w}{\partial \theta_i} & \cdots & \dfrac{\partial\;{}^{0}\boldsymbol{P}_w}{\partial d_j} & \cdots \\[10pt] \cdots & {}^{0}\hat{Z}_i & \cdots & \boldsymbol{0}_{3\times 1} & \cdots \end{bmatrix}$$
+
+    <p><strong>Joint Directions and Cross Products:</strong></p>
+    $${}^{0}\boldsymbol{J}_w = \begin{bmatrix} \cdots & {}^{0}\hat{Z}_i \times {}^{0}\boldsymbol{P}_{i\to w} & \cdots & {}^{0}\hat{Z}_j & \cdots \\[6pt] \cdots & {}^{0}\hat{Z}_i & \cdots & \boldsymbol{0}_{3\times 1} & \cdots \end{bmatrix}$$
+
+    <!-- 5.7.12 Full Forward Velocity -->
+    <h3 id="sec-5-7-12">5.7.12 Full Forward Velocity via Wrist Jacobian
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=36" target="_blank">PDF p.36</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Key Result &mdash; End-Effector Velocity via Wrist Jacobian</div>
+      $$\boxed{{}^{0}\boldsymbol{V}_{ee} = TV_{ee\to w}\;{}^{0}\boldsymbol{J}_w\;\dot{\boldsymbol{q}}}$$
+      <p>The evaluation of ${}^{0}\boldsymbol{J}_w$ is much easier than finding ${}^{0}\boldsymbol{J}_{ee}$, and singularity analysis is simpler due to the block-triangular structure.</p>
+    </div>
+
+    <!-- 5.7.13 Different Reference Frames -->
+    <h3 id="sec-5-7-13">5.7.13 Velocity Transformation ${}^{r_2}_{r_1}TV_{b\to a}$ (Different Reference Frames)
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=37" target="_blank">PDF p.37</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; Cross-Frame Velocity Transformation</div>
+      <p>For two points $a$ and $b$ on the same rigid body, velocity of $a$ known in $\{r_1\}$, find velocity of $b$ in $\{r_2\}$:</p>
+      $$\boxed{\begin{bmatrix} {}^{r_2}\boldsymbol{v}_b \\ {}^{r_2}\boldsymbol{\omega} \end{bmatrix} = \underbrace{\begin{bmatrix} {}^{r_2}_{r_1}\boldsymbol{R} & {}^{r_2}\hat{\boldsymbol{P}}_{b\to a}\;{}^{r_2}_{r_1}\boldsymbol{R} \\ \boldsymbol{0}_{3\times 3} & {}^{r_2}_{r_1}\boldsymbol{R} \end{bmatrix}}_{{}^{r_2}_{r_1}TV_{b\to a}} \begin{bmatrix} {}^{r_1}\boldsymbol{v}_a \\ {}^{r_1}\boldsymbol{\omega} \end{bmatrix}}$$
+    </div>
+
+    <!-- 5.7.14 General Frame Change -->
+    <h3 id="sec-5-7-14">5.7.14 Velocity Transformation ${}^{0}_{ref}TV_{ee\to w}$ &mdash; General Frame Change
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=38" target="_blank">PDF p.38</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; General Velocity Transformation (Wrist to EE, Cross-Frame)</div>
+      $$\boxed{\begin{bmatrix} {}^{0}\boldsymbol{v}_{ee} \\ {}^{0}\boldsymbol{\omega} \end{bmatrix} = \underbrace{\begin{bmatrix} {}^{0}_{ref}\boldsymbol{R} & {}^{0}\hat{\boldsymbol{P}}_{ee\to w}\;{}^{0}_{ref}\boldsymbol{R} \\ \boldsymbol{0}_{3\times 3} & {}^{0}_{ref}\boldsymbol{R} \end{bmatrix}}_{{}^{0}_{ref}TV_{ee\to w}} \begin{bmatrix} {}^{ref}\boldsymbol{v}_w \\ {}^{ref}\boldsymbol{\omega} \end{bmatrix}}$$
+    </div>
+
+    <!-- 5.7.15 Jacobian ref Jw -->
+    <h3 id="sec-5-7-15">5.7.15 Jacobian ${}^{ref}\boldsymbol{J}_w$ &mdash; Cross-Product Method
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=39" target="_blank">PDF p.39</a>
+    </h3>
+
+    <p>To determine the Jacobian based on a point coincident with the wrist and oriented w.r.t. any reference frame, use the <strong>cross-product method</strong>:</p>
+
+    $${}^{ref}\boldsymbol{J}_w = \begin{bmatrix} \cdots & {}^{ref}\hat{Z}_i \times {}^{ref}\boldsymbol{P}_{i\to w} & \cdots & {}^{ref}\hat{Z}_j & \cdots \\[6pt] \cdots & {}^{ref}\hat{Z}_i & \cdots & \boldsymbol{0}_{3\times 1} & \cdots \end{bmatrix}$$
+
+    <p><strong>Key points:</strong></p>
+    <ul>
+      <li>${}^{ref}\hat{Z}_i$: third column of ${}^{ref}_{i}\boldsymbol{T}$</li>
+      <li>${}^{ref}\boldsymbol{P}_{i\to w} = {}^{ref}_{i}\boldsymbol{R}\;{}^{i}\boldsymbol{P}_{i\to w}$</li>
+    </ul>
+
+    <!-- ============================================================ -->
+    <!-- 5.7.16 INVERSE VELOCITY PROBLEM -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-7-16">5.7.16 Inverse Velocity Problem
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=40" target="_blank">PDF p.40</a>
+    </h2>
+
+    <p>The <strong>inverse velocity problem</strong>: ${}^{0}\boldsymbol{V}_{ee}$ is known and $\dot{\boldsymbol{q}}$ is unknown.</p>
+
+    <p><strong>Step 1</strong>: Invert the velocity transformation matrix:</p>
+    $${}^{ref}\boldsymbol{V}_w = \left({}^{0}_{ref}TV_{ee\to w}\right)^{-1}\;{}^{0}\boldsymbol{V}_{ee} = {}^{ref}_{0}TV_{w\to ee}\;{}^{0}\boldsymbol{V}_{ee}$$
+
+    <p><strong>Step 2</strong>: Find $\dot{\boldsymbol{q}}$ by inverting the Jacobian:</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Inverse Velocity Problem</div>
+      $$\boxed{\dot{\boldsymbol{q}} = \left({}^{ref}\boldsymbol{J}_w\right)^{-1}\;{}^{ref}\boldsymbol{V}_w}$$
+      <p>The inverse of the block-triangular Jacobian is:</p>
+      $$\left({}^{ref}\boldsymbol{J}_w\right)^{-1} = \begin{bmatrix} A^{-1} & \boldsymbol{0}_{3\times 3} \\ -C^{-1}BA^{-1} & C^{-1} \end{bmatrix}$$
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5.8 SINGULARITIES -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-8">5.8 Singularities
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=41" target="_blank">PDF p.41</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition &mdash; Singularities</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Singularities<span class="tooltip-content">Configurations where the Jacobian matrix loses rank (its determinant becomes zero). At a singularity, the robot cannot generate end-effector velocity in one or more directions regardless of joint velocities. Common examples: a fully extended arm (boundary singularity) and aligned wrist axes (wrist singularity).<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;5.8; <a href="https://en.wikipedia.org/wiki/Singularity_(robotics)" target="_blank">Wikipedia &mdash; Singularity (robotics)</a></span></span></span></strong> occur when the Jacobian becomes singular (rank deficient). Physically, the manipulator <strong>loses one or more degrees of freedom (DoF)</strong> &mdash; it cannot move in some directions no matter what joint rates are selected.</p>
+      <p>At singular points, the <strong>inverse Jacobian blows up</strong> &mdash; joint rates approach infinity as the singularity is approached.</p>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-label">Warning &mdash; Physical Implications of Singularities</div>
+      <p>In singular configurations, applying the inverse Jacobian in a robot control system is dangerous because $\boldsymbol{J}^{-1}$ becomes unbounded. This results in:</p>
+      <ul>
+        <li>Joint rates approaching infinity near singularities</li>
+        <li>Real robots may jerk, vibrate, or trigger protective stops</li>
+        <li>Controller may deviate from the planned path</li>
+      </ul>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why do Jacobian singularities matter in practice, not just in math?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>Singularities are not merely a mathematical curiosity &mdash; they have direct, dangerous consequences on real robots:</p>
+        <p><strong>1. Infinite joint velocities.</strong> Near a singularity, $\boldsymbol{J}^{-1}$ has entries that grow without bound. A controller using $\dot{\boldsymbol{q}} = \boldsymbol{J}^{-1}\boldsymbol{v}$ will command joint rates far exceeding motor limits, causing the robot to jerk violently or trigger an emergency stop.</p>
+        <p><strong>2. Path tracking failure.</strong> Industrial robots following a straight-line Cartesian path (e.g., welding seams or painting) may pass through or near singularities. The robot cannot maintain the desired Cartesian speed and the path deviates, ruining the workpiece.</p>
+        <p><strong>3. Loss of controllability.</strong> At the singularity itself, a degree of freedom vanishes &mdash; no combination of joint velocities can produce motion in the lost direction. This is physically observable: for example, when a 6-axis robot's wrist fully straightens ($\theta_5 = 0$), joints 4 and 6 become redundant with each other and the wrist can no longer yaw.</p>
+        <p><strong>4. Industrial mitigation.</strong> Real controllers use strategies such as damped least-squares (DLS) inversion, singularity avoidance in path planners, and joint-limit checking to prevent catastrophic behavior near singularities.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;5.8 &middot; <a href="https://mecademic.com/insights/academic-tutorials/what-are-singularities-6-axis-robot-arm/" target="_blank">Mecademic &mdash; Singularities in 6-Axis Arms</a> &middot; MSE492 Chapter 5, pp.&nbsp;41&ndash;45</div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Singularity videos -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment &mdash; Video: Robot Singularities in Practice</div>
+      <p><strong>Recommended resources:</strong></p>
+      <ol>
+        <li><a href="https://mecademic.com/insights/academic-tutorials/what-are-singularities-6-axis-robot-arm/" target="_blank">Mecademic &mdash; What Are Singularities in a Six-Axis Robot Arm?</a></li>
+        <li><a href="https://robodk.com/blog/robot-singularities/" target="_blank">RoboDK &mdash; Robot Singularities: What Are They and How to Beat Them</a></li>
+        <li><a href="https://robohub.org/3-types-of-robot-singularities-and-how-to-avoid-them/" target="_blank">Robohub &mdash; 3 Types of Robot Singularities</a></li>
+      </ol>
+      <p><strong>What to look for</strong>: Wrist singularity (joints 4 &amp; 6 align), shoulder singularity (wrist center above joint 1), elbow singularity (arm fully extended).</p>
+    </div>
+
+    <!-- Enrichment: Why singularities matter -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Why Singularities Matter in Practice</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>1. Loss of degrees of freedom.</strong> At a singularity, the end-effector cannot move in at least one Cartesian direction.</p>
+          <p><strong>2. Infinite joint velocities required.</strong> As $\det(\boldsymbol{J}) \to 0$, some entries of $\boldsymbol{J}^{-1}$ go to infinity.</p>
+          <p><strong>3. In practice, the controller saturates.</strong> Real robots have joint velocity limits. Exceeding them causes slowdowns, path deviations, or protective stops.</p>
+          <p><strong>4. Two types from the factored determinant:</strong></p>
+          <ul>
+            <li><strong>Arm singularities</strong> ($|A| = 0$): Relate to the first 3 joints (positioning). Occur at workspace boundaries or interior alignments.</li>
+            <li><strong>Wrist singularities</strong> ($|C| = 0$): Relate to the last 3 joints (orienting). Occur when wrist axes align.</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 5.8.1 Worked Example: Singularity of Two-Link -->
+    <h3 id="sec-5-8-1">5.8.1 Worked Example: Singularity of Two-Link Manipulator
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=42" target="_blank">PDF p.42</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example 5 &mdash; Singularity Analysis</div>
+      <p><strong>Problem</strong>: Consider the two-link manipulator with the end-effector moving along the X axis at 1.0 m/s. Find the joint velocities along this trajectory.</p>
+      <div class="figure">
+      <img src="assets/images/ch5_p42.png" alt="Figure (page 42): The two-link planar manipulator moving along X at 1.0 m/s, approaching a singular configuration as the arm extends." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 42): The two-link planar manipulator moving along X at 1.0 m/s, approaching a singular configuration as the arm extends.</div>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch5-5">Show Solution</button>
+    <div id="sol-ch5-5" class="solution-content">
+      <p>The <strong>inverse Jacobian</strong> (for the 2x2 linear velocity Jacobian):</p>
+      $${}^{0}\boldsymbol{J}_3^{-1} = \frac{1}{L_1 L_2 s_2} \begin{bmatrix} L_2 c_{12} & L_2 s_{12} \\ -L_1 c_1 - L_2 c_{12} & -L_1 s_1 - L_2 s_{12} \end{bmatrix}$$
+
+      <p>For a velocity of 1 m/s in the X direction:</p>
+      $$\dot{\theta}_1 = \frac{c_{12}}{L_1 s_2}, \quad \dot{\theta}_2 = -\frac{c_1}{L_2 s_2} - \frac{c_{12}}{L_1 s_2}$$
+
+      <div class="callout callout-warning">
+        <div class="callout-label">Warning &mdash; Boundary Singularity</div>
+        <p><strong>As the arm stretches out toward $\theta_2 = 0$, both joint rates go to infinity</strong> (since $s_2 \to 0$ in the denominator). This is the classic boundary singularity &mdash; the arm is fully extended and cannot generate velocity in the radial direction.</p>
+      </div>
+    </div>
+
+    <!-- 5.8.2 Singularity Conditions -->
+    <h3 id="sec-5-8-2">5.8.2 Singularity Conditions
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=43" target="_blank">PDF p.43</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Singularity Condition</div>
+      $$\boxed{|{}^{ref}\boldsymbol{J}_w| = |A_{3\times 3}|\;|C_{3\times 3}| = 0}$$
+      <p>where $A_{3\times 3}$ is associated with the <strong>main arm</strong> (linear velocity) and $C_{3\times 3}$ is associated with the <strong>spherical wrist</strong> (angular velocity).</p>
+    </div>
+
+    <!-- 5.8.3 Main Arm Singularities -->
+    <h3 id="sec-5-8-3">5.8.3 Main Arm Singularities
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=44" target="_blank">PDF p.44</a>
+    </h3>
+
+    <p>This singularity occurs when $|A_{3\times 3}| = 0$. Two types:</p>
+    <ul>
+      <li><strong>Boundary singularity</strong>: End-effector on the surface of the workspace (fully stretched or folded back).</li>
+      <li><strong>Interior singularities</strong>: Within the workspace &mdash; two or more axes lined up, or four revolute joint axes parallel or intersecting at a common point.</li>
+    </ul>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p44.png" alt="Figure (page 44): (1) Boundary singularity &mdash; arm fully extended; (2) Interior singularity &mdash; joint axes aligned or collinear." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 44): (1) Boundary singularity &mdash; arm fully extended; (2) Interior singularity &mdash; joint axes aligned or collinear.</div>
+
+    <!-- 5.8.4 Wrist Singularities -->
+    <h3 id="sec-5-8-4">5.8.4 Wrist Singularities
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=45" target="_blank">PDF p.45</a>
+    </h3>
+
+    <p>This singularity occurs when $|C_{3\times 3}| = 0$. Since:</p>
+    $$C_{3\times 3} = \begin{bmatrix} {}^{ref}\hat{Z}_4 & {}^{ref}\hat{Z}_5 & {}^{ref}\hat{Z}_6 \end{bmatrix}$$
+
+    <p>A spherical wrist is singular whenever the vectors ${}^{ref}\hat{Z}_4$, ${}^{ref}\hat{Z}_5$, and ${}^{ref}\hat{Z}_6$ are <strong>linearly dependent</strong>.</p>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p45.png" alt="Figure (page 45): Wrist singularity where joint axes 4 and 6 align (become collinear). Typically occurs when $\theta_5 = 0$ or $\theta_5 = \pi$." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 45): Wrist singularity where joint axes 4 and 6 align (become collinear). Typically occurs when $\theta_5 = 0$ or $\theta_5 = \pi$.</div>
+
+    <!-- Enrichment: Modern Robotics Singularities Video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment &mdash; Video: Modern Robotics &mdash; Singularities</div>
+      <p><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/5-3-singularities/" target="_blank">Modern Robotics 5.3 &mdash; Singularities</a>: Discusses how the Jacobian becomes rank-deficient and connects to the manipulability ellipsoid.</p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>At a singularity of the Jacobian, which of the following is true?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">The end-effector can move in all directions</button>
+        <button class="quiz-option" data-correct="true">The manipulator loses one or more degrees of freedom in task space</button>
+        <button class="quiz-option" data-correct="false">Joint velocities become zero</button>
+        <button class="quiz-option" data-correct="false">The robot reaches its workspace boundary (always)</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! At a singularity, $\det(J) = 0$, the Jacobian loses rank, and certain task-space directions become unreachable (require infinite joint velocities)." data-incorrect="At a singularity, the Jacobian loses rank, meaning some task-space velocities require infinite joint velocities. The robot loses DOF in task space."></div>
+    </div>
+
+    <div class="concept-check" data-concept="singularities">
+      <span class="concept-check-label">How well do you understand singularities?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5.9 STATIC FORCES -->
+    <!-- ============================================================ -->
+    <h2 id="sec-5-9">5.9 Static Forces in Manipulators</h2>
+
+    <h3 id="sec-5-9-1">5.9.1 Force Transformation ${}^{r_2}_{r_1}TF_{b\to a}$
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=46" target="_blank">PDF p.46</a>
+    </h3>
+
+    <div class="figure">
+      <img src="assets/images/ch5_p46.png" alt="Figure (page 46): Two points $a$ and $b$ on a rigid body with applied force $\boldsymbol{f}$ and moments $\boldsymbol{m}_a$ and $\boldsymbol{m}_b$, referenced from frames $\{r_1\}$ and $\{r_2\}$." loading="lazy">
+    </div>
+    <div class="figure-desc">Figure (page 46): Two points $a$ and $b$ on a rigid body with applied force $\boldsymbol{f}$ and moments $\boldsymbol{m}_a$ and $\boldsymbol{m}_b$, referenced from frames $\{r_1\}$ and $\{r_2\}$.</div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; Force Transformation Matrix</div>
+      <p><strong>Known</strong>: ${}^{r_1}\boldsymbol{F}_a = \begin{bmatrix} {}^{r_1}\boldsymbol{f} \\ {}^{r_1}\boldsymbol{m}_a \end{bmatrix}$. <strong>Find</strong>: ${}^{r_2}\boldsymbol{F}_b = \begin{bmatrix} {}^{r_2}\boldsymbol{f} \\ {}^{r_2}\boldsymbol{m}_b \end{bmatrix}$</p>
+      <p><strong>Derivation:</strong></p>
+      $${}^{r_2}\boldsymbol{f} = {}^{r_2}_{r_1}\boldsymbol{R}\;{}^{r_1}\boldsymbol{f}$$
+      $${}^{r_2}\boldsymbol{m}_b = {}^{r_2}_{r_1}\boldsymbol{R}\;{}^{r_1}\boldsymbol{m}_a + {}^{r_2}\hat{\boldsymbol{P}}_{b\to a}\;{}^{r_2}_{r_1}\boldsymbol{R}\;{}^{r_1}\boldsymbol{f}$$
+      <p><strong>Matrix form:</strong></p>
+      $$\boxed{\begin{bmatrix} {}^{r_2}\boldsymbol{f} \\ {}^{r_2}\boldsymbol{m}_b \end{bmatrix} = \underbrace{\begin{bmatrix} {}^{r_2}_{r_1}\boldsymbol{R} & \boldsymbol{0}_{3\times 3} \\ {}^{r_2}\hat{\boldsymbol{P}}_{b\to a}\;{}^{r_2}_{r_1}\boldsymbol{R} & {}^{r_2}_{r_1}\boldsymbol{R} \end{bmatrix}}_{{}^{r_2}_{r_1}TF_{b\to a}} \begin{bmatrix} {}^{r_1}\boldsymbol{f} \\ {}^{r_1}\boldsymbol{m}_a \end{bmatrix}}$$
+      <p><strong>Note</strong>: The force transformation has the skew-symmetric matrix in the <strong>lower-left</strong> block (affecting moment), while the velocity transformation has it in the <strong>upper-right</strong> block (affecting linear velocity). This is the duality between velocities and forces.</p>
+    </div>
+
+    <!-- 5.9.2 Inverse Static Force Problem -->
+    <h3 id="sec-5-9-2">5.9.2 Inverse Static Force Problem
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=47" target="_blank">PDF p.47</a>
+    </h3>
+
+    <p>Solved from the <strong>conservation of power</strong>:</p>
+    $$\boldsymbol{\tau}^\top \dot{\boldsymbol{q}} = {}^{0}\boldsymbol{F}_{ee}^\top\;{}^{0}\boldsymbol{V}_{ee}$$
+
+    <p>Since ${}^{0}\boldsymbol{V}_{ee} = {}^{0}\boldsymbol{J}_{ee}\;\dot{\boldsymbol{q}}$:</p>
+    $$\boldsymbol{\tau}^\top \dot{\boldsymbol{q}} = {}^{0}\boldsymbol{F}_{ee}^\top\;{}^{0}\boldsymbol{J}_{ee}\;\dot{\boldsymbol{q}}$$
+
+    <p>True for all $\dot{\boldsymbol{q}}$, so $\boldsymbol{\tau}^\top = {}^{0}\boldsymbol{F}_{ee}^\top\;{}^{0}\boldsymbol{J}_{ee}$. Transposing:</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Key Result &mdash; Static Force / Jacobian Transpose Relationship</div>
+      $$\boxed{\boldsymbol{\tau} = {}^{0}\boldsymbol{J}_{ee}^\top\;{}^{0}\boldsymbol{F}_{ee} = {}^{0}\boldsymbol{J}_w^\top\;{}^{0}\boldsymbol{F}_w = {}^{ref}\boldsymbol{J}_w^\top\;{}^{ref}\boldsymbol{F}_w}$$
+      <p><strong>Key insight</strong>: The <strong>transpose of the Jacobian</strong> maps end-effector forces/moments to joint torques, while the Jacobian itself maps joint velocities to end-effector velocities. This is the <strong>duality between velocity and force</strong> in robotics.</p>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why is the transpose of the Jacobian used for static force mapping, not the inverse?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>The relationship $\boldsymbol{\tau} = \boldsymbol{J}^\top \boldsymbol{F}$ comes from the <strong>principle of virtual work</strong> (conservation of power), not from algebraically inverting the velocity equation.</p>
+        <p><strong>The derivation:</strong> In static equilibrium, the power generated at the joints equals the power delivered at the end-effector: $\boldsymbol{\tau}^\top \dot{\boldsymbol{q}} = \boldsymbol{F}^\top \boldsymbol{v}$. Substituting $\boldsymbol{v} = \boldsymbol{J}\dot{\boldsymbol{q}}$ gives $\boldsymbol{\tau}^\top \dot{\boldsymbol{q}} = \boldsymbol{F}^\top \boldsymbol{J}\dot{\boldsymbol{q}}$. Since this must hold for every possible $\dot{\boldsymbol{q}}$, we conclude $\boldsymbol{\tau}^\top = \boldsymbol{F}^\top \boldsymbol{J}$, and transposing yields $\boldsymbol{\tau} = \boldsymbol{J}^\top \boldsymbol{F}$.</p>
+        <p><strong>Why not $\boldsymbol{J}^{-1}$?</strong> Three reasons:</p>
+        <ol>
+          <li>$\boldsymbol{J}^{-1}$ may not exist: it fails at singularities and whenever $\boldsymbol{J}$ is not square (redundant or under-actuated robots).</li>
+          <li>$\boldsymbol{J}^\top$ always exists &mdash; every matrix has a transpose, regardless of shape or rank. So $\boldsymbol{\tau} = \boldsymbol{J}^\top \boldsymbol{F}$ is universally valid.</li>
+          <li>The transpose and the inverse do fundamentally different things. $\boldsymbol{J}^{-1}$ maps task-space velocities to joint velocities. $\boldsymbol{J}^\top$ maps task-space forces to joint torques. These are related by duality, not by simple inversion.</li>
+        </ol>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;5.9 &middot; <a href="https://ocw.mit.edu/courses/2-12-introduction-to-robotics-fall-2005/5c160fb678fa75191c399a373c6ce648_chapter6.pdf" target="_blank">MIT OCW &mdash; Intro to Robotics, Ch.&nbsp;6: Statics</a></div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Proof Conservation of Power -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Proof &mdash; Conservation of Power and the Force-Velocity Duality</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+          <p><strong>Theorem</strong>: If $\boldsymbol{v} = \boldsymbol{J}\dot{\boldsymbol{q}}$, then $\boldsymbol{\tau} = \boldsymbol{J}^\top \boldsymbol{F}$.</p>
+
+          <p><strong>Proof:</strong></p>
+          <p><em>Step 1</em>: Conservation of energy (static case): $P_{\text{joints}} = P_{\text{end-effector}}$</p>
+          <p><em>Step 2</em>: Power expressions:</p>
+          $$P_{\text{joints}} = \boldsymbol{\tau}^\top \dot{\boldsymbol{q}}, \quad P_{\text{end-effector}} = \boldsymbol{F}^\top \boldsymbol{v}$$
+          <p><em>Step 3</em>: Substitute $\boldsymbol{v} = \boldsymbol{J}\dot{\boldsymbol{q}}$:</p>
+          $$\boldsymbol{\tau}^\top \dot{\boldsymbol{q}} = \boldsymbol{F}^\top \boldsymbol{J} \dot{\boldsymbol{q}}$$
+          <p><em>Step 4</em>: Since this holds for all $\dot{\boldsymbol{q}}$: $\boldsymbol{\tau}^\top = \boldsymbol{F}^\top \boldsymbol{J}$</p>
+          <p><em>Step 5</em>: Transpose: $\boldsymbol{\tau} = \boldsymbol{J}^\top \boldsymbol{F} \qquad \blacksquare$</p>
+
+          <p><strong>Why $\boldsymbol{J}^\top$ and not $\boldsymbol{J}^{-1}$?</strong> The transpose preserves the power relationship regardless of whether $\boldsymbol{J}$ is square or invertible. Even for redundant robots, $\boldsymbol{\tau} = \boldsymbol{J}^\top \boldsymbol{F}$ always holds.</p>
+          <p><strong>Reference</strong>: <a href="https://ocw.mit.edu/courses/2-12-introduction-to-robotics-fall-2005/5c160fb678fa75191c399a373c6ce648_chapter6.pdf" target="_blank">MIT OCW &mdash; Introduction to Robotics, Chapter 6: Statics</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: TV and TF are transposes -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Proof &mdash; TV and TF Are Transposes of Each Other</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+          <p><strong>Claim</strong>: $TF_{b \to a} = (TV_{b \to a})^{-\top}$</p>
+          <p>For the same-frame case:</p>
+          $$TV_{b\to a} = \begin{bmatrix} \boldsymbol{I} & \hat{\boldsymbol{P}}_{b\to a} \\ \boldsymbol{0} & \boldsymbol{I} \end{bmatrix}$$
+          <p>Inverse:</p>
+          $$TV_{b\to a}^{-1} = \begin{bmatrix} \boldsymbol{I} & -\hat{\boldsymbol{P}}_{b\to a} \\ \boldsymbol{0} & \boldsymbol{I} \end{bmatrix}$$
+          <p>Transpose of inverse:</p>
+          $$(TV_{b\to a}^{-1})^\top = \begin{bmatrix} \boldsymbol{I} & \boldsymbol{0} \\ -\hat{\boldsymbol{P}}_{b\to a}^\top & \boldsymbol{I} \end{bmatrix} = \begin{bmatrix} \boldsymbol{I} & \boldsymbol{0} \\ \hat{\boldsymbol{P}}_{b\to a} & \boldsymbol{I} \end{bmatrix}$$
+          <p>using $\hat{\boldsymbol{P}}^\top = -\hat{\boldsymbol{P}}$ for skew-symmetric matrices. This matches $TF_{b\to a}$. $\blacksquare$</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>The relationship between joint torques $\tau$ and end-effector force/moment $\mathcal{F}$ is:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">$\tau = J \cdot \mathcal{F}$</button>
+        <button class="quiz-option" data-correct="true">$\tau = J^T \cdot \mathcal{F}$</button>
+        <button class="quiz-option" data-correct="false">$\tau = J^{-1} \cdot \mathcal{F}$</button>
+        <button class="quiz-option" data-correct="false">$\mathcal{F} = J^T \cdot \tau$</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The static force relationship uses the Jacobian transpose: $\tau = J^T \mathcal{F}$. This comes from the virtual work principle." data-incorrect="The static force relationship is $\tau = J^T \mathcal{F}$. Note it uses $J^T$ (transpose), not $J$ or $J^{-1}$. This is dual to the velocity relationship $v = J\dot\theta$."></div>
+    </div>
+
+    <div class="concept-check" data-concept="static-forces">
+      <span class="concept-check-label">How well do you understand static forces?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <div class="quiz-score"></div>
+
+    <!-- ============================================================ -->
+    <!-- KEY EQUATIONS SUMMARY -->
+    <!-- ============================================================ -->
+    <h2 id="key-equations">Key Equations Summary</h2>
+
+    <h3>Velocity Notation
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=4" target="_blank">PDF p.4</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>$\frac{d}{dt}{}^{B}\boldsymbol{Q} = {}^{B}\boldsymbol{V}_Q$</td><td>Velocity of point $Q$ w.r.t. frame $\{B\}$</td></tr>
+        <tr><td>${}^{A}({}^{B}\boldsymbol{V}_Q) = {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{V}_Q$</td><td>Frame change via rotation matrix</td></tr>
+        <tr><td>$\boldsymbol{v}_C = {}^{U}\boldsymbol{V}_{C_{ORG}}$</td><td>Velocity of frame origin</td></tr>
+        <tr><td>$\boldsymbol{\omega}_C = {}^{U}\boldsymbol{\Omega}_C$</td><td>Angular velocity shorthand</td></tr>
+      </tbody>
+    </table>
+
+    <h3>General Velocity of Rigid Bodies
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=10" target="_blank">PDF p.10</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>${}^{A}\boldsymbol{V}_Q = {}^{A}\boldsymbol{V}_{B_{ORG}} + {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{V}_Q + {}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\;{}^{B}\boldsymbol{Q}$</td><td>General velocity equation</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Velocity Propagation &mdash; Revolute Joints
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=13" target="_blank">PDF p.13</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>${}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\;{}^{i}\boldsymbol{\omega}_i + \dot{\theta}_{i+1}\;{}^{i+1}\hat{Z}_{i+1}$</td><td>Angular velocity (revolute)</td></tr>
+        <tr><td>${}^{i+1}\boldsymbol{v}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}({}^{i}\boldsymbol{v}_i + {}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{i+1})$</td><td>Linear velocity (revolute)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Velocity Propagation &mdash; Prismatic Joints
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=15" target="_blank">PDF p.15</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>${}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\;{}^{i}\boldsymbol{\omega}_i$</td><td>Angular velocity (prismatic)</td></tr>
+        <tr><td>${}^{i+1}\boldsymbol{v}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}({}^{i}\boldsymbol{v}_i + {}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{i+1}) + \dot{d}_{i+1}\;{}^{i+1}\hat{Z}_{i+1}$</td><td>Linear velocity (prismatic)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Jacobian &mdash; Forward Velocity
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=19" target="_blank">PDF p.19</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>${}^{0}\boldsymbol{V}_{e.e.} = {}^{0}\boldsymbol{J}_{e.e.}\;\dot{\boldsymbol{q}}$</td><td>Forward velocity problem</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Jacobian &mdash; Derivatives Method
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=22" target="_blank">PDF p.22</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>${}^{0}\boldsymbol{v}_{e.e.} = \sum_{i=1}^{n} \frac{\partial\;{}^{0}\boldsymbol{P}_{ee}}{\partial q_i}\;\dot{q}_i$</td><td>Linear velocity via partial derivatives</td></tr>
+        <tr><td>${}^{0}\boldsymbol{\omega}_{e.e.} = \sum_{i=1}^{n} \dot{\theta}_i\;{}^{0}\hat{Z}_i$</td><td>Angular velocity via joint directions</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Jacobian &mdash; Cross-Product Method
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=26" target="_blank">PDF p.26</a>
+    </h3>
+    <table>
+      <thead><tr><th>Column Type</th><th>Linear Velocity</th><th>Angular Velocity</th></tr></thead>
+      <tbody>
+        <tr><td>Revolute joint $i$</td><td>${}^{0}\hat{Z}_i \times {}^{0}\boldsymbol{P}_{i\to ee}$</td><td>${}^{0}\hat{Z}_i$</td></tr>
+        <tr><td>Prismatic joint $j$</td><td>${}^{0}\hat{Z}_j$</td><td>$\boldsymbol{0}_{3\times 1}$</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Velocity Transformation Matrices
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=33" target="_blank">PDF p.33</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>$TV_{b\to a} = \begin{bmatrix} \boldsymbol{I}_{3\times 3} & \hat{\boldsymbol{P}}_{b\to a} \\ \boldsymbol{0}_{3\times 3} & \boldsymbol{I}_{3\times 3} \end{bmatrix}$</td><td>Same-frame velocity transformation</td></tr>
+        <tr><td>${}^{r_2}_{r_1}TV_{b\to a} = \begin{bmatrix} {}^{r_2}_{r_1}\boldsymbol{R} & {}^{r_2}\hat{\boldsymbol{P}}_{b\to a}\;{}^{r_2}_{r_1}\boldsymbol{R} \\ \boldsymbol{0}_{3\times 3} & {}^{r_2}_{r_1}\boldsymbol{R} \end{bmatrix}$</td><td>Cross-frame velocity transformation</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Wrist Jacobian and Singularities
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=32" target="_blank">PDF p.32</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>${}^{0}\boldsymbol{V}_{ee} = TV_{ee\to w}\;{}^{0}\boldsymbol{J}_w\;\dot{\boldsymbol{q}}$</td><td>End-effector velocity via wrist Jacobian</td></tr>
+        <tr><td>$|{}^{ref}\boldsymbol{J}_w| = |A_{3\times 3}|\;|C_{3\times 3}| = 0$</td><td>Singularity condition</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Inverse Velocity and Static Forces
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=40" target="_blank">PDF p.40</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>$\dot{\boldsymbol{q}} = ({}^{ref}\boldsymbol{J}_w)^{-1}\;{}^{ref}\boldsymbol{V}_w$</td><td>Inverse velocity problem</td></tr>
+        <tr><td>$\boldsymbol{\tau} = {}^{0}\boldsymbol{J}_{ee}^\top\;{}^{0}\boldsymbol{F}_{ee}$</td><td>Inverse static force problem</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Force Transformation Matrix
+      <a class="source-link" href="../Slides/MSE492 - Chapter5-rev2.pdf#page=46" target="_blank">PDF p.46</a>
+    </h3>
+    <table>
+      <thead><tr><th>Equation</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>${}^{r_2}_{r_1}TF_{b\to a} = \begin{bmatrix} {}^{r_2}_{r_1}\boldsymbol{R} & \boldsymbol{0}_{3\times 3} \\ {}^{r_2}\hat{\boldsymbol{P}}_{b\to a}\;{}^{r_2}_{r_1}\boldsymbol{R} & {}^{r_2}_{r_1}\boldsymbol{R} \end{bmatrix}$</td><td>Force transformation between frames</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============================================================ -->
+    <!-- ENRICHMENT: MANIPULABILITY ELLIPSOID -->
+    <!-- ============================================================ -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Bonus Concept &mdash; The Manipulability Ellipsoid</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; The Manipulability Ellipsoid</div>
+
+          <p>The Jacobian reveals how "well" the robot can move in different directions. This is captured by the <strong><span class="tooltip-term" tabindex="0">manipulability ellipsoid<span class="tooltip-content">A geometric visualization of the robot's ability to move in different directions at a given configuration. Computed from the singular value decomposition of the Jacobian, its axes show the directions and magnitudes of achievable end-effector velocities for unit joint velocity. Introduced by Tsuneo Yoshikawa in 1985.<span class="tooltip-source">Yoshikawa, &ldquo;Manipulability of Robotic Mechanisms,&rdquo; <em>Int. J. Robotics Research</em>, 1985; Craig &sect;5.8; <a href="https://en.wikipedia.org/wiki/Manipulability_ellipsoid" target="_blank">Wikipedia</a></span></span></span></strong>.</p>
+
+          <p><strong>Construction</strong>: Consider all joint velocities with unit norm ($\|\dot{\boldsymbol{q}}\| = 1$). The Jacobian maps this hypersphere into an <strong>ellipsoid</strong> in task space:</p>
+          $$\boldsymbol{v} = \boldsymbol{J}\dot{\boldsymbol{q}}, \quad \|\dot{\boldsymbol{q}}\| = 1$$
+          <p>The principal axes are determined by the <strong>singular values</strong> of $\boldsymbol{J}$.</p>
+
+          <p><strong>What the ellipsoid tells you:</strong></p>
+          <ul>
+            <li><strong>Long axes</strong>: Directions of high manipulability (fast end-effector motion).</li>
+            <li><strong>Short axes</strong>: Directions of low manipulability (slow motion).</li>
+            <li><strong>At a singularity</strong>: The ellipsoid collapses &mdash; one or more axes shrink to zero.</li>
+          </ul>
+
+          <p><strong>Manipulability measures:</strong></p>
+          <ol>
+            <li><strong>Yoshikawa's manipulability index</strong>: $w = \sqrt{\det(\boldsymbol{J}\boldsymbol{J}^\top)}$. At a singularity, $w = 0$.</li>
+            <li><strong>Condition number</strong>: $\kappa = \sigma_{\max}/\sigma_{\min}$. A value of 1 means isotropic (equally easy to move in all directions).</li>
+          </ol>
+
+          <p><strong>Force ellipsoid</strong>: Dual concept &mdash; unit joint torques produce an end-effector force ellipsoid governed by $\boldsymbol{J}^{-\top}$. Directions of fast motion correspond to low force authority, and vice versa.</p>
+
+          <p><strong>Resources:</strong></p>
+          <ul>
+            <li><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/5-4-manipulability/" target="_blank">Modern Robotics 5.4 &mdash; Manipulability</a></li>
+            <li><a href="https://robotacademy.net.au/lesson/velocity-ellipsoid-in-3d-and-manipulability/" target="_blank">Robot Academy &mdash; Velocity Ellipsoid and Manipulability</a></li>
+            <li><a href="https://demonstrations.wolfram.com/ManipulabilityEllipsoidOfARobotArm/" target="_blank">Wolfram &mdash; Manipulability Ellipsoid Interactive</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Manipulability_ellipsoid" target="_blank">Wikipedia &mdash; Manipulability Ellipsoid</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="flashcard-deck">
+      <div class="flashcard-deck-header">Key Concept Flashcards</div>
+      <div class="flashcard-container">
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Jacobian Mapping</div>
+            <div class="flashcard-text">What does the Jacobian matrix map, and what is the equation?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">The Jacobian maps joint velocities to task-space (end-effector) velocities: $v = J(\theta)\,\dot\theta$. It is a $6 \times n$ matrix for an $n$-joint robot in 3D.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Velocity Propagation (Revolute)</div>
+            <div class="flashcard-text">What are the angular and linear velocity propagation formulas for a revolute joint?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">${}^{i+1}\omega_{i+1} = {}^{i+1}_i R \; {}^i\omega_i + \dot\theta_{i+1} \hat{Z}_{i+1}$<br><br>${}^{i+1}v_{i+1} = {}^{i+1}_i R({}^i v_i + {}^i\omega_i \times {}^i P_{i+1})$</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Singularities</div>
+            <div class="flashcard-text">What happens at a Jacobian singularity, and what is the mathematical condition?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">At a singularity, $\det(J) = 0$. The robot loses one or more DOF in task space &mdash; certain end-effector velocities require infinite joint velocities. Two types: arm singularities ($|A|=0$) and wrist singularities ($|C|=0$).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Static Force Relationship</div>
+            <div class="flashcard-text">How are joint torques related to end-effector forces?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\tau = J^T \mathcal{F}$<br><br>The Jacobian transpose maps end-effector forces/moments to joint torques. This is dual to the velocity relationship $v = J\dot\theta$ and comes from conservation of power (virtual work).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Two Jacobian Methods</div>
+            <div class="flashcard-text">What are the two methods for computing the Jacobian, and when is each preferred?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text"><strong>Method 1 &mdash; Derivatives:</strong> Differentiate ${}^0 P_{ee}$ w.r.t. each joint variable. Best for simple robots with easy FK expressions.<br><br><strong>Method 2 &mdash; Cross Products:</strong> Use ${}^0\hat{Z}_i \times {}^0 P_{i\to ee}$ for revolute joints. More systematic for complex robots with DH parameters.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Inverse Velocity Problem</div>
+            <div class="flashcard-text">Given a desired end-effector velocity, how do you find the required joint velocities?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\dot\theta = J^{-1} v$ (when $J$ is square and non-singular).<br><br>This requires inverting the Jacobian. At singularities, $J^{-1}$ does not exist (or blows up), meaning some end-effector velocities are unachievable.</div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="flashcard-btn flashcard-prev">Prev</button>
+        <span class="flashcard-counter">1 / 6</span>
+        <button class="flashcard-btn flashcard-next">Next</button>
+        <button class="flashcard-shuffle">Shuffle</button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED PRACTICE -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Practice</h3>
+      <ul>
+        <li><a href="MSE429_Tutorial_4.html">Tutorial 4</a> &mdash; Velocity Analysis (end-effector velocity, rotating disc, velocity propagation for 3R and 3-DOF arms)</li>
+        <li><a href="MSE429_Tutorial_5.html">Tutorial 5</a> &mdash; Jacobians &amp; Forces (Stanford Jacobian both methods, inverse velocity, degeneracies, inverse force)</li>
+        <li><a href="MSE429_Midterm_1.html">Midterm 1</a> &mdash; Comprehensive Exam (includes forward kinematics, Pieper's method, wrist rotation)</li>
+      </ul>
+    </div>
+
+    <button class="quick-ref-toggle" title="Quick Reference">&Sigma;</button>
+    <div class="quick-ref-panel">
+      <h3>Ch 5 Quick Reference</h3>
+      <div class="ref-item">
+        <div class="ref-name">Jacobian</div>
+        <div class="ref-eq">$v = J(\theta) \dot\theta$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Static Forces</div>
+        <div class="ref-eq">$\tau = J^T \mathcal{F}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Singularity</div>
+        <div class="ref-eq">$\det(J) = 0$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Angular vel (revolute)</div>
+        <div class="ref-eq">${}^{i+1}\omega_{i+1} = {}^{i+1}_i R \; {}^i\omega_i + \dot\theta_{i+1} \hat{Z}_{i+1}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Linear vel</div>
+        <div class="ref-eq">${}^{i+1}v_{i+1} = {}^{i+1}_i R({}^i v_i + {}^i\omega_i \times {}^i P_{i+1})$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Inverse velocity</div>
+        <div class="ref-eq">$\dot\theta = J^{-1} v$ (when $J$ is square and non-singular)</div>
+      </div>
+    </div>
+
+    <!-- Page navigation -->
+    <nav class="page-nav"></nav>
+
+  </main>
+
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

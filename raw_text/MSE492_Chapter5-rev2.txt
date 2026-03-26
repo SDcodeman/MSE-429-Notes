@@ -1,0 +1,1190 @@
+               Chapter 5
+
+
+              Jacobians:
+Velocities and Static Forces
+
+   MSE 429 – Advanced Kinematics for Robotics System   Ch5 - 1
+         Overview
+
+This chapter covers two methods for analyzing velocities and static forces:
+
+•   Velocity analysis of rigid bodies and velocity propagation
+•   Forward velocity problem and Jacobian
+     –   Joint directions and derivatives
+     –   Joint directions and cross products
+     –   Velocity transformation matrix and simpler Jacobians
+     –   Inverse velocity problem and singularities
+     –   Force transformation matrices and inverse static problem
+
+
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System      Ch5 - 2
+         5.1 Introduction
+
+This chapter examines the notions of linear and angular velocities of rigid bodies.
+
+The notion of differentiation of position vectors and rotation matrices will be used to
+define the velocity terms for general motion (i.e., a motion that includes both
+translation and rotation.
+
+A systematic analysis of the velocities of the links of a manipulator will be conducted
+from the based o the end-effector (velocity propagation).
+
+The study of both velocities and the static forces acting on a rigid body leads to a matrix
+entity called the Jacobian.
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                     Ch5 - 3
+        5.2 Notation – Differentiation of Position Vector
+
+- The derivative of position vector 𝑸𝑸 with respect to frame {𝐵𝐵} is;
+                                      d 𝐵𝐵
+                                           𝑸𝑸 = 𝐵𝐵𝑽𝑽𝑄𝑄
+                                     dt
+
+- The velocity vector can be expressed in terms of any other reference frame (such as
+  frame 𝐴𝐴 ), using a leading superscript;
+                                               𝐴𝐴
+                                  𝐴𝐴 𝐵𝐵           d 𝐵𝐵
+                                    ( 𝑽𝑽𝑄𝑄 ) =         𝑸𝑸
+                                               dt
+
+- Note that there is no need to express the outer leading superscript if the calculated
+  velocity is written in terms of the frame of differentiation.
+                                       𝐵𝐵 𝐵𝐵
+                                         ( 𝑽𝑽𝑄𝑄 ) = 𝐵𝐵𝑽𝑽𝑄𝑄
+
+- Note that the outer leading superscript can be removed by explicitly including the
+  rotation matrix that accomplishes the change in the reference frame.
+                                  𝐴𝐴 𝐵𝐵
+                                    ( 𝑽𝑽𝑄𝑄 ) = 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑽𝑽𝑄𝑄
+
+- The velocity of the origin of a frame (such as frame {𝐶𝐶}) relative to universal frame
+  {𝑈𝑈} can be expressed as:
+                                      𝒗𝒗𝐶𝐶 = 𝑈𝑈𝑽𝑽𝐶𝐶𝑂𝑂𝑂𝑂𝑂𝑂
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch5 - 4
+           5.2 Notation – Differentiation of Position Vector
+
+Example: Figure below shows a fixed universe frame,
+{𝑈𝑈}, a frame attached to a train traveling at 100 mph,
+{𝑇𝑇}, and a frame attached to a car traveling at 30
+mph, {𝐶𝐶}. Both vehicles are leading in the 𝑌𝑌� direction
+of {𝑈𝑈}. The rotation matrices, 𝑈𝑈𝑇𝑇𝑹𝑹 and 𝑈𝑈𝐶𝐶𝑹𝑹, are know
+and constant.
+
+           𝑈𝑈
+             d 𝑈𝑈
+• Find               𝑷𝑷𝐶𝐶𝑂𝑂𝑂𝑂𝑂𝑂
+           dt
+                𝑈𝑈
+                 d 𝑈𝑈
+                         𝑷𝑷𝐶𝐶𝑂𝑂𝑂𝑂𝑂𝑂 = 𝑈𝑈𝑽𝑽𝐶𝐶𝑂𝑂𝑂𝑂𝑂𝑂 = 𝒗𝒗𝐶𝐶 = 30 𝑌𝑌�
+                dt
+
+
+• Find 𝐶𝐶 ( 𝑈𝑈𝑽𝑽 𝑇𝑇𝑂𝑂𝑂𝑂𝑂𝑂 )
+                𝐶𝐶 𝑈𝑈
+                        𝑽𝑽 𝑇𝑇𝑂𝑂𝑂𝑂𝑂𝑂 = 𝐶𝐶𝒗𝒗 𝑇𝑇 = 𝑈𝑈𝐶𝐶𝑹𝑹𝒗𝒗 𝑇𝑇 = 𝑈𝑈𝐶𝐶𝑹𝑹 100𝑌𝑌� = 𝑈𝑈𝐶𝐶𝑹𝑹−1 100𝑌𝑌�
+
+
+• Find 𝐶𝐶 ( 𝑇𝑇𝑽𝑽𝐶𝐶𝑂𝑂𝑂𝑂𝑂𝑂 )
+
+                𝐶𝐶 𝑇𝑇
+                        𝑽𝑽𝐶𝐶𝑂𝑂𝑂𝑂𝑂𝑂 = 𝐶𝐶𝑇𝑇𝑹𝑹 𝑇𝑇𝑽𝑽𝐶𝐶𝑂𝑂𝑂𝑂𝑂𝑂 = − 𝑈𝑈𝐶𝐶𝑹𝑹−1 𝑈𝑈𝑇𝑇𝑹𝑹 70𝑌𝑌�
+                                  MSE 429 – Advanced Kinematics for Robotics System             Ch5 - 5
+         5.2 Notation – The Angular Velocity Vector
+
+- The angular velocity of frame {𝐵𝐵} relative to frame {𝐴𝐴} is the vector 𝐴𝐴𝛀𝛀𝐵𝐵
+
+
+
+
+- For the angular velocity of frame {𝐶𝐶} relative to some understood reference {𝑈𝑈}, a
+  simplified notation is introduced as
+
+                                        𝝎𝝎𝐶𝐶 = 𝑈𝑈𝛀𝛀𝐶𝐶
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                Ch5 - 6
+         5.3 Linear and Rotational Velocity of Rigid Bodies
+
+Linear Velocity
+Assume the case of the general mapping of a position vector
+
+
+
+
+                                              𝐴𝐴
+                                                   𝑄𝑄
+
+
+
+
+The absolute velocity of point 𝑄𝑄 with respect to frame {𝐴𝐴} is found by differentiating
+the position vector with respect to time:
+
+                           d 𝐴𝐴𝑸𝑸   d 𝐴𝐴𝑷𝑷𝐵𝐵𝑂𝑂𝑂𝑂𝑂𝑂   d 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑸𝑸
+                                  =                +
+                             dt          dt                dt
+
+                    MSE 429 – Advanced Kinematics for Robotics System                      Ch5 - 7
+         5.3 Linear and Rotational Velocity of Rigid Bodies
+
+Linear Velocity – cont’d
+If the orientation of frame {𝐵𝐵} relative to {𝐴𝐴} does not change, then then rotation
+matrix 𝐵𝐵𝐴𝐴𝑹𝑹 remains constant. Hence,
+
+
+                           d 𝐴𝐴𝑸𝑸   d 𝐴𝐴𝑷𝑷𝐵𝐵𝑂𝑂𝑂𝑂𝑂𝑂   𝐴𝐴
+                                                          d 𝐵𝐵
+                                                               𝑸𝑸
+                                  =                + 𝐵𝐵𝑹𝑹
+                             dt          dt                 dt
+
+                               𝐴𝐴
+                                    𝑽𝑽𝑄𝑄 = 𝐴𝐴𝑽𝑽𝐵𝐵𝑂𝑂𝑂𝑂𝑂𝑂 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑽𝑽𝑄𝑄
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                   Ch5 - 8
+         5.3 Linear and Rotational Velocity of Rigid Bodies
+
+Rotational Velocity                                                               𝑍𝑍̂𝐴𝐴   𝐴𝐴
+Assume the case of two reference frames                               𝐴𝐴
+                                                                           𝛀𝛀𝐵𝐵
+that are coincident, and the moving                                                                    𝑌𝑌�𝐵𝐵
+reference frame rotates instantaneously                       𝑍𝑍̂𝐵𝐵                                                  𝑄𝑄
+about an axis of rotation with angular                                 𝐵𝐵                                      𝐵𝐵
+                                                                                                                    𝑸𝑸
+velocity of 𝐴𝐴Ω𝐵𝐵                                                                                                         𝑌𝑌�𝐴𝐴
+                                                                                  𝑂𝑂
+
+                                                              𝑋𝑋�𝐴𝐴
+                                                                                               𝑋𝑋�𝐵𝐵
+
+
+                                            𝐴𝐴
+                                                 𝑸𝑸 = 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑸𝑸
+
+
+The velocity of point 𝑄𝑄 is given by
+
+                                         d 𝐴𝐴𝑸𝑸            𝐵𝐵
+                                                      𝐴𝐴 d 𝑸𝑸
+                                                    = 𝐵𝐵𝑹𝑹
+                                           dt              dt
+
+                                  𝐴𝐴
+                                       𝑽𝑽𝑄𝑄 = 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑸𝑸
+
+                     MSE 429 – Advanced Kinematics for Robotics System                                                            Ch5 - 9
+         5.3 Linear and Rotational Velocity of Rigid Bodies
+
+General Velocity Representation
+Assume the case of the general mapping of a position vector where the orientation
+between frames {𝐴𝐴} and {𝐵𝐵} changes over time:
+
+
+
+
+                                                       𝐴𝐴
+                                                            𝑄𝑄
+
+
+
+
+In the case of simultaneous linear and rotation velocity, the absolute velocity of 𝑄𝑄 with
+respect to frame {𝐴𝐴} is defined as
+
+                     𝐴𝐴
+                          𝑽𝑽𝑄𝑄 = 𝐴𝐴𝑽𝑽𝐵𝐵𝑂𝑂𝑂𝑂𝑂𝑂 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑽𝑽𝑄𝑄 + 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑸𝑸
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch5 - 10
+         5.5 Convention – Motion of the Links of a Robot
+
+In considering the motion of robot links:
+
+• Link frame {0} is used as the reference frame
+
+• 𝑣𝑣𝑖𝑖 is the linear velocity of the origin of link frame {𝑖𝑖}
+
+• 𝜔𝜔𝑖𝑖 is the angular velocity of link frame {𝑖𝑖}
+
+
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System   Ch5 - 11
+         5.6 Velocity Propagation from Link to Link
+
+• Links undergo a change in position and orientation over time, i.e., linear and angular
+  velocity.
+• The velocity of each joint (joint rate) contributes to the linear and angular velocity of
+  the links of the manipulator.
+• The velocity of the links is a function of all the joint rates that precede the link. For
+  example, the velocity of the end-effector is a function of all the joint rates. This
+  characteristic is referred to as velocity propagation.
+• Therefore, the linear and angular velocity of a link 𝑖𝑖 + 1 can be described as the
+  velocity of link 𝑖𝑖 plus the contribution of joint 𝑖𝑖 + 1, which precedes link 𝑖𝑖 + 1.
+
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                     Ch5 - 12
+                5.6 Velocity Propagation from Link to Link – Revolute Joints
+
+Consider each link of the mechanism as a rigid body with linear and angular velocity
+vectors.
+
+The angular velocity of link 𝑖𝑖 + 1 described with respect to 𝑖𝑖 :
+
+ 𝑖𝑖
+      𝝎𝝎𝑖𝑖+1 = 𝑖𝑖𝝎𝝎𝑖𝑖 + 𝑖𝑖+1
+                           𝑖𝑖
+                              𝑹𝑹 𝜃𝜃̇𝑖𝑖+1 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1
+
+
+where
+                            0
+𝜃𝜃̇ 𝑖𝑖+1   𝑖𝑖+1 ̂
+               𝑍𝑍𝑖𝑖+1 =     0
+                          𝜃𝜃̇𝑖𝑖+1
+
+
+Described with respect to {𝑖𝑖 + 1}:
+
+( 𝑖𝑖+1       𝑖𝑖        𝑖𝑖+1      𝑖𝑖        𝑖𝑖    ̇ 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1 )
+     𝑖𝑖 𝑹𝑹 ) 𝝎𝝎𝑖𝑖+1 = ( 𝑖𝑖 𝑹𝑹 )( 𝝎𝝎𝑖𝑖 + 𝑖𝑖+1𝑹𝑹 𝜃𝜃𝑖𝑖+1
+
+𝑖𝑖+1
+       𝝎𝝎𝑖𝑖+1 = 𝑖𝑖+1     𝑖𝑖       ̇ 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1
+                   𝑖𝑖 𝑹𝑹 𝝎𝝎𝑖𝑖 + 𝜃𝜃𝑖𝑖+1
+
+
+                                MSE 429 – Advanced Kinematics for Robotics System      Ch5 - 13
+              5.6 Velocity Propagation from Link to Link – Revolute Joints
+
+The resulting linear velocity of frame {𝑖𝑖 + 1} is the same as that of the origin of frame
+{𝑖𝑖} plus the contribution made by the revolute joint:
+
+ 𝑖𝑖
+      𝒗𝒗𝑖𝑖+1 = 𝑖𝑖𝒗𝒗𝑖𝑖 + 𝑖𝑖𝝎𝝎𝑖𝑖 × 𝑖𝑖𝑷𝑷𝑖𝑖+1
+
+
+
+
+Described with respect to {𝑖𝑖 + 1}:
+
+𝑖𝑖+1       𝑖𝑖        𝑖𝑖+1     𝑖𝑖     𝑖𝑖     𝑖𝑖
+   𝑖𝑖 𝑹𝑹 ( 𝒗𝒗𝑖𝑖+1 ) = 𝑖𝑖 𝑹𝑹 ( 𝒗𝒗𝑖𝑖 + 𝝎𝝎𝑖𝑖 × 𝑷𝑷𝑖𝑖+1 )
+
+𝑖𝑖+1                       𝑖𝑖     𝑖𝑖     𝑖𝑖
+       𝒗𝒗𝑖𝑖+1 = 𝑖𝑖+1
+                   𝑖𝑖 𝑹𝑹 ( 𝒗𝒗𝑖𝑖 + 𝝎𝝎𝑖𝑖 × 𝑷𝑷𝑖𝑖+1 )
+
+
+
+
+                            MSE 429 – Advanced Kinematics for Robotics System           Ch5 - 14
+           5.6 Velocity Propagation from Link to Link – Prismatic Joints
+
+Equivalent relationships can be achieved for prismatic joints:
+The angular velocity of link {𝑖𝑖 + 1}:
+𝑖𝑖+1                 𝑖𝑖
+   𝝎𝝎𝑖𝑖+1 = 𝑖𝑖+1
+               𝑖𝑖 𝑹𝑹 𝝎𝝎𝑖𝑖
+
+
+
+
+Note: there is no contribution of the
+prismatic joint to the angular velocity.
+
+
+
+
+The linear velocity of the origin of {𝑖𝑖 + 1}:
+
+𝑖𝑖+1
+   𝒗𝒗𝑖𝑖+1 = 𝑖𝑖+1
+               𝑖𝑖 𝑹𝑹 ( 𝑖𝑖
+                          𝒗𝒗 𝑖𝑖 + 𝑖𝑖
+                                     𝝎𝝎 𝑖𝑖 × 𝑖𝑖
+                                                𝑷𝑷𝑖𝑖+1 ) + 𝑑𝑑̇ 𝑖𝑖+1
+                                                                    𝑖𝑖+1 ̂
+                                                                        𝑍𝑍𝑖𝑖+1
+
+
+
+
+                           MSE 429 – Advanced Kinematics for Robotics System     Ch5 - 15
+         5.6 Velocity Propagation from Link to Link
+
+Example: A two-link manipulator with rotation
+joints is shown. Calculate the velocity of the tip
+of the arm as a function of joint rates. Give the
+answer in two form – in terms of frame {3}, and
+also in terms of frame {0}.
+
+
+        𝑐𝑐1   −𝑠𝑠1   0    0
+0       𝑠𝑠1   𝑐𝑐1    0    0
+1𝑻𝑻 =
+         0     0     1    0
+         0     0     0    1
+        𝑐𝑐2   −𝑠𝑠2   0 𝐿𝐿1
+1       𝑠𝑠2    𝑐𝑐2   0 0
+2𝑻𝑻 =
+         0      0    1 0
+         0      0    0 1
+        1     0   0 𝐿𝐿2
+2       0     1   0 0
+3𝑻𝑻 =
+        0     0   1 0
+        0     0   0 1
+
+                     MSE 429 – Advanced Kinematics for Robotics System   Ch5 - 16
+        5.6 Velocity Propagation from Link to Link
+
+Example: cont’d.
+                                                                           0
+                                    1
+                                      𝝎𝝎1 = 10𝑹𝑹   𝝎𝝎0 + 𝜃𝜃̇1 1𝑍𝑍̂1 =
+                                                   0
+                                                                           0
+                                                                          𝜃𝜃̇1
+                                                                                 0
+                               1
+                                𝒗𝒗1 = 10𝑹𝑹 ( 0𝒗𝒗0 + 0𝝎𝝎0 × 0𝑷𝑷1 ) =              0
+                                                                                 0
+                                                                            0
+                               2
+                                   𝝎𝝎2 = 21𝑹𝑹 1𝝎𝝎1 + 𝜃𝜃̇2 2𝑍𝑍̂2 =           0
+                                                                       𝜃𝜃̇1 + 𝜃𝜃̇2
+
+                                                          𝑐𝑐2    𝑠𝑠2      0   0        𝐿𝐿1 𝑠𝑠2 𝜃𝜃̇1
+             2
+              𝒗𝒗2 = 21𝑹𝑹 ( 1𝒗𝒗1 + 1𝝎𝝎1 × 1𝑷𝑷2 ) =        −𝑠𝑠2    𝑐𝑐2      0 𝐿𝐿1 𝜃𝜃̇1 = 𝐿𝐿1 𝑐𝑐2 𝜃𝜃̇1
+                                                           0      0       1   0             0
+                                                                    0
+                               3
+                                𝝎𝝎3 = 32𝑹𝑹 2𝝎𝝎2 + 𝜃𝜃̇3 3𝑍𝑍̂3 =      0
+                                                               𝜃𝜃̇1 + 𝜃𝜃̇2
+
+                                                                     𝐿𝐿1 𝑠𝑠2 𝜃𝜃̇1
+                   3
+                    𝒗𝒗3 = 32𝑹𝑹 ( 2𝒗𝒗2 + 2𝝎𝝎2 × 2𝑷𝑷3 ) = 𝐿𝐿1 𝑐𝑐2 𝜃𝜃̇1 + 𝐿𝐿2 (𝜃𝜃̇1 + 𝜃𝜃̇2 )
+                                                                          0
+
+                     MSE 429 – Advanced Kinematics for Robotics System                                Ch5 - 17
+        5.6 Velocity Propagation from Link to Link
+
+Example: cont’d.
+To find the velocities with respect to non-moving base frame, we rotate them with the
+rotation matrix, 03𝑹𝑹 , which is:
+
+
+                                                          𝑐𝑐12      𝑠𝑠12    0
+                              0     0 1 2
+                              3𝑹𝑹 = 1𝑹𝑹 2𝑹𝑹 3𝑹𝑹 =         −𝑠𝑠12     𝑐𝑐12    0
+                                                            0         0     1
+The rotation yields:
+                                            −𝐿𝐿1 𝑠𝑠1 𝜃𝜃̇1 − 𝐿𝐿2 𝑠𝑠12 (𝜃𝜃̇1 + 𝜃𝜃̇2 )
+                          0            3
+                           𝒗𝒗3 = 03𝑹𝑹 𝒗𝒗3 = 𝐿𝐿1 𝑐𝑐1 𝜃𝜃̇1 + 𝐿𝐿2 𝑐𝑐12 (𝜃𝜃̇1 + 𝜃𝜃̇2 )
+                                                              0
+
+
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System              Ch5 - 18
+         5.7 Jacobians & Forward Velocity Problem
+
+The Forward Velocity Problem determines the velocity (linear an angular) of the end-
+effector 0𝑽𝑽𝑒𝑒.𝑒𝑒. as a function of the joint rates 𝒒𝒒.̇
+A Jacobian is a mathematical concept that describes the variations of a given set of
+functions in a collective manner. It provides the linear mapping between time-varying
+variables.
+The Jacobian allows the mapping between the angular/linear velocity of the end-
+effector as a function of the joint rates
+
+
+                                                                               0
+  Forward Velocity      0                0                    0                    𝒗𝒗𝑒𝑒.𝑒𝑒.
+                            𝑽𝑽𝑒𝑒.𝑒𝑒. = 𝐉𝐉𝑒𝑒.𝑒𝑒. 𝒒𝒒̇   where       𝑽𝑽𝑒𝑒.𝑒𝑒. =   0
+     Problem                                                                       𝝎𝝎𝑒𝑒.𝑒𝑒.
+
+
+                                                                                              Slide credit: Dr. F. Firmani
+
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                                           Ch5 - 19
+               5.7 Jacobians & Forward Velocity Problem
+
+  In the previous example, if only the linear velocity is of interest, we can form the
+  Jacobian matrix as:
+   0
+         − L1s1θ1 − L2 s12 (θ1 + θ2 )   − L1s1 − L2 s12 − L2 s12  θ1 
+     v3 =
+                                2×1  L1c1 + L2c12                   
+                                                               L2c12  θ2 
+         L1c1θ1 + L2c12 (θ1 + θ 2 )                     
+                                                                2×2 0 J 3            2×1 q
+
+
+   3
+                     L2 s2θ1               L2 s2         0  θ1 
+       v3   =
+              L c θ − L c (θ + θ )  2×1  L1c2 + L2c12 L2c12  θ 
+             1 2 1     2 12   1   2 
+                                                             2
+
+                                                        2×2 3 J 3           2×1 q
+
+  If we are interested in including angular velocity, the Jacobian matrix can be formed as:
+         − L1s1θ1 − L2 s12 (θ1 + θ2 )   − L1s1 − L2 s12 − L2 s12 
+                                                                  θ1 
+         − L1c1θ1 − L2c12 (θ1 + θ 2 )  =
+   0
+     v3 =                                      L c + L2c12     L2c12  
+                                             11                        θ
+                   θ  + θ                       1           1       2
+                     1     2               
+                                                            
+                                                                     2×1 q
+                                                         3×2 0 J 3
+
+              L2 s2θ1             L2 s2         0 
+                                                   θ1 
+3
+= v3  L1c2θ1 − L2c12 (θ1 + θ 2 )  = L1c2 + L2c12 L2c12  
+                                                        θ
+              θ  + θ                 1        1     2
+                1     2            2×1 q    
+                                                    3×2 3 J 3
+                            MSE 429 – Advanced Kinematics for Robotics System                 Ch5 - 20
+         5.7 Jacobians & Forward Velocity Problem
+
+The Jacobian can be determined using two methods:
+   i.   Joint Directions and Derivatives
+   ii. Joint Directions and Cross Products
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System   Ch5 - 21
+        5.7 Jacobians – Joint Directions and Derivatives
+
+The linear velocity of the end-effector is determined by summing the partial derivatives
+of the position vector 0𝑷𝑷𝑒𝑒𝑒𝑒 with respect to each joint variable times their joint rate,
+
+
+                                                    𝑛𝑛
+                                  0                𝜕𝜕 0𝑷𝑷𝑒𝑒𝑒𝑒
+                                      𝒗𝒗𝑒𝑒.𝑒𝑒. = �            𝑞𝑞̇
+                                                     𝜕𝜕𝑞𝑞𝑖𝑖 𝑖𝑖
+                                                  𝑖𝑖=1
+
+
+
+The angular velocity of the end-effector is defined by the contribution of all the
+revolute joints,
+
+
+                                                         𝑛𝑛
+                                      0
+                                          𝝎𝝎𝑒𝑒.𝑒𝑒. = � 𝜃𝜃̇𝑖𝑖 0𝑍𝑍̂𝑖𝑖
+                                                     𝑖𝑖=1
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                 Ch5 - 22
+         5.7 Jacobians – Joint Directions and Derivatives
+
+Thus, the Jacobian can be obtained as follows
+
+
+                                               𝜕𝜕 0𝑷𝑷𝑒𝑒𝑒𝑒       𝜕𝜕 0𝑷𝑷𝑒𝑒𝑒𝑒        Linear
+                                                 𝜕𝜕𝜃𝜃𝑖𝑖           𝜕𝜕𝑑𝑑𝑗𝑗         Velocity
+                          0
+                              𝐉𝐉𝑒𝑒.𝑒𝑒. =
+                                           ⋯                ⋯                ⋯   Angular
+                                                  0̂
+                                                   𝑍𝑍𝑖𝑖          03×1            Velocity
+
+                                               Revolute         Prismatic
+                                                Joint 𝒊𝒊         Joint 𝒋𝒋
+
+
+• The Jacobian is formed by sequentially adding a column that represents the
+  corresponding joint (revolute or prismatic).
+• The joint direction 0𝑍𝑍̂𝑖𝑖 can be obtained by extracting the third column to the
+  homogeneous transforms 0𝑖𝑖 𝑻𝑻.
+• The position vector 0𝑷𝑷𝑒𝑒𝑒𝑒 is extracted from the last column of 𝑒𝑒𝑒𝑒0 𝑻𝑻.
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                      Ch5 - 23
+          5.7 Jacobians & Forward Velocity Problem
+
+We can apply this method in the previous example:
+
+
+                                                    𝜕𝜕 0𝑷𝑷3       𝜕𝜕 0𝑷𝑷3
+                                            0
+                                              𝐉𝐉3 = 𝜕𝜕𝜃𝜃1           𝜕𝜕𝜃𝜃2
+                                                      0̂             0̂
+                                                       𝑍𝑍1            𝑍𝑍2
+
+We have
+        𝑐𝑐1   −𝑠𝑠1    0       0               𝑐𝑐𝑐   −𝑠𝑠𝑠      0     𝐿𝐿1             1   0    0 𝐿𝐿2
+0       𝑠𝑠1   𝑐𝑐1     0       0     1         𝑠𝑠𝑠   𝑐𝑐𝑐       0      0      2       0   1    0 0
+1𝑻𝑻 =                               2𝑻𝑻 =                                   3𝑻𝑻 =
+         0     0      1       0                0     0        1      0              0   0    1 0
+         0     0      0       1                0     0        0      1              0   0    0 1
+We can calculate
+       𝑐𝑐12   −𝑠𝑠12       0       𝐿𝐿1 𝑐𝑐1        𝑐𝑐12      −𝑠𝑠12      0 𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12
+0      𝑠𝑠12    𝑐𝑐12       0       𝐿𝐿1 𝑠𝑠1 0      𝑠𝑠12       𝑐𝑐12      0 𝐿𝐿1 𝑠𝑠1 + 𝐿𝐿2 𝑠𝑠𝑠𝑠
+2 𝑻𝑻 =                                      𝑻𝑻 =
+         0       0        1         0 3            0          0       1          0
+         0       0        0         1              0          0       0          1
+
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System                              Ch5 - 24
+              5.7 Jacobians & Forward Velocity Problem
+
+
+          𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12
+0
+   𝑷𝑷𝟑𝟑 = 𝐿𝐿1 𝑠𝑠1 + 𝐿𝐿2 𝑠𝑠𝑠𝑠
+                   0
+𝜕𝜕 0𝑷𝑷3     −𝐿𝐿1 𝑠𝑠𝑠 − 𝐿𝐿2 𝑠𝑠𝑠𝑠
+         = 𝐿𝐿1 𝑐𝑐𝑐 + 𝐿𝐿2 𝑐𝑐𝑐𝑐
+  𝜕𝜕𝜃𝜃1
+                     0
+𝜕𝜕 0𝑷𝑷3     −𝐿𝐿2 𝑠𝑠𝑠𝑠
+         = 𝐿𝐿1 𝑐𝑐𝑐𝑐
+  𝜕𝜕𝜃𝜃2
+                 0
+and
+          0              0
+0̂                0̂
+    𝑍𝑍1 = 0        𝑍𝑍2 = 0
+                                                                  −𝐿𝐿1 𝑠𝑠𝑠 − 𝐿𝐿2 𝑠𝑠𝑠𝑠   −𝐿𝐿2 𝑠𝑠𝑠𝑠
+          1              1
+                                              𝜕𝜕 0𝑷𝑷3   𝜕𝜕 0𝑷𝑷3    𝐿𝐿1 𝑐𝑐𝑐 + 𝐿𝐿2 𝑐𝑐𝑐𝑐    𝐿𝐿1 𝑐𝑐𝑐𝑐
+                                  0                      𝜕𝜕𝜃𝜃𝟐𝟐 =           0                0
+                                      𝐉𝐉3 =    𝜕𝜕𝜃𝜃1
+                                               0̂         0̂                0                0
+                                                 𝑍𝑍1       𝑍𝑍𝟐𝟐
+                                                                            0                0
+                                                                            1                1
+
+                         MSE 429 – Advanced Kinematics for Robotics System                          Ch5 - 25
+            5.7 Jacobians – Joint Directions and Cross-products
+
+Revolute Joints consider a rigid body rotating about an axis 𝑍𝑍̂𝑖𝑖 with an angular velocity
+𝜃𝜃̇ 𝑖𝑖 . If the end-effector (ee) is a point on this rigid body, the contribution of each revolute
+joint to the velocity of ee can be determined as follows:
+
+
+
+𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+     𝑍𝑍𝑖𝑖   𝜃𝜃̇𝑖𝑖
+
+
+                                                         𝑟𝑟𝑟𝑟𝑟𝑟                𝑟𝑟𝑟𝑟𝑟𝑟
+                              Angular velocity:                   𝝎𝝎𝑖𝑖 = 𝜃𝜃̇ 𝑖𝑖 𝑍𝑍̂𝑖𝑖
+
+
+                                             𝑟𝑟𝑟𝑟𝑟𝑟
+                          Linear velocity:            𝒗𝒗𝑖𝑖 = 𝜃𝜃̇𝑖𝑖     𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+                                                                            𝑍𝑍𝑖𝑖 × 𝑷𝑷𝑒𝑒𝑒𝑒
+
+
+Note: Frame 𝑟𝑟𝑟𝑟𝑟𝑟 can be any reference frame, for example, 𝑟𝑟𝑟𝑟𝑟𝑟 = {0}.
+
+
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System                      Ch5 - 26
+         5.7 Jacobians – Joint Directions and Cross-products
+
+Prismatic Joints consider a rigid body attached to a prismatic joint sliding along axis 𝑍𝑍̂𝑗𝑗
+with a velocity 𝑑𝑑𝑗𝑗̇ . While the contribution of this joint to the angular velocity of the rigid
+body is none, its contribution to the linear velocity of the rigid body is 𝑑𝑑𝑗𝑗̇ along 𝑍𝑍̂𝑗𝑗 :
+
+
+                                                     𝑟𝑟𝑟𝑟𝑟𝑟
+                               Angular velocity:              𝝎𝝎𝑗𝑗 = 03×1
+                                                  𝑟𝑟𝑟𝑟𝑟𝑟
+                               Linear velocity:            𝒗𝒗𝑗𝑗 = 𝑑𝑑𝑗𝑗̇ 𝑟𝑟𝑟𝑟𝑟𝑟𝑍𝑍̂𝑗𝑗
+
+
+
+
+                                                                           𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+                                         𝑑𝑑𝑗𝑗̇                                   𝑍𝑍𝑗𝑗
+
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                       Ch5 - 27
+         5.7 Jacobians – Joint Directions and Cross-products
+
+Let 𝑟𝑟𝑟𝑟𝑟𝑟 = {0}, thus the Jacobian can be obtained as follows;
+
+
+                                             0̂
+                                              𝑍𝑍𝑖𝑖 × 0𝑷𝑷𝑖𝑖→𝑒𝑒𝑒𝑒                 0̂
+                                                                                 𝑍𝑍𝑗𝑗                  Linear
+                          0                                                                           Velocity
+                              𝐉𝐉𝑒𝑒.𝑒𝑒. = ⋯                          ⋯                     ⋯
+                                                     0̂                                               Angular
+                                                        𝑍𝑍𝑖𝑖                  03×1                    Velocity
+
+                                                  Revolute                  Prismatic
+                                                   Joint 𝒊𝒊                  Joint 𝒋𝒋
+
+
+
+
+• The Jacobian is formed by sequentially adding a column that represents the
+  corresponding joint (revolute or prismatic).
+• The joint direction 0𝑍𝑍̂𝑖𝑖 can be obtained from 0𝑖𝑖 𝑻𝑻.
+• The position vector 0𝑷𝑷𝑒𝑒𝑒𝑒 can be found as
+                    0
+                        𝑷𝑷𝑖𝑖 → 𝑒𝑒𝑒𝑒 = 0𝑷𝑷𝑒𝑒𝑒𝑒 − 0𝑷𝑷𝑖𝑖          or   0
+                                                                        𝑷𝑷𝑖𝑖→𝑒𝑒𝑒𝑒 = 0𝑖𝑖 𝑹𝑹 𝑖𝑖𝑷𝑷𝑒𝑒𝑒𝑒
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                                           Ch5 - 28
+           5.7 Jacobians & Forward Velocity Problem
+
+We can apply this method in the previous example:
+
+                                              0̂                 0𝑍𝑍̂
+                                 0             𝑍𝑍1 × 0𝑷𝑷1→3               0
+                                                                     2 × 𝑷𝑷2→3
+                                     𝐉𝐉3 =          0̂                  0̂
+                                                     𝑍𝑍1                 𝑍𝑍2
+From case 1
+           𝑐𝑐1   −𝑠𝑠1    0       0                        𝑐𝑐12    −𝑠𝑠12    0     𝐿𝐿1 𝑐𝑐1
+0          𝑠𝑠1   𝑐𝑐1     0       0                 0      𝑠𝑠12     𝑐𝑐12    0     𝐿𝐿1 𝑠𝑠1
+1𝑻𝑻 =                                              2 𝑻𝑻 =
+            0     0      1       0                          0        0     1       0
+            0     0      0       1                          0        0     0       1
+       𝑐𝑐12      −𝑠𝑠12       0       𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12
+0      𝑠𝑠12       𝑐𝑐12       0       𝐿𝐿1 𝑠𝑠1 + 𝐿𝐿2 𝑠𝑠𝑠𝑠
+3 𝑻𝑻 =
+         0          0        1                0
+         0          0        0                1
+Therefore
+          𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12                       𝐿𝐿1 𝑐𝑐1                  0
+0                                        0                        0
+    𝑷𝑷3 = 𝐿𝐿1 𝑠𝑠1 + 𝐿𝐿2 𝑠𝑠𝑠𝑠                 𝑷𝑷2 = 𝐿𝐿1 𝑠𝑠1            𝑷𝑷1 = 0
+                   0                                 0                      0
+
+                         MSE 429 – Advanced Kinematics for Robotics System                 Ch5 - 29
+           5.7 Jacobians & Forward Velocity Problem
+
+
+
+
+                      𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12
+0           0      0
+  𝑷𝑷1→3 = 𝑷𝑷3 − 𝑷𝑷1 = 𝐿𝐿1 𝑠𝑠1 + 𝐿𝐿2 𝑠𝑠𝑠𝑠
+                               0
+                      𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12 𝐿𝐿1 𝑐𝑐1     𝐿𝐿2 𝑐𝑐12
+0         0     0
+  𝑷𝑷2→3 = 𝑷𝑷3 − 𝑷𝑷2 = 𝐿𝐿1 𝑠𝑠1 + 𝐿𝐿2 𝑠𝑠𝑠𝑠 - 𝐿𝐿1 𝑠𝑠1 = 𝐿𝐿2 𝑠𝑠𝑠𝑠
+                               0             0           0
+and
+                0   𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12      −𝐿𝐿1 𝑠𝑠1 − 𝐿𝐿2 𝑠𝑠𝑠𝑠
+0𝑍𝑍̂   0
+    1 × 𝑷𝑷1→3 = 0 × 𝐿𝐿1 𝑠𝑠1 + 𝐿𝐿2 𝑠𝑠𝑠𝑠 = 𝐿𝐿1 𝑐𝑐1 + 𝐿𝐿2 𝑐𝑐12
+                1            0                       0
+                0   𝐿𝐿2 𝑐𝑐12       −𝐿𝐿2 𝑠𝑠𝑠𝑠
+0𝑍𝑍̂    0
+    2 × 𝑷𝑷2→3 = 0 × 𝐿𝐿2 𝑠𝑠𝑠𝑠 = 𝐿𝐿2 𝑐𝑐12
+                1       0              0
+
+
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System   Ch5 - 30
+            5.7 Jacobians & Forward Velocity Problem
+
+
+
+
+                                            −𝐿𝐿1 𝑠𝑠𝑠 − 𝐿𝐿2 𝑠𝑠𝑠𝑠   −𝐿𝐿2 𝑠𝑠𝑠𝑠
+                                             𝐿𝐿1 𝑐𝑐𝑐 + 𝐿𝐿2 𝑐𝑐𝑐𝑐    𝐿𝐿1 𝑐𝑐𝑐𝑐
+            0̂
+             𝑍𝑍1 × 0𝑷𝑷1→3   0𝑍𝑍̂     0                0                0
+0                               2 × 𝑷𝑷2→3
+    𝐉𝐉3 =         0̂               0̂     =           0                0
+                   𝑍𝑍1              𝑍𝑍2               0                0
+                                                      0                0
+                                                      1                1
+
+
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System      Ch5 - 31
+         5.7 Jacobians – Remarks
+
+Finding the Jacobian of a point at the tip of the end-effector can be tedious and difficult.
+Determining the singularities of this Jacobian involves computing the determinant of a 6
+× 6 matrix!
+
+
+As an alternative, since the end-effector link is a rigid body, one could determine the
+Jacobian with respect to the wrist, 0𝐉𝐉𝑤𝑤
+                   0                                                𝐴𝐴3×3   03×3
+                       𝑽𝑽𝑤𝑤 = 0𝐉𝐉𝑤𝑤 𝒒𝒒̇   where        0
+                                                           𝐉𝐉𝑤𝑤 =
+                                                                    𝐵𝐵3×3   𝐶𝐶3×3
+                                              0
+resulting in a much simpler determinant           𝐉𝐉𝑤𝑤 = 𝐴𝐴3×3 𝐶𝐶3×3 .
+
+
+Once 0𝑽𝑽𝑤𝑤 is found, then a velocity transformation can be employed to find the
+velocity with respect to end-effector, 0𝑽𝑽𝑒𝑒𝑒𝑒 .
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch5 - 32
+              5.7 Jacobians – Remarks – Velocity Transformation 𝑻𝑻𝑻𝑻𝑏𝑏 →𝑎𝑎
+
+Velocity Transformation 𝑻𝑻𝑻𝑻𝒃𝒃 →𝒂𝒂
+Assume two points “a” and “b” on the same rigid body, let the velocity of point a be
+known with respect to a reference frame {𝑟𝑟1 }. What is the velocity of point b with
+respect to frame {𝑟𝑟1 }?
+                                                                                                                             𝑟𝑟1
+                           𝑟𝑟1                                            𝑟𝑟1                                     𝑟𝑟1              𝒗𝒗𝑎𝑎
+             𝑟𝑟                  𝒗𝒗𝑎𝑎                  𝑟𝑟                       𝒗𝒗𝑏𝑏                                    𝝎𝝎
+Known: 1𝑽𝑽𝑎𝑎 =             𝑟𝑟1           , find 1𝑽𝑽𝑏𝑏 =                   𝑟𝑟1
+                                 𝝎𝝎                                             𝝎𝝎
+𝑟𝑟1         𝑟𝑟        𝑟𝑟                𝑟𝑟
+      𝒗𝒗𝑏𝑏 = 1𝒗𝒗𝒂𝒂 + 1𝝎𝝎 × 1 𝑷𝑷𝑎𝑎 →𝑏𝑏
+             𝑟𝑟       𝑟𝑟                          𝑟𝑟
+                                                � 𝒃𝒃 →𝒂𝒂 𝟏𝟏 𝝎𝝎       𝑟𝑟            𝑟𝑟           𝒓𝒓
+          = 1𝒗𝒗𝒂𝒂 + 1𝑷𝑷𝒃𝒃 → 𝒂𝒂 × 1𝝎𝝎 = 1𝒗𝒗𝒂𝒂 + 1𝑷𝑷                                                                                        {𝑟𝑟1}
+                                             𝑟𝑟
+where the skew matrix 1 �
+                       𝑷𝑷𝑏𝑏 →𝑎𝑎 is
+                      0                 −𝑃𝑃𝑏𝑏→𝑎𝑎𝑧𝑧                  𝑃𝑃𝑏𝑏→𝑎𝑎𝑦𝑦
+𝑟𝑟1 �
+   𝐏𝐏𝑏𝑏 →𝑎𝑎 =      𝑃𝑃𝑏𝑏→𝑎𝑎𝑧𝑧                0                       −𝑃𝑃𝑏𝑏→𝑎𝑎𝑥𝑥
+                  −𝑃𝑃𝑏𝑏→𝑎𝑎𝑦𝑦            𝑃𝑃𝑏𝑏→𝑎𝑎𝑥𝑥                       0
+                                                       𝑟𝑟1                              𝑟𝑟1 �        𝑟𝑟1
+                                                             𝒗𝒗𝑏𝑏
+                                                                𝑰𝑰3×3                     𝑷𝑷𝑏𝑏 →𝑎𝑎         𝒗𝒗𝑎𝑎
+                                                       𝑟𝑟1    =                                      𝑟𝑟1
+                                                           𝝎𝝎   𝟎𝟎3×3                     𝑰𝑰3×3            𝝎𝝎
+                                                        𝑻𝑻𝑻𝑻𝒃𝒃 →𝒂𝒂  Velocity Transformation Matrix
+                                  MSE 429 – Advanced Kinematics for Robotics System                                                        Ch5 - 33
+           5.7 Jacobians – Remarks – Velocity Transformation 𝑻𝑻𝑻𝑻𝑒𝑒𝑒𝑒 →𝑤𝑤
+
+    𝑟𝑟𝑟𝑟𝑟𝑟
+Let        𝐉𝐉𝑤𝑤 be known (from slide 25) for a given set of joint rates 𝒒𝒒.̇ The velocity of the
+wrist can be found. The general velocity transformation can be implemented to the
+end-effector to find 0𝑽𝑽𝒆𝒆𝒆𝒆 .
+                                                                                               0
+                                                                                                   𝒗𝒗𝑤𝑤                  𝑤𝑤
+                      0                                           0
+            0             𝒗𝒗𝑤𝑤       0                 0              𝒗𝒗𝑒𝑒𝑒𝑒
+Known: 𝑽𝑽𝑤𝑤 =          0         = 𝐉𝐉𝑤𝑤 𝒒𝒒,̇      find 𝑽𝑽𝑒𝑒𝑒𝑒 =    0
+                           𝝎𝝎                                          𝝎𝝎                                                0
+                                                                                                                             𝝎𝝎
+0
+    𝒗𝒗𝑒𝑒𝑒𝑒 = 0𝒗𝒗𝑤𝑤 + 0𝝎𝝎 × 0𝑷𝑷𝑤𝑤 →𝑒𝑒𝑒𝑒                                                                         𝑷𝑷𝑤𝑤 →𝑒𝑒𝑒𝑒
+        = 0𝒗𝒗𝑤𝑤 + 0𝑷𝑷𝑒𝑒𝑒𝑒 →𝑤𝑤 × 0𝝎𝝎                                                                                          {0}
+                   � 𝑒𝑒𝑒𝑒 →𝑤𝑤 0𝝎𝝎
+        = 0𝒗𝒗𝑤𝑤 + 0𝑷𝑷                                                                     ee
+                                                                      0             −𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑧𝑧          𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑦𝑦
+                       � 𝑒𝑒𝑒𝑒 →𝑤𝑤 is: 0𝑷𝑷
+where the skew matrix 0𝑷𝑷              � 𝑒𝑒𝑒𝑒 →𝑤𝑤 =            𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑧𝑧                0               −𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑥𝑥
+                                                              −𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑦𝑦          𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑥𝑥                 0
+                                     0                      0�                 0
+                                         𝒗𝒗𝑒𝑒𝑒𝑒 𝑰𝑰3×3        𝑷𝑷𝑒𝑒𝑒𝑒 →𝑤𝑤            𝒗𝒗𝑤𝑤
+                                         0    =                                0
+                                           𝝎𝝎   𝟎𝟎3×3         𝑰𝑰3×3                𝝎𝝎
+                                                𝑻𝑻𝑻𝑻𝑒𝑒𝑒𝑒 →𝑤𝑤 Velocity Transformation Matrix
+                           MSE 429 – Advanced Kinematics for Robotics System                                                      Ch5 - 34
+         5.7 Jacobians – Remarks ( 0𝐉𝐉𝑤𝑤 )
+
+Joint Directions and Derivatives
+                                              𝜕𝜕 0𝑷𝑷𝑤𝑤         𝜕𝜕 0𝑷𝑷𝑤𝑤           Linear
+                            0                   𝜕𝜕𝜃𝜃𝑖𝑖           𝜕𝜕𝑑𝑑𝑗𝑗          Velocity
+                                𝐉𝐉𝑤𝑤 =
+                                         ⋯                 ⋯                 ⋯
+                                                  0̂                             Angular
+                                                  𝑍𝑍𝑖𝑖             03×1          Velocity
+
+                                              Revolute         Prismatic
+                                               Joint 𝒊𝒊         Joint 𝒋𝒋
+
+
+
+
+Joint Directions and Cross-Products
+                                                                                  Linear
+                                             0̂
+                                             𝑍𝑍𝑖𝑖 × 0𝑷𝑷𝑖𝑖→𝑤𝑤         0̂
+                                                                      𝑍𝑍𝑗𝑗       Velocity
+                            0
+                             𝐉𝐉𝑤𝑤 = ⋯                          ⋯             ⋯
+                                                   0̂                            Angular
+                                                    𝑍𝑍𝑖𝑖            03×1
+                                                                                 Velocity
+
+                                              Revolute         Prismatic
+                                               Joint 𝒊𝒊         Joint 𝒋𝒋
+
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System                     Ch5 - 35
+         5.7 Jacobians – Remarks
+
+Jacobian ( 𝟎𝟎𝐉𝐉𝐰𝐰 ) Remarks
+In order to evaluate the velocity of the end-effector based on a set of joint rates, two
+matrices were required: the Jacobian 0𝐉𝐉𝑤𝑤 and the velocity transformation matrix
+𝑻𝑻𝑻𝑻𝑒𝑒𝑒𝑒 →𝑤𝑤 :
+                                   0
+                                       𝑽𝑽𝑒𝑒𝑒𝑒 = 𝑻𝑻𝑻𝑻𝑒𝑒𝑒𝑒 →𝑤𝑤 0𝐉𝐉𝑤𝑤 𝒒𝒒̇
+The evaluation of 0𝐉𝐉𝑤𝑤 is much easier than finding 0𝐉𝐉ee. Also, for analyzing singularities,
+solving for the determinant is simpler;
+                                        0
+                                            𝐉𝐉𝑤𝑤 = 𝐴𝐴3×3 𝐶𝐶3×3
+where
+                                       0            𝐴𝐴3×3   03×3
+                                           𝐉𝐉𝑤𝑤 =
+                                                    𝐵𝐵3×3   𝐶𝐶3×3
+
+
+The only drawback is that the joint directions require finding the homogeneous
+transforms 0𝑖𝑖 𝑻𝑻 which is still tedious. As an alternative, let us consider a Jacobian based
+on a point at the wrist out oriented as one the intermediate frames {3 or 4}.
+
+                     MSE 429 – Advanced Kinematics for Robotics System                    Ch5 - 36
+                                                                                                                                          𝑟𝑟
+               5.7 Jacobians – Remarks – Velocity Transformation 𝑟𝑟21𝑻𝑻𝑻𝑻𝑏𝑏 →𝑎𝑎
+                                                  𝑟𝑟
+Velocity Transformation 𝑟𝑟21𝑻𝑻𝑻𝑻𝑏𝑏 →𝑎𝑎
+
+Assume two points “a” and “b” on the same rigid body, let the velocity of point a be
+known with respect to a reference frame {𝑟𝑟1 }. What is the velocity of point b with
+respect to frame {𝑟𝑟2 }?
+                                𝑟𝑟1
+                                      𝒗𝒗𝑎𝑎
+                                                                              𝑟𝑟2
+                                                                                    𝒗𝒗𝑏𝑏                                                          𝒗𝒗𝑎𝑎
+              𝑟𝑟1                                            𝑟𝑟2                                                                        𝝎𝝎
+Known: 𝑽𝑽𝑎𝑎 =                   𝑟𝑟1          , find 𝑽𝑽𝑏𝑏 =                    𝑟𝑟2
+                                      𝝎𝝎                                            𝝎𝝎
+𝑟𝑟2           𝑟𝑟       𝑟𝑟1             𝑟𝑟              𝑟𝑟                                                                         {𝑟𝑟2}
+      𝒗𝒗𝑏𝑏 = 𝑟𝑟21𝑹𝑹          𝒗𝒗𝑎𝑎 + 1𝝎𝝎 × 1 𝑷𝑷𝑎𝑎 →𝑏𝑏
+              𝑟𝑟      𝑟𝑟              𝑟𝑟     𝑟𝑟                         𝑟𝑟    𝑟𝑟
+           = 𝑟𝑟21𝑹𝑹 1𝒗𝒗𝑎𝑎 + 𝑟𝑟21𝑹𝑹 1𝑷𝑷𝑏𝑏 → 𝑎𝑎 × 𝑟𝑟21𝑹𝑹 1𝝎𝝎                                                                                                  {𝑟𝑟1}
+              𝑟𝑟      𝑟𝑟              𝑟𝑟
+                              � 𝒃𝒃 →𝒂𝒂 𝑟𝑟2𝑹𝑹 𝟏𝟏 𝝎𝝎     𝑟𝑟          𝒓𝒓
+           = 𝑟𝑟21𝑹𝑹 1𝒗𝒗𝑎𝑎 + 2 𝑷𝑷         1
+𝑟𝑟2           𝑟𝑟
+ 𝝎𝝎 = 𝑟𝑟21𝑹𝑹 1𝝎𝝎
+                      𝑟𝑟                                                                                    0              −𝑃𝑃𝑏𝑏→𝑎𝑎𝑧𝑧          𝑃𝑃𝑏𝑏→𝑎𝑎𝑦𝑦
+                     𝑟𝑟 �           𝑟𝑟2 �
+where the skew matrix 2 𝑷𝑷𝑏𝑏 →𝑎𝑎 is: 𝑷𝑷𝑏𝑏 →𝑎𝑎 =                                                      𝑃𝑃𝑏𝑏→𝑎𝑎𝑧𝑧                 0               −𝑃𝑃𝑏𝑏→𝑎𝑎𝑥𝑥
+                                                                                                    −𝑃𝑃𝑏𝑏→𝑎𝑎𝑦𝑦             𝑃𝑃𝑏𝑏→𝑎𝑎𝑥𝑥               0
+                                                       𝑟𝑟2                   𝑟𝑟2             𝑟𝑟2 �              𝑟𝑟         𝑟𝑟1
+                                                             𝒗𝒗𝑏𝑏            𝑟𝑟1 𝑹𝑹              𝑷𝑷𝑏𝑏 →𝑎𝑎 𝑟𝑟21𝑹𝑹                 𝒗𝒗𝑎𝑎
+                                                       𝑟𝑟2              =                             𝑟𝑟2                   𝑟𝑟1
+                                                             𝝎𝝎              𝟎𝟎3×3                    𝑟𝑟1 𝑹𝑹                      𝝎𝝎
+                                                                                           𝑟𝑟2
+                                                                                           𝑟𝑟1 𝑻𝑻𝑻𝑻𝒃𝒃 →𝒂𝒂            Velocity Transformation Matrix
+                                       MSE 429 – Advanced Kinematics for Robotics System                                                                     Ch5 - 37
+                    5.7 Jacobians – Remarks – Velocity Transformation 𝒓𝒓𝒓𝒓𝒓𝒓𝟎𝟎𝑻𝑻𝑻𝑻𝒆𝒆𝒆𝒆 →𝐰𝐰
+
+         𝑟𝑟𝑟𝑟𝑟𝑟
+Let               𝐉𝐉𝑤𝑤 be known (next slides) for a given set of joint rates 𝒒𝒒.̇ The velocity of the wrist,
+𝑟𝑟𝑟𝑟𝑟𝑟
+  𝑽𝑽𝑤𝑤 , can be found. The general velocity transformation can be implemented to the
+end-effector to find 0𝑽𝑽𝑒𝑒𝑒𝑒 .
+                                                                                                                                                𝑟𝑟𝑟𝑟𝑟𝑟
+                                          𝑟𝑟𝑟𝑟𝑟𝑟
+                                                                                                                                                         𝒗𝒗𝑤𝑤            𝑤𝑤
+                                                                                                               0
+                   𝑟𝑟𝑟𝑟𝑟𝑟                          𝒗𝒗𝑤𝑤          𝑟𝑟𝑟𝑟𝑟𝑟                                            𝒗𝒗𝑒𝑒𝑒𝑒
+Known:                      𝑽𝑽𝑤𝑤 =          𝑟𝑟𝑟𝑟𝑟𝑟
+                                                           =              𝐉𝐉𝑤𝑤 𝒒𝒒,̇        find 0𝑽𝑽𝑒𝑒𝑒𝑒 =          0
+                                                     𝝎𝝎                                                                𝝎𝝎
+ 0
+     𝒗𝒗𝑒𝑒𝑒𝑒 = 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹
+                               𝑟𝑟𝑟𝑟𝑟𝑟
+                                        𝒗𝒗𝑤𝑤 +
+                                                      𝑟𝑟𝑟𝑟𝑟𝑟
+                                                               𝝎𝝎 ×
+                                                                      𝑟𝑟𝑟𝑟𝑟𝑟
+                                                                               𝑷𝑷𝑤𝑤 →𝑒𝑒𝑒𝑒                                                                                𝝎𝝎
+                        𝑟𝑟𝑟𝑟𝑟𝑟           𝑟𝑟𝑟𝑟𝑟𝑟                 𝑟𝑟𝑟𝑟𝑟𝑟
+                                                                                                                                                                𝑷𝑷𝑤𝑤 →𝑒𝑒𝑒𝑒
+             = 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹 𝒗𝒗𝑤𝑤 + 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹 𝑷𝑷𝑒𝑒𝑒𝑒 →𝑤𝑤 × 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹 𝝎𝝎
+                                                                                                                                                                             {0}
+                              𝑟𝑟𝑟𝑟𝑟𝑟           � 𝑒𝑒𝑒𝑒 →𝑤𝑤 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹               𝑟𝑟𝑟𝑟𝑟𝑟
+             = 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹               𝒗𝒗𝑤𝑤 + 0𝑷𝑷                                          𝝎𝝎
+                                                                                                                                  ee
+ 0                            𝑟𝑟𝑟𝑟𝑟𝑟
+     𝝎𝝎 = 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹                    𝝎𝝎
+                                                                                                                                                       {𝑟𝑟𝑟𝑟𝑟𝑟}
+                      � 𝑒𝑒𝑒𝑒 →𝑤𝑤 is
+where the skew matrix 𝑷𝑷
+                              0              −𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑧𝑧          𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑦𝑦                                             0           0�                             𝑟𝑟𝑟𝑟𝑟𝑟
+                                                                                                  0
+                                                                                                      𝒗𝒗𝑒𝑒𝑒𝑒           𝑟𝑟𝑟𝑟𝑟𝑟𝑹𝑹           𝑷𝑷𝑒𝑒𝑒𝑒→𝑤𝑤 𝑟𝑟𝑟𝑟𝑟𝑟0𝑹𝑹                  𝒗𝒗𝑤𝑤
+�
+𝑷𝑷𝑒𝑒𝑒𝑒 →𝑤𝑤 =           𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑧𝑧                 0               −𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑥𝑥 and                            =
+                                                                                                   0                                                0                  𝑟𝑟𝑟𝑟𝑟𝑟
+                      −𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑦𝑦           𝑃𝑃𝑒𝑒𝑒𝑒→𝑤𝑤𝑥𝑥                 0                             𝝎𝝎              𝟎𝟎3×3                    𝑟𝑟𝑟𝑟𝑟𝑟𝑹𝑹                        𝝎𝝎
+                                                                           Velocity Transformation Matrix                                  𝟎𝟎
+                                                                                                                                       𝒓𝒓𝒓𝒓𝒓𝒓𝑻𝑻𝑻𝑻𝒆𝒆𝒆𝒆 →𝐰𝐰
+                                            MSE 429 – Advanced Kinematics for Robotics System                                                                                   Ch5 - 38
+                                                                                       𝑟𝑟𝑟𝑟𝑟𝑟
+              5.7 Jacobians – Remarks – Jacobian                                                𝐉𝐉𝑤𝑤
+
+In order to determine the Jacobian based on a point on the end-effector coincident with
+the wrist and oriented with respect to any reference frame, we must use the cross-
+product method;
+
+
+                                                        𝑟𝑟𝑟𝑟𝑟𝑟𝑍𝑍̂     𝑟𝑟𝑟𝑟𝑟𝑟                           𝑟𝑟𝑟𝑟𝑟𝑟 ̂          Linear
+                                                                 𝑖𝑖 ×        𝑷𝑷𝑖𝑖→𝑤𝑤                         𝑍𝑍𝑗𝑗
+                                𝑟𝑟𝑟𝑟𝑟𝑟                                                                                  Velocity
+                                         𝐉𝐉𝑤𝑤 = ⋯                                          ⋯                        ⋯
+                                                                 𝑟𝑟𝑟𝑟𝑟𝑟 ̂                                               Angular
+                                                                      𝑍𝑍𝑖𝑖                             03×1             Velocity
+
+                                                              Revolute                           Prismatic
+                                                               Joint 𝒊𝒊                           Joint 𝒋𝒋
+
+                                     𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+• The joint direction                      𝑍𝑍𝑖𝑖 can be obtained by extracting the third column to the
+                                                𝑟𝑟𝑟𝑟𝑟𝑟
+   homogeneous transforms                            𝑖𝑖 𝑻𝑻.
+                                                                                                                                   𝑟𝑟𝑟𝑟𝑟𝑟
+• The position vector 𝑖𝑖𝑷𝑷𝑖𝑖 →𝑤𝑤 is extracted from the last column of 𝑤𝑤𝑖𝑖𝑻𝑻, then                                                          𝑷𝑷𝑖𝑖 →𝑤𝑤
+       𝑟𝑟𝑟𝑟𝑟𝑟     𝑖𝑖
+   =        𝑖𝑖 𝑹𝑹    𝑷𝑷𝑖𝑖 →𝑤𝑤
+
+
+
+                                MSE 429 – Advanced Kinematics for Robotics System                                                                Ch5 - 39
+         Inverse Velocity Problem
+
+In the previous sections, our goal was to find the velocity of the end-effector 0𝑽𝑽𝑒𝑒𝑒𝑒 as a
+function of the joint rates 𝒒𝒒.̇ The inverse velocity problem is the opposite, 0𝑽𝑽𝑒𝑒𝑒𝑒 is
+known and 𝒒𝒒̇ unknown.
+First, we invert the velocity transformation matrix or find the appropriate one using the
+general method shown before:
+                                       𝑟𝑟𝑟𝑟𝑟𝑟                  0                −1 0
+                                                𝑽𝑽𝑤𝑤 =      𝑟𝑟𝑟𝑟𝑟𝑟 𝑻𝑻𝑻𝑻𝑒𝑒𝑒𝑒 →𝑤𝑤      𝑽𝑽𝑒𝑒𝑒𝑒
+                                                          𝑟𝑟𝑟𝑟𝑟𝑟           0
+                                                   =         0 𝑻𝑻𝑻𝑻𝑤𝑤 →𝑒𝑒𝑒𝑒 𝑽𝑽𝑒𝑒𝑒𝑒
+
+
+
+Then, 𝒒𝒒̇ is found by inverting the Jacobian matrix
+                                                            𝑟𝑟𝑟𝑟𝑟𝑟          −1 𝑟𝑟𝑟𝑟𝑟𝑟
+                                                  𝒒𝒒̇ =              𝐉𝐉𝑤𝑤               𝑽𝑽𝑤𝑤
+where
+
+           𝑟𝑟𝑟𝑟𝑟𝑟          −1         𝐴𝐴−1                 03×3                                𝑟𝑟𝑟𝑟𝑟𝑟            𝐴𝐴3×3   03×3
+                    𝐉𝐉𝑤𝑤        =                                             with                      𝐉𝐉𝑤𝑤 =
+                                  −𝐶𝐶 −1 𝐵𝐵𝐴𝐴−1            𝐶𝐶 −1                                                 𝐵𝐵3×3   𝐶𝐶3×3
+
+
+                            MSE 429 – Advanced Kinematics for Robotics System                                                    Ch5 - 40
+         5.8 Singularities
+
+Given that we have a linear transformation relating joint velocity to Cartesian velocity, a
+reasonable question to ask is: Is this matrix invertible? That is, is it nonsingular? If the
+matrix is nonsingular, then we can invert it to calculate joint rates from given Cartesian
+velocities:
+                                         𝒒𝒒̇ = 𝑱𝑱−1 v
+Singularities occur when the Jacobian becomes singular (rank deficient). Physically, the
+manipulator loses one or more DoF, i.e. it cannot move in some directions in the end-
+effector space no matter what joint rates are selected.
+
+
+Most manipulators have configurations where the Jacobian becomes singular. Such
+locations are called singularities of the mechanism or singularities for short. In singular
+points, the danger in applying the inverse Jacobian in a robot control system is that the
+inverse Jacobian blows up! This results in joint rates approaching infinity as the
+singularity is approached.
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch5 - 41
+                5.8 Singularities
+
+In the previous example, Consider the end-effector is moving along the X axis at 1.0
+m/s.
+
+
+
+
+We can find the joint velocities along this trajectory using the inverse Jacobian as:
+
+  0               1           L2c12            L2 s12       
+      J 3−1 =
+                L1L2 s1  − L1c1 − L2c12   − L1s1 − L2 s12 
+
+Then, using the inverse Jacobian equation for a velocity of 1 m/s in the X direction, we
+can calculate joint rates as a function of manipulator configuration
+
+           c                c       c12
+  θ1 =12
+          ,θ2 −
+              =1 −
+           L1s1            L2 s2    L1s2
+as the arm stretches out toward θ2= 0, both joint rates go to infinity.
+                             MSE 429 – Advanced Kinematics for Robotics System          Ch5 - 42
+         5.8 Singularities
+
+                                               𝑟𝑟𝑟𝑟𝑟𝑟
+Regardless of the Jacobian 0𝐉𝐉𝑒𝑒.𝑒𝑒 , 0𝐉𝐉𝑤𝑤 , or     𝐉𝐉𝑤𝑤 , the conditions that make the
+manipulator be in a singular configuration are the same. Thus, the most convenient
+             𝑟𝑟𝑟𝑟𝑟𝑟
+Jacobian is         𝐉𝐉𝑤𝑤 . The conditions are found by setting the determinant of the Jacobian
+to zero, i.e.,
+
+
+
+
+             𝑟𝑟𝑟𝑟𝑟𝑟                                        𝑟𝑟𝑟𝑟𝑟𝑟            𝐴𝐴3×3   03×3
+                      𝐉𝐉𝑤𝑤 = 𝐴𝐴3×3 𝐶𝐶3×3 = 0      where             𝐉𝐉𝑤𝑤 =
+                                                                             𝐵𝐵3×3   𝐶𝐶3×3
+
+
+
+                                    𝑟𝑟𝑟𝑟𝑟𝑟
+Notice that the determinant of     𝐉𝐉𝑤𝑤 involves two matrices, 𝐴𝐴3×3 which is associated to
+the contribution of the main arm to the linear velocity and 𝐶𝐶3×3 which is associated to
+the contribution of the spherical wrist to the angular velocity.
+
+
+
+
+                         MSE 429 – Advanced Kinematics for Robotics System                   Ch5 - 43
+        5.8 Singularities
+
+Main Arm Singularities
+This singularity occurs when 𝐴𝐴3×3 = 0. There are two types:
+Boundary singularity: It occurs when the end-effector is on the surface of the workspace
+(fully stretched or folded back)
+Interior Singularities occur within the workspace and depends on the architecture (e.g.,
+two or more axes lined up on a straight line or four revolute joint axes are parallel or
+intersect at a common point).
+
+
+
+
+              (Boundary and Interior Singularities form Robot Dynamics and Control, 2004)
+                    MSE 429 – Advanced Kinematics for Robotics System                       Ch5 - 44
+          5.8 Singularities
+
+Wrist Singularities
+This singularity occurs when 𝐶𝐶3×3 = 0
+                           𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+                                  𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+Since 𝐶𝐶3×3 = 𝑟𝑟𝑟𝑟𝑟𝑟𝑍𝑍̂4    𝑍𝑍5         𝑍𝑍6 , a spherical wrist is in a singular configuration
+                     𝑟𝑟𝑟𝑟𝑟𝑟 ̂ 𝑟𝑟𝑟𝑟𝑟𝑟 ̂         𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+whenever the vectors       𝑍𝑍4 ,     𝑍𝑍5 and         𝑍𝑍6 are linearly dependent
+
+
+                                                  𝑟𝑟𝑟𝑟𝑟𝑟 ̂
+                                                       𝑍𝑍5
+
+
+
+
+                     (Wrist Singularities form Robot Dynamics and Control, 2004)
+
+
+                       MSE 429 – Advanced Kinematics for Robotics System                         Ch5 - 45
+                                                                                                         𝑟𝑟
+               5.9 Static Forces in Manipulators – 𝑟𝑟21 𝑻𝑻𝑭𝑭 𝑏𝑏→𝑎𝑎
+
+Assume the force and moment about point 𝑎𝑎 be known with respect to a reference
+frame {𝑟𝑟1 }. What is the force and moment about point b with respect to frame {𝑟𝑟2 }?
+                                 𝑟𝑟1                                             𝑟𝑟2
+              𝑟𝑟1                      𝒇𝒇                         𝑟𝑟2                  𝒇𝒇
+Known: 𝑭𝑭𝑎𝑎 =                    𝑟𝑟1              , find 𝑭𝑭𝑏𝑏 =                 𝑟𝑟2
+                                       𝒎𝒎𝑎𝑎                                           𝒎𝒎𝑏𝑏                                                           𝒇𝒇
+𝑟𝑟2          𝑟𝑟 𝑟𝑟
+                                                                                                                                      𝒎𝒎𝑎𝑎
+      𝒇𝒇   = 𝑟𝑟21𝐑𝐑 1𝒇𝒇
+𝑟𝑟2            𝑟𝑟        𝑟𝑟1                 𝑟𝑟              𝑟𝑟
+      𝒎𝒎𝑏𝑏 = 𝑟𝑟21𝑹𝑹            𝒎𝒎𝑎𝑎 + 1𝒇𝒇 × 1𝑷𝑷𝑎𝑎 →𝑏𝑏                                                                         {𝑟𝑟2}
+              𝑟𝑟    𝑟𝑟                  𝑟𝑟        𝑟𝑟                     𝑟𝑟     𝑟𝑟
+           = 𝑟𝑟21𝑹𝑹 1𝒎𝒎𝑎𝑎 + 𝑟𝑟21𝑹𝑹 1𝑷𝑷𝒃𝒃 → 𝒂𝒂 × 𝑟𝑟21𝑹𝑹 1𝒇𝒇
+                                                                                                                                                          {𝑟𝑟1}
+             𝑟𝑟 𝑟𝑟         𝑟𝑟 �        𝑟𝑟2 𝒓𝒓𝟏𝟏
+           = 𝑟𝑟21𝑹𝑹 1𝒎𝒎𝑎𝑎 + 2 𝑷𝑷𝒃𝒃 →𝒂𝒂 𝑟𝑟1 𝑹𝑹 𝒇𝒇
+
+                                                                                                              0        −𝑃𝑃𝑏𝑏→𝑎𝑎𝑧𝑧       𝑃𝑃𝑏𝑏→𝑎𝑎𝑦𝑦
+                        � 𝑏𝑏 →𝑎𝑎 is: 2 𝐏𝐏
+                                       �𝑏𝑏 →𝑎𝑎 =  𝑟𝑟                     𝑟𝑟
+where the skew matrix 2 𝑷𝑷                                                                            𝑃𝑃𝑏𝑏→𝑎𝑎𝑧𝑧            0            −𝑃𝑃𝑏𝑏→𝑎𝑎𝑥𝑥
+                                                                                                     −𝑃𝑃𝑏𝑏→𝑎𝑎𝑦𝑦        𝑃𝑃𝑏𝑏→𝑎𝑎𝑥𝑥            0
+                                                        𝑟𝑟2                           𝑟𝑟2                                𝑟𝑟1
+                                                              𝒇𝒇                      𝑟𝑟1 𝑹𝑹                  𝟎𝟎3×3            𝒇𝒇
+                                                       𝑟𝑟2              = 𝑟𝑟2
+                                                             𝒎𝒎𝑏𝑏               � 𝑏𝑏 →𝑎𝑎 𝑟𝑟𝑟𝑟2𝑹𝑹
+                                                                                𝑷𝑷
+                                                                                                              𝑟𝑟2
+                                                                                                              𝑟𝑟1 𝑹𝑹
+                                                                                                                        𝑟𝑟1
+                                                                                                                              𝒎𝒎𝑎𝑎
+                                                                                             1
+
+                                                                                            𝑟𝑟2
+                                                                                            𝑟𝑟1 𝑻𝑻𝑭𝑭 𝑏𝑏→𝑎𝑎         Force Transformation Matrix
+                                        MSE 429 – Advanced Kinematics for Robotics System                                                                  Ch5 - 46
+           Inverse Static Force Problem
+
+The Inverse Static Force is solved from the equation of conservation of power.
+                                                   PowerIN = PowerOUT
+                                                                       ⊤ 0
+                                                   𝝉𝝉⊤ 𝒒𝒒̇ = 0𝑭𝑭𝑒𝑒𝑒𝑒         𝑽𝑽𝑒𝑒𝑒𝑒
+
+Since 0𝑽𝑽𝑒𝑒𝑒𝑒 = 0𝐉𝐉𝑒𝑒𝑒𝑒 𝒒𝒒̇
+                                                                      ⊤ 0
+                                                  𝝉𝝉⊤ 𝒒𝒒̇ = 0𝑭𝑭𝑒𝑒𝑒𝑒         𝐉𝐉𝑒𝑒𝑒𝑒 𝒒𝒒̇
+
+This is true for all 𝒒𝒒̇ ,
+                                                                      ⊤ 0
+                                                    𝝉𝝉⊤ = 0𝑭𝑭𝑒𝑒𝑒𝑒           𝐉𝐉𝑒𝑒𝑒𝑒
+
+Transposing,
+                                            ⊤ 0                    ⊤ 0                𝑟𝑟𝑟𝑟𝑟𝑟          ⊤ 𝑟𝑟𝑟𝑟𝑟𝑟
+                             𝝉𝝉 = 0𝐉𝐉𝑒𝑒𝑒𝑒         𝑭𝑭𝑒𝑒𝑒𝑒 = 0𝐉𝐉𝑤𝑤         𝑭𝑭𝑤𝑤 =                𝐉𝐉𝑤𝑤              𝑭𝑭𝑤𝑤
+
+
+
+
+                             MSE 429 – Advanced Kinematics for Robotics System                                          Ch5 - 47
+MSE 429 – Advanced Kinematics for Robotics System   Ch5 - 48
+

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial 5 — MSE429 Study Pages</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}], throwOnError: false});"></script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+  <main class="main-content">
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&gt;</span>
+      <a href="index.html#tutorials">Tutorials</a><span class="sep">&gt;</span>
+      Tutorial 5
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Tutorial 5: Jacobians &amp; Static Forces</h1>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 5.1                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 5.1</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=1" target="_blank">PDF p.1</a>
+      <p><strong>Problem:</strong> Determine the Jacobian matrix, ${}^{0}J_{EE}$, of the Stanford manipulator using the joint direction and derivative-based method.</p>
+
+      <button class="solution-toggle" data-target="sol-tut5-1">Show Solution</button>
+      <div class="solution-content" id="sol-tut5-1">
+
+        <p>The Jacobian allows us to find the forward velocity problem:</p>
+        $${}^{0}\vec{V}_{EE} = \left[{}^{0}J\right]_{EE} \dot{\vec{q}}$$
+        $$\begin{Bmatrix} \dot{x} \\ \dot{y} \\ \dot{z} \\ \omega_x \\ \omega_y \\ \omega_z \end{Bmatrix} = \left[{}^{0}J\right]_{EE} \begin{Bmatrix} \dot{\theta}_1 \\ \dot{\theta}_2 \\ \dot{d}_3 \\ \dot{\theta}_4 \\ \dot{\theta}_5 \\ \dot{\theta}_6 \end{Bmatrix}$$
+
+        <div class="derivation-steps">
+          <div class="derivation-step visible">
+            <div class="step-label">Step 1: Compute Successive Transforms</div>
+            <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=1" target="_blank">PDF p.1</a>
+            <p>From Problem 3 in Tutorial 3:</p>
+            $${}^{0}_{1}T = \begin{bmatrix} C_1 & -S_1 & 0 & 0 \\ S_1 & C_1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{0}\hat{Z}_1 = \begin{Bmatrix} 0 \\ 0 \\ 1 \end{Bmatrix}$$
+
+            $${}^{0}_{2}T = \begin{bmatrix} C_1 C_2 & -C_1 S_2 & S_1 & S_1 d_2 \\ S_1 C_2 & -S_1 S_2 & -C_1 & -C_1 d_2 \\ S_2 & C_2 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{0}\hat{Z}_2 = \begin{Bmatrix} S_1 \\ -C_1 \\ 0 \end{Bmatrix}$$
+
+            $${}^{0}_{3}T = \begin{bmatrix} C_1 C_2 & -S_1 & -C_1 S_2 & -C_1 S_2\, d_3 \\ S_1 C_2 & C_1 & -S_1 S_2 & -S_1 S_2\, d_3 \\ S_2 & 0 & C_2 & C_2\, d_3 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{0}\hat{Z}_3 = \begin{Bmatrix} -C_1 S_2 \\ -S_1 S_2 \\ C_2 \end{Bmatrix}$$
+
+            $${}^{0}\hat{Z}_4 = \begin{Bmatrix} C_1 C_2 S_4 + S_1 S_4 \\ S_1 C_2 S_4 - C_1 S_4 \\ S_2 S_4 \end{Bmatrix}$$
+
+            $${}^{0}\hat{Z}_5 = \begin{Bmatrix} -(C_1 C_2 C_4 - S_1 S_4) S_5 - C_1 S_2 C_5 \\ -(S_1 C_2 C_4 + C_1 S_4) S_5 - S_1 S_2 C_5 \\ -S_2 C_4 S_5 + C_2 C_5 \end{Bmatrix}$$
+
+            $${}^{0}\hat{Z}_6 = \begin{Bmatrix} C_1 C_2 S_4 + S_1 S_4 \\ S_1 C_2 S_4 - C_1 C_4 \\ S_2 S_4 \end{Bmatrix}$$
+          </div>
+
+          <div class="derivation-step">
+            <div class="step-label">Step 2: Find Position of End-Effector</div>
+            <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=2" target="_blank">PDF p.2</a>
+            <p>The position vector ${}^{0}\vec{P}_{EE}$ (with $d_6 = h$):</p>
+            $${}^{0}\vec{P}_{EE} = \begin{Bmatrix} -(C_1 C_2 C_4 - S_1 S_4) S_5 + C_1 S_2 C_5) h - C_1 S_2\, d_3 \\ -(S_1 C_2 C_4 + C_1 S_4) S_5 + S_1 S_2 C_5) h - S_1 S_2\, d_3 \\ (-S_2 C_4 S_5 + C_2 C_5) h + C_2\, d_3 \end{Bmatrix}$$
+          </div>
+
+          <div class="derivation-step">
+            <div class="step-label">Step 3: Compute Partial Derivatives</div>
+            <p>We require $\frac{\partial {}^{0}\vec{P}_{EE}}{\partial q_k}$ for $k = 1, 2, \ldots, 6$ where $\vec{q} = \{\theta_1, \theta_2, d_3, \theta_4, \theta_5, \theta_6\}^T$.</p>
+
+            $$\frac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_1} = \begin{Bmatrix} ((S_1 C_2 C_4 + C_1 S_4) S_5 + S_1 S_2 C_5) h + S_1 S_2\, d_3 \\ -((-C_1 C_2 C_4 + S_1 S_4) S_5 + C_1 S_2 C_5) h - C_1 S_2\, d_3 \\ 0 \end{Bmatrix}$$
+
+            $$\frac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_2} = \begin{Bmatrix} (C_1 S_2 C_4 S_5 - C_1 C_2 C_5) h - C_1 C_2\, d_3 \\ (S_1 S_2 C_4 S_5 - S_1 C_2 C_5) h - S_1 C_2\, d_3 \\ (-C_2 C_4 S_5 - S_2 C_5) h - S_2\, d_3 \end{Bmatrix}$$
+
+            $$\frac{\partial {}^{0}\vec{P}_{EE}}{\partial d_3} = \begin{Bmatrix} -C_1 S_2 \\ -S_1 S_2 \\ C_2 \end{Bmatrix}$$
+
+            $$\frac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_4} = \begin{Bmatrix} (C_1 C_2 S_4 + S_1 C_4) S_5\, h \\ (S_1 C_2 S_4 - C_1 C_4) S_5\, h \\ S_2 S_4 S_5\, h \end{Bmatrix}$$
+
+            $$\frac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_5} = \begin{Bmatrix} -(-(C_1 C_2 C_4 - S_1 S_4) C_5 - C_1 S_2 S_5) h \\ -(-(S_1 C_2 C_4 + C_1 S_4) C_5 - S_1 S_2 S_5) h \\ (-S_2 C_4 C_5 - C_2 S_5) h \end{Bmatrix}$$
+
+            $$\frac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_6} = \begin{Bmatrix} 0 \\ 0 \\ 0 \end{Bmatrix}$$
+          </div>
+
+          <div class="derivation-step">
+            <div class="step-label">Step 4: Construct the Jacobian</div>
+            $$\left[{}^{0}J\right]_{EE} = \begin{bmatrix} \dfrac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_1} & \dfrac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_2} & \dfrac{\partial {}^{0}\vec{P}_{EE}}{\partial d_3} & \dfrac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_4} & \dfrac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_5} & \dfrac{\partial {}^{0}\vec{P}_{EE}}{\partial \theta_6} \\[6pt] {}^{0}\hat{Z}_1 & {}^{0}\hat{Z}_2 & \vec{0}_{3\times1} & {}^{0}\hat{Z}_4 & {}^{0}\hat{Z}_5 & {}^{0}\hat{Z}_6 \end{bmatrix}_{6 \times 6}$$
+            <p>Note: For the prismatic joint (column 3), the angular velocity contribution is zero ($\vec{0}_{3\times1}$), and the linear velocity is $\hat{Z}_3$ (the joint direction).</p>
+          </div>
+
+          <div class="step-controls">
+            <button class="step-btn step-prev" disabled>Previous Step</button>
+            <span class="step-counter">Step 1 of 4</span>
+            <button class="step-btn step-next">Next Step</button>
+            <button class="step-btn step-show-all">Show All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 5.2                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 5.2</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Problem:</strong> Determine the Jacobian matrix, ${}^{0}J_{EE}$, of the Stanford manipulator using the joint direction and cross-product method.</p>
+
+      <button class="solution-toggle" data-target="sol-tut5-2">Show Solution</button>
+      <div class="solution-content" id="sol-tut5-2">
+
+        <p>Using Slide 24, the Jacobian columns are constructed as:</p>
+        <p>For revolute joints:</p>
+        $$\text{Column } i = \begin{Bmatrix} {}^{0}\hat{Z}_i \times {}^{0}\vec{P}_{i \to EE} \\ {}^{0}\hat{Z}_i \end{Bmatrix}$$
+        <p>For prismatic joints:</p>
+        $$\text{Column } i = \begin{Bmatrix} {}^{0}\hat{Z}_i \\ \vec{0} \end{Bmatrix}$$
+
+        <div class="figure">
+          <img src="assets/images/tut5_p1.png" alt="Position vectors from joints to end-effector" loading="lazy">
+        </div>
+        <div class="figure-desc">
+          <strong>Figure:</strong> Position vectors from each joint origin to the end-effector, with ${}^{0}\vec{P}_{i \to EE} = {}^{0}\vec{P}_{0 \to EE} - {}^{0}\vec{P}_{0 \to i}$ for $i = 1, 2, \ldots, 6$.
+        </div>
+
+        <h4>Column 1 (Revolute):</h4>
+        <p>${}^{0}\vec{P}_{1 \to EE} = {}^{0}\vec{P}_{EE}$ (since ${}^{0}\vec{P}_{0 \to 1} = \vec{0}$):</p>
+        $${}^{0}\hat{Z}_1 \times {}^{0}\vec{P}_{0 \to EE} = \begin{Bmatrix} (S_1 C_2 C_4 + C_1 S_4) S_5 + S_1 S_2 C_5) h + S_1 S_2\, d_3 \\ -((-C_1 C_2 C_4 + S_1 S_4) S_5 + C_1 S_2 C_5) h - C_1 S_2\, d_3 \\ 0 \end{Bmatrix}$$
+
+        <h4>Column 2 (Revolute):</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=3" target="_blank">PDF p.3</a>
+        <p>From ${}^{0}_{2}T$: ${}^{0}\vec{P}_{0 \to 2} = \begin{Bmatrix} S_1 d_2 \\ -C_1 d_2 \\ 0 \end{Bmatrix}$</p>
+        $${}^{0}\hat{Z}_2 \times {}^{0}\vec{P}_{2 \to EE} = \begin{Bmatrix} (C_1 S_2 C_4 S_5 - C_2 C_1 C_5) h - C_1 C_2\, d_3 \\ (S_1 S_2 C_4 S_5 - S_1 C_2 C_5) h - S_1 C_2\, d_3 \\ (-C_2 C_4 S_5 - S_2 C_5) h - S_2\, d_3 \end{Bmatrix}$$
+
+        <h4>Column 3 (Prismatic):</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=4" target="_blank">PDF p.4</a>
+        $${}^{0}\hat{Z}_3 = \begin{Bmatrix} -C_1 S_2 \\ -S_1 S_2 \\ C_2 \end{Bmatrix}$$
+
+        <h4>Column 4 (Revolute):</h4>
+        <p>Since frames $\{3\}$ and $\{4\}$ are coincident: ${}^{0}\vec{P}_{4 \to EE} = {}^{0}\vec{P}_{W \to EE}$</p>
+        $${}^{0}\hat{Z}_4 \times {}^{0}\vec{P}_{W \to EE} = \begin{Bmatrix} (C_1 C_2 S_4 + S_1 C_4) S_5\, h \\ (S_1 C_2 S_4 - C_1 C_4) S_5\, h \\ S_2 S_4 S_5\, h \end{Bmatrix}$$
+
+        <h4>Column 5 (Revolute):</h4>
+        $${}^{0}\hat{Z}_5 \times {}^{0}\vec{P}_{5 \to EE} = \begin{Bmatrix} -((C_1 C_2 C_4 - S_1 S_4) C_5 - C_1 S_2 S_5) h \\ -((S_1 C_2 C_4 + C_1 S_4) C_5 - S_1 S_2 S_5) h \\ (-S_2 C_4 C_5 - C_2 S_5) h \end{Bmatrix}$$
+
+        <h4>Column 6 (Revolute):</h4>
+        $${}^{0}\hat{Z}_6 \times {}^{0}\vec{P}_{6 \to EE} = \begin{Bmatrix} 0 \\ 0 \\ 0 \end{Bmatrix}$$
+        <p>(Since $\hat{Z}_6$ is parallel to the vector from frame 6 to the end-effector)</p>
+
+        <p>The cross-product method yields the same Jacobian as the derivative method in Problem 5.1.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 5.3                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 5.3</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=5" target="_blank">PDF p.5</a>
+      <p><strong>Problem:</strong> Consider for the Stanford manipulator a Jacobian based on a point on the end-effector that is coincident with the wrist centre. What is ${}^{0}J_W$?</p>
+
+      <button class="solution-toggle" data-target="sol-tut5-3">Show Solution</button>
+      <div class="solution-content" id="sol-tut5-3">
+
+        <p>The wrist centre position:</p>
+        $${}^{0}\vec{P}_{0 \to W} = {}^{0}\vec{P}_{0 \to 3} = \begin{Bmatrix} -C_1 S_2\, d_3 \\ -S_1 S_2\, d_3 \\ C_2\, d_3 \end{Bmatrix}$$
+
+        <p>Finding $\frac{\partial {}^{0}\vec{P}_W}{\partial q_k}$ for $k = 1, 2, 3, 4, 5, 6$:</p>
+
+        $$\frac{\partial {}^{0}\vec{P}_W}{\partial \theta_1} = \begin{Bmatrix} S_1 S_2\, d_3 \\ -C_1 S_2\, d_3 \\ 0 \end{Bmatrix}, \quad \frac{\partial {}^{0}\vec{P}_W}{\partial \theta_2} = \begin{Bmatrix} -C_1 C_2\, d_3 \\ -S_1 C_2\, d_3 \\ -S_2\, d_3 \end{Bmatrix}$$
+
+        $$\frac{\partial {}^{0}\vec{P}_W}{\partial d_3} = \begin{Bmatrix} -C_1 S_2 \\ -S_1 S_2 \\ C_2 \end{Bmatrix}, \quad \frac{\partial {}^{0}\vec{P}_W}{\partial \theta_4} = \frac{\partial {}^{0}\vec{P}_W}{\partial \theta_5} = \frac{\partial {}^{0}\vec{P}_W}{\partial \theta_6} = \begin{Bmatrix} 0 \\ 0 \\ 0 \end{Bmatrix}$$
+
+        <h4>The Wrist-Centre Jacobian:</h4>
+        $$\left[{}^{0}J_W\right] = \begin{bmatrix} S_1 S_2 d_3 & -C_1 C_2 d_3 & -C_1 S_2 & 0 & 0 & 0 \\ -C_1 S_2 d_3 & -S_1 C_2 d_3 & -S_1 S_2 & 0 & 0 & 0 \\ 0 & -S_2 d_3 & C_2 & 0 & 0 & 0 \\ 0 & S_1 & 0 & C_1 C_2 S_4 + S_1 S_4 & \cdots & \cdots \\ 0 & -C_1 & 0 & S_1 C_2 S_4 - C_1 S_4 & \cdots & \cdots \\ 1 & 0 & 0 & S_2 S_4 & \cdots & \cdots \end{bmatrix}$$
+
+        <p>Note: The upper-right $3 \times 3$ block is all zeros because the wrist joint rotations ($\theta_4$, $\theta_5$, $\theta_6$) do not translate the wrist centre point.</p>
+
+        <h4>Velocity Transformation:</h4>
+        <p>To find ${}^{0}\vec{V}_{EE}$ from Slide 23:</p>
+        $${}^{0}\vec{V}_{EE} = \left[T_V\right] \cdot {}^{0}\vec{V}_W$$
+        <p>where:</p>
+        $$\left[T_V\right] = \begin{bmatrix} I_{3\times3} & -\left[{}^{0}\vec{P}_{EE \to W}\right]_\times \\ [0]_{3\times3} & I_{3\times3} \end{bmatrix}$$
+
+        $${}^{0}\vec{P}_{W \to EE} = \begin{Bmatrix} (C_1 C_2 C_4 - S_1 S_4) S_5 + C_1 S_2 C_5) h \\ (S_1 C_2 C_4 + C_1 S_4) S_5 + S_1 S_2 C_5) h \\ (S_2 C_4 S_5 - C_2 C_5) h \end{Bmatrix}$$
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 5.4                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 5.4</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=6" target="_blank">PDF p.6</a>
+      <p><strong>Problem:</strong> Find ${}^{3}J_W$ for the Stanford manipulator and determine the velocity transformation $T_{V_{W \to EE}}$.</p>
+
+      <button class="solution-toggle" data-target="sol-tut5-4">Show Solution</button>
+      <div class="solution-content" id="sol-tut5-4">
+
+        <p>From Slide 32, the Jacobian is formed as:</p>
+        $$\left[{}^{3}J_W\right] = \begin{bmatrix} {}^{3}\hat{Z}_1 \times {}^{3}\vec{P}_{1 \to W} & {}^{3}\hat{Z}_2 \times {}^{3}\vec{P}_{2 \to W} & {}^{3}\hat{Z}_3 & {}^{0}_{3\times1} & {}^{0}_{3\times1} & {}^{0}_{3\times1} \\ {}^{3}\hat{Z}_1 & {}^{3}\hat{Z}_2 & \vec{0} & {}^{3}\hat{Z}_4 & {}^{3}\hat{Z}_5 & {}^{3}\hat{Z}_6 \end{bmatrix}$$
+
+        <h4>Joint Directions in Frame $\{3\}$:</h4>
+        $${}^{3}\hat{Z}_3 = \begin{Bmatrix} 0 \\ 0 \\ 1 \end{Bmatrix}, \quad {}^{3}\hat{Z}_2 = \begin{Bmatrix} 0 \\ 1 \\ 0 \end{Bmatrix}, \quad {}^{3}\hat{Z}_1 = \begin{Bmatrix} S_2 \\ C_2 \\ 0 \end{Bmatrix}$$
+        $${}^{3}\hat{Z}_4 = \begin{Bmatrix} -S_4 \\ C_4 \\ 0 \end{Bmatrix}, \quad {}^{3}\hat{Z}_5 = \begin{Bmatrix} -C_4 S_5 \\ -S_4 S_5 \\ -C_5 \end{Bmatrix}$$
+
+        <h4>Position Vectors:</h4>
+        $${}^{3}\vec{P}_{1 \to W} = {}^{3}_{2}R \begin{Bmatrix} 0 \\ d_3 \\ 0 \end{Bmatrix} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{bmatrix} \begin{Bmatrix} 0 \\ d_3 \\ 0 \end{Bmatrix} = \begin{Bmatrix} 0 \\ 0 \\ d_3 \end{Bmatrix}$$
+
+        <p>Cross products:</p>
+        $${}^{3}\hat{Z}_1 \times {}^{3}\vec{P}_{1 \to W} = \begin{Bmatrix} S_2 \\ C_2 \\ 0 \end{Bmatrix} \times \begin{Bmatrix} 0 \\ 0 \\ d_3 \end{Bmatrix} = \begin{Bmatrix} C_2 d_3 \\ -S_2 d_3 \\ 0 \end{Bmatrix}$$
+
+        $${}^{3}\hat{Z}_2 \times {}^{3}\vec{P}_{2 \to W} = \begin{Bmatrix} 0 \\ 1 \\ 0 \end{Bmatrix} \times \begin{Bmatrix} 0 \\ 0 \\ d_3 \end{Bmatrix} = \begin{Bmatrix} d_3 \\ 0 \\ 0 \end{Bmatrix}$$
+
+        <h4>Final Jacobian:</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=7" target="_blank">PDF p.7</a>
+        $$\left[{}^{3}J_W\right] = \begin{bmatrix} 0 & -d_3 & 0 & 0 & 0 & 0 \\ -S_2 d_3 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & 0 & 0 & 0 \\ S_2 & 0 & 0 & 0 & S_4 & -C_4 S_5 \\ C_2 & -1 & 0 & 0 & -C_4 & -S_4 S_5 \\ 0 & 0 & 0 & 0 & 0 & C_5 \end{bmatrix}$$
+
+        <p>Therefore: ${}^{3}\vec{V}_W = \left[{}^{3}J_W\right] \dot{\vec{q}}$</p>
+
+        <h4>Velocity Transformation to Base Frame:</h4>
+        $${}^{0}\vec{V}_{EE} = \left[{}^{0}_{3}T_{V_{EE \to W}}\right] {}^{3}\vec{V}_W$$
+
+        $$\left[{}^{0}_{3}T_{EE \to W}\right] = \begin{bmatrix} {}^{0}_{3}R & [0]_{3\times3} \\ [0]_{3\times3} & {}^{0}_{3}R \end{bmatrix}, \quad \text{where } {}^{0}_{3}R = \begin{bmatrix} C_1 C_2 & -S_1 & -C_1 S_2 \\ S_1 C_2 & C_1 & -S_1 S_2 \\ S_2 & 0 & C_2 \end{bmatrix}$$
+
+        $${}^{0}\vec{P}_{EE \to W} = \begin{Bmatrix} ((C_1 C_2 C_4 - S_1 S_4) S_5 + C_1 S_2 C_5) h \\ ((S_1 C_2 C_4 + C_1 S_4) S_5 + S_1 S_2 C_5) h \\ (S_2 C_4 S_5 - C_2 C_5) h \end{Bmatrix}$$
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 5.5                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 5.5</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=8" target="_blank">PDF p.8</a>
+      <p><strong>Problem:</strong> Solve the inverse velocity problem of the Stanford manipulator.</p>
+
+      <button class="solution-toggle" data-target="sol-tut5-5">Show Solution</button>
+      <div class="solution-content" id="sol-tut5-5">
+
+        <p>From Problem 5.4, split $\left[{}^{3}J_W\right]$ into sub-matrices (Slide #33):</p>
+        $$\left[{}^{3}J_W\right] = \begin{bmatrix} [A] & [B] \\ [C] & [D] \end{bmatrix}$$
+
+        <p>where:</p>
+        $$[A] = \begin{bmatrix} 0 & -d_3 & 0 \\ -S_2 d_3 & 0 & 0 \\ 0 & 0 & 1 \end{bmatrix}, \quad [B] = \begin{bmatrix} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{bmatrix} = [0]$$
+
+        $$[C] = \begin{bmatrix} S_2 & 0 & 0 \\ C_2 & -1 & 0 \\ 0 & 0 & 0 \end{bmatrix}, \quad [D] = \begin{bmatrix} 0 & S_4 & -C_4 S_5 \\ 0 & -C_4 & -S_4 S_5 \\ 0 & 0 & C_5 \end{bmatrix}$$
+
+        <h4>Computing the Inverses:</h4>
+        $$[A]^{-1} = \begin{bmatrix} 0 & -\frac{1}{S_2 d_3} & 0 \\ -\frac{1}{d_3} & 0 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+        <p>(Since $|A| = S_2 d_3^2$)</p>
+
+        $$\left[{}^{3}J_W\right]^{-1} = \begin{bmatrix} [A^{-1}] & [0]_{3\times3} \\ -[C][B][A^{-1}] & [C^{-1}] \end{bmatrix}$$
+
+        <h4>Velocity Degeneracies:</h4>
+        <div class="callout callout-warning">
+          <div class="callout-label">Warning</div>
+          <p>The inversion of $\left[{}^{3}J_W\right]$ is not possible if the matrix is singular. This is known as <strong>velocity degeneracy</strong>.</p>
+          $$|{}^{0}J_W| = |A| \cdot |C| = S_2\, d_3^2\, S_5 = 0$$
+          <p>The velocity degeneracies for the Stanford mechanism are:</p>
+          <ol>
+            <li>$S_2 = 0$ (i.e., $\theta_2 = 0°$ or $180°$)</li>
+            <li>$d_3 = 0$ (prismatic joint fully retracted)</li>
+            <li>$S_5 = 0$ (i.e., $\theta_5 = 0°$ or $180°$)</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 5.6                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 5.6</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 5 (Solutions).pdf#page=9" target="_blank">PDF p.9</a>
+      <p><strong>Problem:</strong> Solve the inverse force problem of the Stanford manipulator. Find $\vec{\tau}$ for known forces and moments ${}^{0}\vec{F}_{EE}$ applied on the tip of the end-effector. What are the required joint torques/forces to sustain ${}^{0}\vec{F}_{EE}$?</p>
+
+      <button class="solution-toggle" data-target="sol-tut5-6">Show Solution</button>
+      <div class="solution-content" id="sol-tut5-6">
+
+        <p>From Slide #38:</p>
+        $$\vec{\tau} = \left[{}^{0}J\right]^T_{EE} \cdot {}^{0}\vec{F}_{EE} = \left[{}^{0}J\right]^T \cdot {}^{0}\vec{F}_{W} = \left[{}^{3}J_W\right]^T \cdot {}^{3}\vec{F}_W$$
+
+        <p>Given that the end-effector is a rigid object, we can use any point on it (e.g., wrist), and any frame (e.g., $\{3\}$). We just have to transform ${}^{0}\vec{F}_{EE}$ to the desired frame.</p>
+
+        <p>Let ${}^{3}\vec{F}_W$ be known:</p>
+        $$\vec{\tau} = \left[{}^{3}J_W\right]^T {}^{3}\vec{F}_W$$
+
+        $$\vec{\tau} = \begin{bmatrix} 0 & -S_2 d_3 & 0 & S_2 & C_2 & 0 \\ -d_3 & 0 & 0 & 0 & -1 & 0 \\ 0 & 0 & 1 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & S_4 & -C_4 & 0 \\ 0 & 0 & 0 & -C_4 S_5 & -S_4 S_5 & C_5 \end{bmatrix} \begin{Bmatrix} {}^{3}f_x \\ {}^{3}f_y \\ {}^{3}f_z \\ {}^{3}m_x \\ {}^{3}m_y \\ {}^{3}m_z \end{Bmatrix}$$
+
+        <h4>Individual Joint Torques/Forces:</h4>
+        $$\tau_1 = -S_2\, d_3\, ({}^{3}f_y) + S_2\, ({}^{3}m_x) + C_2\, ({}^{3}m_y)$$
+        $$\tau_2 = -d_3\, ({}^{3}f_x) - ({}^{3}m_y)$$
+        $$f_3 = ({}^{3}f_z)$$
+        $$\tau_4 = 0$$
+        $$\tau_5 = S_4\, ({}^{3}m_x) - C_4\, ({}^{3}m_y)$$
+        $$\tau_6 = -C_4 S_5\, ({}^{3}m_x) - S_4 S_5\, ({}^{3}m_y) + C_5\, ({}^{3}m_z)$$
+
+        <p>Note: $\tau_4 = 0$ because the fourth joint axis passes through the wrist centre, so forces/moments at the wrist do not create a torque about joint 4.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED CHAPTERS                                              -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Chapter</h3>
+      <p>This tutorial covers material from <a href="MSE492_Chapter_5.html">Chapter 5: Jacobians, Velocities &amp; Static Forces</a>.</p>
+    </div>
+
+    <nav class="page-nav"></nav>
+  </main>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

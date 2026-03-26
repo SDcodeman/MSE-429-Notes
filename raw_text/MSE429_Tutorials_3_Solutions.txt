@@ -1,0 +1,48 @@
+Problem 1: Drive the inverse kinematics of the three‐
+link manipulator shown. Consider that the desired
+orientation of the last link is known.
+
+
+
+
+                                            Page 1
+Problem 2: A 4R manipulator is shown
+below. The nonzero link parameters are
+                           ⎯⎯            ⎯⎯
+𝑎     1, 𝛼    45 , 𝑑      √2, and 𝑎    √2,
+and the mechnism is pictured in the
+configuration corresponding to Θ
+ 0, 90 , 90 , 0 . Each joint has 180
+as limits. Find all values of 𝜃 such that
+
+ 𝑃        1.1, 1.5, 1.707
+
+
+
+
+                                              Page 2
+Problem 3: Solve the forward kinematics of the Stanford manipulator, which has a R⊥R⊥P∥(R⊥R⊥R)sph layout.
+
+
+
+
+                                          Problem 3 Page 1
+Problem 4: Solve the inverse kinematics of the Stanford manipulator, which has a R⊥R⊥P∥(R⊥R⊥R)sph layout.
+
+
+
+
+                                          Page 3
+Problem 4 ‐ cont.:
+
+
+
+
+                     Page 4
+Problem 4 ‐ cont.2:
+
+
+
+
+                      Page 5
+

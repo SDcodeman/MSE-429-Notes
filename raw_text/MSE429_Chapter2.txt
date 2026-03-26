@@ -1,0 +1,530 @@
+              Chapter 2
+
+
+Spatial Descriptions and
+    Transformation
+
+
+  MSE 429 – Advanced Kinematics for Robotics System   Ch2 - 1
+        Overview
+
+This chapter covers the following topics:
+
+• Descriptions of positions vectors and orientations
+• Definition of frames and mapping
+• Definition of operators for translations, rotations, and transformations.
+• Summary of interpretations
+• Transform equations
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System          Ch2 - 2
+        2.2 Description of a Position
+
+With respect to a reference frame, any point can be described by a 3   1
+position vector.
+
+
+
+
+      𝑝
+ 𝑃    𝑝
+      𝑝
+
+
+
+
+The leading superscript indicates the coordinate system to which the vector is
+referenced to.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System              Ch2 - 3
+       2.2 Description of an Orientation
+
+Rotation matrices are used to describe the projects of the moving frame onto
+the axes of the fixed frame.
+
+Consider 𝐴 be the fixed reference frame and 𝐵 be the moving frame with unit
+vectors 𝑋 , 𝑌 , and 𝑍 . Let the unit vectors of frame 𝐵 projected on 𝐴
+become 𝑋 , 𝑌 , and 𝑍 .
+
+The relative orientation of 𝐵
+with respect to 𝐴 is defined
+by a 3 3 orthogonal matrix as
+
+
+
+
+                            𝑟     𝑟    𝑟
+ 𝑅     𝑋      𝑌     𝑍       𝑟     𝑟    𝑟
+                            𝑟     𝑟    𝑟
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System        Ch2 - 4
+       2.2 Description of an Orientation – Direct Cosine Representation
+
+The projection of each axis of moving frame 𝐵 onto the axes of the fixed frame
+ 𝐴 can be represented by direction cosines.
+For example, axis yB projected onto the axes 𝑋 , 𝑌 , and 𝑍 requires knowing the
+angles αy, βy, and γy.
+
+                  𝑣x       cos αy
+            𝑌     𝑣y       cos 𝛽y
+                  𝑣z                                                𝑍    𝐴
+                           cos γy
+                                                          𝐵
+Since all the axes are unit vectors, the              𝑧
+dot product definition reduces to                                   𝑣             𝑦
+                                                                        γy
+                                                                                       βy 𝑣      𝑌
+                     XA X𝐵                                      𝑣
+       cos α𝑦                   XA 𝑌 𝐵                                       αy
+                     XA    𝑌𝐵
+where XA        𝑌𝐵        1.                      𝑋
+                                                                    𝑥
+
+
+                                                              Credit: Dr. F. Firmani
+
+                  MSE 429 – Advanced Kinematics for Robotics System                           Ch2 - 5
+        2.2 Description of an Orientation – Direct Cosine Representation
+
+
+Therefore, the rotation matrix
+                                                     𝑢𝑥   vx   wx
+                      𝑅           𝑋     𝑌    𝑍       u𝑦   vy   wy
+                                                     uz   v𝑧   w𝑧
+
+can be defined in terms of direction cosines as
+
+
+                                  𝑐𝑜𝑠 αx    𝑐𝑜𝑠 αy   𝑐𝑜𝑠 αz
+                          𝑅       𝑐𝑜𝑠 𝛽x    𝑐𝑜𝑠 𝛽y   𝑐𝑜𝑠 𝛽z
+                                  𝑐𝑜𝑠 γx    𝑐𝑜𝑠 γ𝑦   𝑐𝑜𝑠 γz
+
+or in terms of dot products
+
+
+                                      XA XB XA YB XA ZB
+                              𝑅       YA XB YA YB YA ZB
+                                      ZA XB ZA YB ZA ZB
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System        Ch2 - 6
+         2.2 Description of an Orientation
+
+Note: the description of frame 𝐴 relative to 𝐵 is given by the transpose of 𝑅,
+that is
+
+                                        𝑅       𝑅
+
+Note:
+                             𝑋                           1   0   0
+                𝑅    𝑅       𝑌      𝑋       𝑌       𝑍    0   1   0      𝐼
+                             𝑍                           0   0   1
+
+Hence,
+
+                                    𝑅       𝑅       𝑅
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System       Ch2 - 7
+        2.2 Description of a Frame
+
+Frame is a set of four vectors giving position and orientation information. This
+description can be thought of as a position vector and a rotation matrix.
+
+
+
+
+For example, frame 𝐵 is described by 𝑅 and 𝑃             , where 𝑃    is the
+vector that locates the origin of the frame 𝑃 .
+
+                                𝐵       𝑅,    𝑃
+
+                  MSE 429 – Advanced Kinematics for Robotics System            Ch2 - 8
+        2.3 Mapping
+
+Mapping is used in robotics to change the descriptions of quantities in terms of
+various reference coordinate systems, form frame to frame.
+
+Types of mapping:
+• Translational mapping
+• Rotational mapping
+• General mapping
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System           Ch2 - 9
+        2.3 Mapping – Translational
+
+Consider the position defined by the vector 𝑃 as shown. Let us express it in
+space in terms of frame 𝐴 , that is 𝑃 . Note that 𝐴 and 𝐵 have the same
+orientation. Given that vector 𝑃      locates the origin of 𝐵 with respect to
+ 𝐴 , we have
+
+                                 𝑃      𝑃     𝑃
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System         Ch2 - 10
+       2.3 Mapping – Rotational
+
+Let the two frames 𝐴 and 𝐵 share the same origin, but with different
+orientation. Rotation matrix 𝑅 describes 𝐵 relative to 𝐴 .
+
+
+
+
+It can be shown that any point expressed in 𝐵 can be expressed in 𝐴 using
+the rotational mapping:
+
+                                    𝑃     𝑅 𝑃
+                 MSE 429 – Advanced Kinematics for Robotics System      Ch2 - 11
+        2.3 Mapping – General Mapping
+
+General mapping involves both rotation and translation. Let the two frames 𝐴
+and 𝐵 have different origins and different orientation.
+
+
+
+
+The general transformation mapping of a vector from its description in one frame
+to a description in a second frame is
+
+                                𝑃     𝑅 𝑃       𝑃
+                  MSE 429 – Advanced Kinematics for Robotics System         Ch2 - 12
+        2.3 Mapping – General Mapping
+
+Homogeneous Transform - It is desirable to expressed the general mapping
+as an operator in matrix form via transformation matrix 𝑇.
+
+                                      𝑃     𝑇 𝑃
+
+Combining both position vector and rotation matrices into one operator:
+
+                           𝑃          𝑅        𝑃         𝑃
+                          1       0   0 0       1       1
+
+In which
+• a “1” is added s the last element of the 4 1 vector
+• a row “ 0 0 0 1 “ is added as the last row of the 4 4 matrix.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System       Ch2 - 13
+        2.4 Mapping with Homogeneous Transforms
+
+Homogeneous transforms can be used for mapping:
+
+i.   Translation mapping ( 𝑅        𝐼 )
+
+                           𝑃           𝐼              𝑃          𝑃
+                          1          0 0      0        1        1
+
+ii. Rotational mapping ( 𝑃                000     )
+
+                                                       0
+                                𝑃             𝑅        0    𝑃
+                               1                       0   1
+                                          0   0   0    1
+
+iii. General mapping
+
+                           𝑃              𝑅           𝑃          𝑃
+                          1          0    0 0          1        1
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System   Ch2 - 14
+        2.6 Transformation Arithmetic
+
+Homogeneous transforms have the following properties:
+
+i.   Compound Transformations
+
+                                                           𝑅     𝑃
+                 𝑇    𝑇 𝑇 𝑇⋯         𝑇     𝑇
+                                                   0       0 0    1
+     where 𝑅    𝑅 𝑅…        𝑅
+
+
+ii. Inversion of a Homogeneous Transform
+
+                                  𝑅            𝑅       𝑃
+                      𝑇                                          𝑇
+                                0 0 0              1
+     where
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System   Ch2 - 15
+       2.7 Transform Equations
+
+Frame 𝐷 can be expressed as products of transformations in two different ways.
+
+
+
+
+                             𝑇     𝑇 𝑇        𝑇 𝑇 𝑇
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System        Ch2 - 16
+          2.8 More on Representation of Orientation – Cayley’s Formula
+
+Although a rotation matrix is composed of 9 elements, there are some properties
+that have to be satisfied, namely orthogonality and unit magnitude, that yield to
+6 independent constraints;
+
+
+           𝑋         1              𝑋       𝑌     0         𝑋         𝑌        𝑍
+            𝑌        1              𝑌       𝑍     0         𝑌         𝑍        𝑋
+           𝑍         1              𝑍       𝑋     0         𝑍         𝑋        𝑌
+ Unit magnitude (3)                             Orthogonality (3)
+Thus, a rotation matrix can be represented by only three parameters. Cayley
+showed that any rotation matrix can be represented with a skew-symmetric
+matrix 𝑆 (𝑆     𝑆 ),
+
+                                                           0      𝑠       𝑠
+𝑅     𝐼     𝑆    𝐼       𝑆          where             𝑆    𝑠     0         𝑠
+                                                            𝑠    𝑠        0
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System             Ch2 - 17
+        2.8 Orientation - Fixed Angles 𝑋    𝑌    𝑍
+
+Let 𝐴 be the fixed frame and 𝐵 the moving frame. Let them be coincident as
+well.
+“First rotate 𝐵 about 𝑋 by an angle 𝛾, then rotate 𝐵 about 𝑌 by an angle 𝛽,
+and then rotate 𝐵 about 𝑍 by an angle 𝛼.”
+
+
+Fixed angles are also referred to as roll, pitch, and yaw angles.
+
+
+
+
+Rotations are performed in the order 𝑅 𝛾 , 𝑅 𝛽 , 𝑅 𝛼 .
+
+                  MSE 429 – Advanced Kinematics for Robotics System    Ch2 - 18
+          2.8 Orientation - Fixed Angles 𝑋            𝑌      𝑍
+
+Forward problem: With the fixed angle representation, the rotation matrices
+are pre-multiplied.
+                                                𝑐𝛼      𝑠𝛼       0       𝑐𝛽    0   𝑠𝛽   1        0       0
+ 𝑅       𝛾, 𝛽, 𝛼       𝑅 𝛼 𝑅 𝛽 𝑅 𝛾              𝑠𝛼     𝑐𝛼        0        0    1    0   0       𝑐𝛾        𝑠𝛾
+                                                 0      0        1        𝑠𝛽   0   𝑐𝛽   0       𝑠𝛾       𝑐𝛾
+                           𝑐𝛼𝑐𝛽       𝑐𝛼𝑠𝛽𝑠𝛾 𝑠𝛼𝑐𝛾         𝑐𝛼𝑠𝛽𝑐𝛾 𝑠𝛼𝑠𝛾               𝑟       𝑟        𝑟
+     𝑅       𝛾, 𝛽, 𝛼       𝑠𝛼𝑐𝛽       𝑠𝛼𝑠𝛽𝑠𝛾 𝑐𝛼𝑐𝛾         𝑠𝛼𝑠𝛽𝑐𝛾 𝑐𝛼𝑠𝛾               𝑟       𝑟        𝑟
+                             𝑠𝛽           𝑐𝛽𝑠𝛾                𝑐𝛽𝑐𝛾                  𝑟       𝑟        𝑟
+
+
+Inverse problem: Extracting 𝑋 𝑌 𝑍 angles from the rotation matrix is of
+interest. Let the rotation matrix be known.
+
+
+                                  𝛽     Atan2        𝑟 , 𝑟           𝑟
+
+                                  𝛼     Atan2 𝑟 /𝑐𝛽, 𝑟 /𝑐𝛽
+                                  𝛾     Atan2 𝑟 /𝑐𝛽, 𝑟 /𝑐𝛽
+
+
+                        MSE 429 – Advanced Kinematics for Robotics System                                Ch2 - 19
+         2.8 Orientation - Fixed Angles 𝑋      𝑌   𝑍
+
+Note: If 𝛽     90 (so that 𝑐𝛽 0), the solution of 𝛼 and 𝛾 degenerates. In this
+case, only the sum or the difference of 𝛼 and 𝛾 can be computed.
+
+
+Convention:
+• If 𝛽    90 , then a solution can be calculated to be:
+                                       𝛽      90
+                                          𝛼   0
+                                 𝛾    Atan2 𝑟 , 𝑟
+
+
+• If 𝛽     90 , then a solution can be calculated to be:
+                                      𝛽       90
+                                          𝛼   0
+                                𝛾      Atan2 𝑟 , 𝑟
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System        Ch2 - 20
+       2.8 Orientation - Euler Angles Z    𝑌   X
+
+Let 𝐴 be the fixed frame and 𝐵 the moving frame. Let them be coincident.
+“First rotate 𝐵 about 𝑍 by an angle 𝛼, then rotate 𝐵 about the rotated 𝑌′
+by an angle 𝛽, and then rotate 𝐵 about the twice-rotated 𝑋′′ by an angle 𝛾.”
+
+
+
+
+A rotation matrix parametrized by Euler angles is indicated by: 𝑅     𝛼, 𝛽, 𝛾 .
+         Alternative notation: 𝑅      𝛼, 𝛽, 𝛾     𝑅       𝛼, 𝛽, 𝛾
+
+                 MSE 429 – Advanced Kinematics for Robotics System         Ch2 - 21
+       2.8 Orientation - Euler Angles Z            𝑌      X
+
+Forward problem: With the Euler angle representation, the rotation matrices
+are post-multiplied.
+                     𝑅        𝛼, 𝛽, 𝛾    𝑅 𝛼 𝑅            𝛽 𝑅         𝛾
+                                             𝑐𝛼      𝑠𝛼       0       𝑐𝛽    0   𝑠𝛽       1    0   0
+                                             𝑠𝛼     𝑐𝛼        0        0    1    0       0   𝑐𝛾    𝑠𝛾
+                                              0      0        1        𝑠𝛽   0   𝑐𝛽       0   𝑠𝛾   𝑐𝛾
+                         𝑐𝛼𝑐𝛽       𝑐𝛼𝑠𝛽𝑠𝛾 𝑠𝛼𝑐𝛾        𝑐𝛼𝑠𝛽𝑐𝛾 𝑠𝛼𝑠𝛾                   𝑟       𝑟    𝑟
+   𝑅       𝛼, 𝛽, 𝛾       𝑠𝛼𝑐𝛽       𝑠𝛼𝑠𝛽𝑠𝛾 𝑐𝛼𝑐𝛾        𝑠𝛼𝑠𝛽𝑐𝛾 𝑐𝛼𝑠𝛾                   𝑟       𝑟    𝑟
+                           𝑠𝛽           𝑐𝛽𝑠𝛾               𝑐𝛽𝑐𝛾                      𝑟       𝑟    𝑟
+
+
+Inverse problem: Note that the matrix is exactly the same one as the one
+obtained for the 𝑋 𝑌 𝑍 fixed angles, but the rotations were taken in opposite
+order. The equations that solve 𝛼, 𝛽, and 𝛾 are therefore the same, that is
+
+                              𝛽      Atan2        𝑟 , 𝑟           𝑟
+
+                                𝛼     Atan2 𝑟 /𝑐𝛽, 𝑟 /𝑐𝛽
+                                𝛾     Atan2 𝑟 /𝑐𝛽, 𝑟 /𝑐𝛽
+
+                     MSE 429 – Advanced Kinematics for Robotics System                                Ch2 - 22
+       2.8 Orientation - Euler Angles Z    𝑌        Z
+
+“First rotate 𝐵 about 𝑍 by an angle 𝛼, then rotate 𝐵 about the rotated 𝑌′
+by an angle 𝛽, and then rotate 𝐵 about the twice-rotated 𝑍′′ by an angle 𝛾.”
+
+
+Forward problem: With the Euler angle representation, the rotation matrices
+are post-multiplied.
+                   𝑅      𝛼, 𝛽, 𝛾   𝑅 𝛼 𝑅           𝛽 𝑅        𝛾
+                                     𝑐𝛼        𝑠𝛼       0   𝑐𝛽     0   𝑠𝛽   𝑐𝛾    𝑠𝛾   0
+                                     𝑠𝛼       𝑐𝛼        0    0     1    0   𝑠𝛾   𝑐𝛾    0
+                                      0        0        1    𝑠𝛽    0   𝑐𝛽   0     0    1
+            𝑐𝛼𝑐𝛽𝑐𝛾 𝑠𝛼𝑠𝛾        𝑐𝛼𝑐𝛽𝑠𝛾 𝑠𝛼𝑐𝛾              𝑐𝛼𝑠𝛽       𝑟   𝑟     𝑟
+            𝑠𝛼𝑐𝛽𝑐𝛾 𝑐𝛼𝑠𝛾        𝑠𝛼𝑐𝛽𝑠𝛾 𝑐𝛼𝑐𝛾              𝑠𝛼𝑠𝛽       𝑟   𝑟     𝑟
+                 𝑠𝛽𝑐𝛾             𝑠𝛽𝑠𝛾                   𝑐𝛽        𝑟   𝑟     𝑟
+Inverse problem:
+
+                           𝛽    Atan2     𝑟         𝑟 ,𝑟
+
+                           𝛼    Atan2 𝑟 /𝑠𝛽, 𝑟 /𝑠𝛽
+                          𝛾    Atan2 𝑟 /𝑠𝛽, 𝑟 /𝑠𝛽
+                 MSE 429 – Advanced Kinematics for Robotics System                     Ch2 - 23
+         2.8 Orientation - Euler Angles Z    𝑌     Z
+
+Note: If 𝛽 0 or 180 (so that 𝑐𝛽          1), the solution of 𝛼 and 𝛾 degenerates. In
+this case, only the sum or the difference of 𝛼 and 𝛾 can be computed.
+
+
+Convention:
+• If 𝛽    0 , then a solution can be calculated to be:
+                                        𝛽    0
+                                        𝛼    0
+                                𝛾    Atan2       𝑟 ,𝑟
+
+
+• If 𝛽    180 , then a solution can be calculated to be:
+                                      𝛽     180
+                                        𝛼    0
+                                𝛾     Atan2 𝑟 , 𝑟
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System           Ch2 - 24
+        2.8 Equivalent Angle - Axis Representation
+
+Let 𝐴 be the fixed frame and 𝐵 the moving frame. Let them be coincident. If
+the axis of rotation is a general direction (rather than one of the unit directions
+that we have seen in previous cases), any orientation may be obtained.
+“First rotate 𝐵 about vector    𝐾 by an angle 𝜃 according to the right-hand rule.”
+
+
+
+
+A general orientation of 𝐵 relative to 𝐴 can be written as 𝑅 𝐾 , 𝜃 or 𝑅 𝜃 .
+                  MSE 429 – Advanced Kinematics for Robotics System             Ch2 - 25
+        2.8 Equivalent Angle - Axis Representation
+
+Forward problem: for a general rotation, the equivalent rotation matrix is
+             𝑘 𝑘 𝑣𝜃 𝑐𝜃        𝑘 𝑘 𝑣𝜃 𝑘 𝑠𝜃                   𝑘 𝑘 𝑣𝜃 𝑘 𝑠𝜃        𝑟   𝑟   𝑟
+  𝑅 𝜃       𝑘 𝑘 𝑣𝜃 𝑘 𝑠𝜃        𝑘 𝑘 𝑣𝜃 𝑐𝜃                    𝑘 𝑘 𝑣𝜃 𝑘 𝑠𝜃        𝑟   𝑟   𝑟
+            𝑘 𝑘 𝑣𝜃 𝑘 𝑠𝜃       𝑘 𝑘 𝑣𝜃 𝑘 𝑠𝜃                    𝑘 𝑘 𝑣𝜃 𝑐𝜃         𝑟   𝑟   𝑟
+where
+                    𝑣𝜃   1    cos 𝜃       and           𝐾            𝑘 ,𝑘 ,𝑘
+Note: the sign of 𝜃 is determined by the right-hand rule, with the thumb pointing
+along the positive sense of 𝐾 .
+
+
+Inverse problem: for a known rotation matrix, the values of the angle and axis
+are:
+                                      𝑟         𝑟            𝑟        1
+                          𝜃    acos
+                                                        2
+and
+                                                    𝑟            𝑟
+                                       1
+                              𝐾                     𝑟            𝑟
+                                   2 sin 𝜃          𝑟            𝑟
+                  MSE 429 – Advanced Kinematics for Robotics System                        Ch2 - 26
+         2.8 Euler Parameters
+
+Forward problem: Based on the equivalent angle-axis representation 𝐾
+𝑘 ,𝑘 ,𝑘     , the Euler parameters are given by
+                𝜃                      𝜃                   𝜃                           𝜃
+    ϵ     𝑘 sin   ,         𝜖    𝑘 sin   ,      𝜖    𝑘 sin   ,             𝜖       cos
+                2                      2                   2                           2
+With the following constraint;
+                              𝜖   𝜖   𝜖    𝜖    1
+The Euler parameters are also known as the unit quaternion. The rotation
+matrix is defined as:
+           1 2𝜖        2𝜖       2 𝜖 𝜖   𝜖 𝜖    2 𝜖 𝜖     𝜖 𝜖           𝑟       𝑟     𝑟
+     𝑅     2 𝜖 𝜖      𝜖 𝜖       1 2𝜖     2𝜖    2 𝜖 𝜖     𝜖 𝜖           𝑟       𝑟     𝑟
+           2 𝜖 𝜖      𝜖 𝜖       2 𝜖 𝜖   𝜖 𝜖    1 2𝜖       2𝜖           𝑟       𝑟     𝑟
+
+
+Inverse problem: For a known rotation matrix, the values of the angle and axis
+are:
+          𝑟    𝑟       𝑟    𝑟       𝑟     𝑟        1
+     𝜖           ,𝜖           ,𝜖             ,𝜖       1 𝑟        𝑟    𝑟
+            4𝜖           4𝜖            4𝜖          2
+
+                   MSE 429 – Advanced Kinematics for Robotics System                       Ch2 - 27
+        2.9 Transformation of Free Vectors
+
+Velocity and force vectors transform differently
+than the position vectors.
+
+
+Note: In mechanics, two vectors are equal if
+they have the same dimensions, magnitude,
+and direction. Equal vector could have different
+line of actions.
+
+Line vector refers to a vector that is dependent on its line of action, along with
+direction and magnitude. Example: Force is a line vector.
+
+
+Free vector refers to a vector that may be positions anywhere in space without
+loss or change of meaning, provided that magnitude and direction are preserved.
+Example: a pure moment vector is a free vector.
+
+
+Velocity vector written in 𝐵 ,   𝑉 , is written in 𝐴 as:    𝑉     𝑅 𝑉
+Moment vector written in 𝐵 ,     𝑁, is written in 𝐴 as:     𝑁         𝑅 𝑁
+
+                  MSE 429 – Advanced Kinematics for Robotics System           Ch2 - 28
+MSE 429 – Advanced Kinematics for Robotics System   Ch2 - 29
+

@@ -1,0 +1,42 @@
+Problem 1: Determine the absolute velocity of the end‐effector (P).
+
+
+
+
+                                            Page 1
+Problem 2: Determine the absolute velocity of the end‐effector (P). Let the radius of the
+disc be 𝑟.
+
+
+
+
+                                            Page 2
+Problem 3: Determine the absolute velocity of the end‐effector (P).
+
+
+
+
+                                            Page 3
+Problem 4: Determine the velocity of the end‐effector's tip of the three revolute‐jointed planar manipulator
+shown.
+
+Velocity propagation ‐ Revolute joints (slides 14 & 15)
+
+   𝝎          𝑹 𝝎      𝜃       𝑍
+   𝒗          𝑹 𝒗       𝝎      𝑷
+
+
+
+
+                                             Page 4
+Page 5
+Problem 5: For the arm with 3‐DOF shown, there is a twist of 90 degrees in magnitude between axes 1 and
+axes 2. Let 𝐿 be the length of the end‐effector.
+  a) Drive link parameters and the kinematics for 𝑇.
+  b) Solve for velocity propagation.
+
+
+
+
+                                        New Section 5 Page 1
+

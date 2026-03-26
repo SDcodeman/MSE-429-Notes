@@ -1,0 +1,766 @@
+            Chapter 6
+
+
+Manipulator Dynamics
+
+
+
+MSE 429 – Advanced Kinematics for Robotics System   Ch6 - 1
+         Overview
+
+In this chapter the dynamics of serial manipulators will be introduced following two
+formulations:
+•   Introduction to Inverse and Forwards Dynamic Problems
+•   Mass Distribution and Inertia Properties
+•   Acceleration of a Rigid Body
+•   Dynamic Formulations
+     -   Newton-Euler Formulation
+     -   Lagrange Formulation
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                  Ch6 - 2
+        Inverse and Forward Dynamic Problems
+
+In this chapter, we consider the forces/torques that are required to cause motion.
+The general dynamic equation of articulated bodies is given by
+                              𝑸𝑸 = 𝑴𝑴 𝚯𝚯 𝚯𝚯̈ + 𝑽𝑽 𝚯𝚯, 𝚯𝚯̇ + 𝑮𝑮(𝚯𝚯)
+where
+         𝑴𝑴 𝚯𝚯 is the mass matrix, a function of the joint displacement, 𝚯𝚯,
+         𝚯𝚯̈ is the vector of joint accelerations,
+         𝑽𝑽 𝚯𝚯, 𝚯𝚯̇ is the velocity coupling vector, a function of 𝚯𝚯 and 𝚯𝚯,̇ (centrifugal
+         and Coriolis terms)
+         𝑮𝑮(𝚯𝚯) is the gravitational vector, a function of 𝚯𝚯, and
+         𝑸𝑸 = 𝝉𝝉 − 𝑱𝑱T 𝑭𝑭 − 𝒇𝒇𝒓𝒓 is the generalized force vector, which includes:
+                   actuator’s torque/force vector,
+                   external forces and friction.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                          Ch6 - 3
+        Inverse and Forward Dynamic Problems – The State-space Equation
+
+Let us consider that there are no external forces or friction.
+                              𝝉𝝉 = 𝑴𝑴 𝚯𝚯 𝚯𝚯̈ + 𝑽𝑽 𝚯𝚯, 𝚯𝚯̇ + 𝑮𝑮(𝚯𝚯)                   (1)
+
+
+Similar to all the Kinematic Problems, the dynamic problem of manipulators is divided
+into Inverse and Forward Dynamics.
+
+
+                                                                          ̇ and joint
+Inverse Dynamics – Given a set of joint displacements (𝚯𝚯), joint rates (𝚯𝚯)
+                     ̈ determine the required joint torques/forces (𝝉𝝉) that are required
+     accelerations (𝚯𝚯),
+     through the actuators to produce such motion. Eq. (1) is a linear equation.
+
+
+Forward Dynamics – Given a set of joint torques/forces (𝝉𝝉), determine the motion of the
+    manipulator (𝚯𝚯, 𝚯𝚯,̇ 𝚯𝚯).
+                           ̈ Eq. (1) is a differential equation.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                Ch6 - 4
+        Inverse and Forward Dynamic Problems – The State-space Equation
+
+The high-level block diagram of the manipulator is shown below
+
+
+
+
+Inverse Kinematics is used for controlling the manipulator, i.e., the torque is controlled
+          to provide a desired motion.
+                     𝝉𝝉 = 𝑴𝑴 𝚯𝚯𝒅𝒅 𝚯𝚯̈ 𝒅𝒅 + 𝑽𝑽 𝚯𝚯𝒅𝒅 , 𝚯𝚯̇ 𝑑𝑑 + 𝑮𝑮(𝚯𝚯𝒅𝒅 )
+
+
+Forward Kinematics is used for simulating the motion of the manipulator. Simulation
+         replaces the Robot block.
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                   Ch6 - 5
+        Mass Distribution
+
+Dynamics requires the mass and the inertia properties of the link.
+
+Mass – The mass is a measure of the resistance of a body to linear acceleration.
+         Similarly, if a force acts on a body, the body will accelerate. The ratio between
+         the force and the resulting acceleration is the inertia (or mass) of the body.
+                                        𝑭𝑭 = 𝑚𝑚𝑚𝑚
+
+Rotational Inertia – Rotational inertia is a measure of the resistance of a body to angular
+         acceleration. Similarly, if a torque acts on a body, the body will undergo an
+         angular acceleration. The ratio between the torque and the angular
+         acceleration is the rotational inertia of the body, which depends on its mass
+         and its distribution about the axis of rotation.
+
+                                   𝑴𝑴 = 𝑰𝑰𝑰𝑰 + 𝝎𝝎 × 𝑰𝑰𝑰𝑰
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                  Ch6 - 6
+       Mass Distribution
+
+Inertia properties of common shapes can be found in the covers of many textbooks.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System                 Ch6 - 7
+         Mass Distribution
+
+The previous bodies have zero products of inertia (𝐼𝐼𝑥𝑥𝑥𝑥 , 𝐼𝐼𝑥𝑥𝑥𝑥 , 𝐼𝐼𝑦𝑦𝑦𝑦 ), because the bodies are
+described with respect to axes that form planes of symmetry (principal axes). Thus, only
+moments of inertia (𝐼𝐼𝑥𝑥𝑥𝑥 , 𝐼𝐼𝑦𝑦𝑦𝑦 , 𝐼𝐼𝑧𝑧𝑧𝑧 ), are non-zero.
+
+All the inertia properties (moments and products of inertia) can be written in a matrix,
+known as the inertia tensor, that has the following form
+
+                                             𝐼𝐼𝑥𝑥𝑥𝑥   −𝐼𝐼𝑥𝑥𝑥𝑥   −𝐼𝐼𝑥𝑥𝑥𝑥
+                                    𝐴𝐴
+                                       𝑰𝑰 = −𝐼𝐼𝑥𝑥𝑥𝑥   𝐼𝐼𝑦𝑦𝑦𝑦    −𝐼𝐼𝑦𝑦𝑧𝑧
+                                            −𝐼𝐼𝑥𝑥𝑥𝑥   −𝐼𝐼𝑦𝑦𝑧𝑧    𝐼𝐼𝑧𝑧𝑧𝑧
+
+where 𝐴𝐴 is the reference frame in
+which the inertia tensor is being described.
+
+                𝐼𝐼𝑥𝑥𝑥𝑥 = ∭𝑉𝑉 𝑦𝑦 2 + 𝑧𝑧 2 𝜌𝜌𝜌𝜌𝜌𝜌                      𝐼𝐼𝑥𝑥𝑦𝑦 = ∭𝑉𝑉 𝑥𝑥𝑥𝑥𝜌𝜌𝜌𝜌𝜌𝜌
+
+                𝐼𝐼𝑦𝑦𝑦𝑦 = ∭𝑉𝑉 𝑥𝑥 2 + 𝑧𝑧 2 𝜌𝜌𝜌𝜌𝜌𝜌                       𝐼𝐼𝑥𝑥𝑥𝑥 = ∭𝑉𝑉 𝑥𝑥𝑧𝑧𝜌𝜌𝜌𝜌𝜌𝜌
+
+                𝐼𝐼𝑧𝑧𝑧𝑧 = ∭𝑉𝑉 𝑥𝑥 2 + 𝑦𝑦 2 𝜌𝜌𝜌𝜌𝜌𝜌                       𝐼𝐼𝑦𝑦𝑧𝑧 = ∭𝑉𝑉 𝑦𝑦𝑦𝑦𝜌𝜌𝜌𝜌𝜌𝜌
+
+                     MSE 429 – Advanced Kinematics for Robotics System                          Ch6 - 8
+            Mass Distribution
+
+Example: Find the inertia tensor for the rectangular body of uniform density 𝜌𝜌 with
+respect to the coordinate system shown.
+            ℎ         𝑙𝑙   𝑤𝑤
+𝐼𝐼𝑥𝑥𝑥𝑥 = ∫0 ∫0 ∫0 𝑦𝑦 2 + 𝑧𝑧 2 𝜌𝜌 𝑑𝑑𝑑𝑑 𝑑𝑑𝑑𝑑 𝑑𝑑𝑑𝑑
+
+                ℎ     𝑙𝑙
+     = ∫0 ∫0 𝑦𝑦 2 + 𝑧𝑧 2 𝜌𝜌 𝑤𝑤 𝑑𝑑𝑑𝑑 𝑑𝑑𝑑𝑑
+
+        ℎ 𝑙𝑙 3
+     = ∫0 3 + 𝑧𝑧 2 𝑙𝑙              𝜌𝜌 𝑤𝑤 𝑑𝑑𝑑𝑑
+
+            ℎ𝑙𝑙 3 𝑤𝑤   ℎ3 𝑙𝑙𝑙𝑙             𝑚𝑚
+     =               +              𝜌𝜌 =        𝑙𝑙 2 + ℎ2
+              3         3                  3
+
+
+
+
+Similarly, 𝐼𝐼𝑦𝑦𝑦𝑦 and 𝐼𝐼𝑧𝑧𝑧𝑧 can be found as
+           𝑚𝑚
+𝐼𝐼𝑦𝑦𝑦𝑦 =            𝑤𝑤 2 + ℎ2
+           3
+
+           𝑚𝑚
+𝐼𝐼𝑧𝑧𝑧𝑧 =            𝑙𝑙 2 + 𝑤𝑤 2
+           3
+
+
+                                  MSE 429 – Advanced Kinematics for Robotics System    Ch6 - 9
+            Mass Distribution
+
+Example: cont’d
+             ℎ      𝑙𝑙   𝑤𝑤
+𝐼𝐼𝑥𝑥𝑥𝑥 = ∫0 ∫0 ∫0 𝑥𝑥𝑥𝑥 𝜌𝜌 𝑑𝑑𝑑𝑑 𝑑𝑑𝑑𝑑 𝑑𝑑𝑑𝑑
+
+        ℎ 𝑙𝑙 𝑤𝑤 2
+     = ∫0 ∫0 2 𝑦𝑦 𝑤𝑤 𝑑𝑑𝑑𝑑 𝑑𝑑𝑑𝑑
+
+             ℎ 𝑤𝑤 2 𝑙𝑙2
+     = ∫0                 𝜌𝜌 𝑑𝑑𝑑𝑑
+                    4
+
+           𝑚𝑚
+     =        𝑤𝑤𝑤𝑤
+           4
+
+
+
+
+Similarly, 𝐼𝐼𝑥𝑥𝑥𝑥 and 𝐼𝐼𝑦𝑦𝑦𝑦 can be found as
+           𝑚𝑚
+𝐼𝐼𝑥𝑥𝑥𝑥 =      𝑤𝑤ℎ
+           4
+
+           𝑚𝑚
+𝐼𝐼𝑦𝑦𝑦𝑦 =      ℎ𝑙𝑙
+           4
+
+
+
+
+                                MSE 429 – Advanced Kinematics for Robotics System   Ch6 - 10
+       Mass Distribution
+
+Example: cont’d
+
+Hence the inertia tensor for this object becomes
+
+
+
+
+                           𝑚𝑚 2                𝑚𝑚           𝑚𝑚
+                              𝑙𝑙 + ℎ2      −      𝑤𝑤𝑤𝑤     −   𝑤𝑤𝑤
+                           3                   4            4
+                   𝐴𝐴           𝑚𝑚      𝑚𝑚 2                𝑚𝑚
+                      𝑰𝑰 =   − 𝑤𝑤𝑤𝑤       𝑤𝑤 + ℎ2          − ℎ𝑙𝑙
+                                 4      3                    4
+                                𝑚𝑚          𝑚𝑚           𝑚𝑚 2
+                             − 𝑤𝑤𝑤        − ℎ𝑙𝑙             𝑙𝑙 + 𝑤𝑤 2
+                                4           4            3
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System     Ch6 - 11
+               Mass Distribution – Parallel Axis Theorem
+
+In general, inertial tensors are described with respect to a frame attached to the
+centroid of the body; however, sometimes it is necessary to describe the inertia tensor
+with respect to another reference frame.
+
+The translation of the moments and products of inertia to another reference frame is
+accomplished with the Parallel Axis Theorem.
+
+
+
+Moment of Inertia                                                                                 Products of Inertia
+                                                                               𝑍𝑍̂
+𝐶𝐶                                                                                                𝐶𝐶
+     𝐼𝐼𝑥𝑥𝑥𝑥 = 𝐴𝐴𝐼𝐼𝑥𝑥𝑥𝑥 + 𝑚𝑚(𝑧𝑧𝐶𝐶2 + 𝑦𝑦𝐶𝐶2 )                                                            𝐼𝐼𝑥𝑥𝑥𝑥 = 𝐴𝐴𝐼𝐼𝑥𝑥𝑥𝑥 − 𝑚𝑚 𝑥𝑥𝐶𝐶 𝑦𝑦𝐶𝐶
+                                                      𝑍𝑍̂                            {𝐶𝐶}
+                                                               𝐶𝐶
+𝐶𝐶
+     𝐼𝐼𝑦𝑦𝑦𝑦 = 𝐴𝐴𝐼𝐼𝑦𝑦𝑦𝑦 + 𝑚𝑚(𝑥𝑥𝐶𝐶2 + 𝑧𝑧𝐶𝐶2 )                         𝑷𝑷                      𝑌𝑌�
+                                                                                                  𝐶𝐶
+                                                                                                       𝐼𝐼𝑦𝑦𝑦𝑦 = 𝐴𝐴𝐼𝐼𝑦𝑦𝑦𝑦 − 𝑚𝑚 𝑦𝑦𝐶𝐶 𝑧𝑧𝐶𝐶
+                                                                                 𝑧𝑧𝐶𝐶
+                                                  {𝐴𝐴}                   𝑋𝑋�
+𝐶𝐶
+     𝐼𝐼𝑧𝑧𝑧𝑧 = 𝐴𝐴𝐼𝐼𝑧𝑧𝑧𝑧 + 𝑚𝑚(𝑥𝑥𝐶𝐶2 + 𝑦𝑦𝐶𝐶2 )                 𝑌𝑌�                      𝑥𝑥𝐶𝐶         𝐶𝐶
+                                                                                                       𝐼𝐼𝑥𝑥𝑧𝑧 = 𝐴𝐴𝐼𝐼𝑥𝑥𝑧𝑧 − 𝑚𝑚 𝑥𝑥𝐶𝐶 𝑧𝑧𝐶𝐶
+                                                𝑋𝑋�            𝑦𝑦𝐶𝐶
+
+
+
+
+                                  MSE 429 – Advanced Kinematics for Robotics System                                                  Ch6 - 12
+      Mass Distribution – Rotation Transformation
+
+In case the two frames are not oriented in the same manner, we have to apply the
+Rotation Transformation of the inertia properties.
+
+
+
+
+                                                   𝑍𝑍̂𝐴𝐴    {𝐶𝐶}
+                                        𝑍𝑍̂𝐶𝐶
+                                                             𝑌𝑌�𝐶𝐶
+
+
+                                 {𝐴𝐴}                      𝑌𝑌�𝐴𝐴
+                                           𝑋𝑋�𝐴𝐴
+                                                   𝑋𝑋�𝐶𝐶
+
+
+
+                                   𝐶𝐶
+                                        𝑰𝑰 = 𝐴𝐴𝐶𝐶𝑹𝑹 𝐴𝐴𝑰𝑰 𝐴𝐴𝐶𝐶𝑹𝑹⊤
+
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System                 Ch6 - 13
+                  Acceleration of Rigid Body
+
+ In pervious chapters, we studied the velocity of a rigid body and defined that the
+ absolute velocity of a rigid body in space can be found as the time derivative of the
+ position vector. The linear acceleration is the second derivative;
+                                                                              𝑍𝑍̂𝐵𝐵
+                                                                                                                      P
+                       𝑍𝑍̂𝐴𝐴
+                                                                                                        𝐵𝐵
+                                                                𝐴𝐴
+                                                                     𝑷𝑷𝑃𝑃                                    𝑷𝑷𝑃𝑃
+
+                                                                                             𝑂𝑂𝐵𝐵
+                                                                                                                               𝑌𝑌�𝐵𝐵
+                                                                𝐴𝐴
+                                                                     𝑷𝑷𝑂𝑂𝐵𝐵
+          𝑋𝑋�𝐴𝐴                                                               𝑋𝑋�𝐵𝐵
+                               𝑂𝑂𝐴𝐴                     𝑌𝑌�𝐴𝐴
+
+  𝐴𝐴
+       𝑷𝑷𝑃𝑃 = 𝐴𝐴𝑷𝑷𝑂𝑂𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃
+  𝐴𝐴
+       𝑽𝑽𝑃𝑃 = 𝐴𝐴𝑽𝑽𝑂𝑂𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑽𝑽𝑃𝑃 + 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃
+   𝐴𝐴
+        𝒂𝒂𝑃𝑃 = 𝐴𝐴𝒂𝒂𝑂𝑂𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝒂𝒂𝑃𝑃 + 2 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑽𝑽𝑃𝑃 + 𝐴𝐴𝛀𝛀̇ 𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃 + 𝐴𝐴𝛀𝛀𝐵𝐵 × ( 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃 )
+Absolute        Absolute        Sliding        Coriolis                       Tangential                        Centripetal
+acceleration of acceleration of acceleration   acceleration                   acceleration                      acceleration
+point 𝑃𝑃        point 𝑂𝑂𝐵𝐵
+
+
+
+                                      MSE 429 – Advanced Kinematics for Robotics System                                                Ch6 - 14
+       Acceleration of Rigid Body
+
+For the angular velocity, consider the case that frame {𝐵𝐵} is rotating relative to {𝐴𝐴} with
+and angular velocity 𝐴𝐴𝛀𝛀𝐵𝐵 and frame {𝐶𝐶} is rotating relative to {𝐵𝐵} with 𝐵𝐵𝛀𝛀𝐶𝐶 . To
+calculate 𝐴𝐴𝛀𝛀𝐶𝐶 , we add the angular velocities relative to frame {𝐴𝐴}.
+
+
+                                         𝐴𝐴
+                                              𝛀𝛀𝐶𝐶 = 𝐴𝐴𝛀𝛀𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝛀𝛀𝐶𝐶
+
+
+The angular acceleration is determined by taking the time derivative of this equation
+
+
+                         𝐴𝐴
+                              𝛀𝛀̇ 𝐶𝐶 = 𝐴𝐴𝛀𝛀̇ 𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝛀𝛀̇ 𝐶𝐶 + 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝛀𝛀𝐶𝐶
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                         Ch6 - 15
+           Newton’s Equation – Euler’s Equation
+
+Newton’s Equation
+The desired linear acceleration (𝒗𝒗̇ 𝐺𝐺 ) of the link with mass 𝑚𝑚 is caused by force 𝑵𝑵,
+                                                                                  𝑣𝑣̇ 𝐺𝐺
+𝑭𝑭 = 𝑚𝑚 𝒗𝒗̇ 𝐺𝐺
+                                                                              G
+                                                                              𝐺𝐺
+                                                                   𝐹𝐹
+
+Euler’s Equation
+The desired angular acceleration of a rigid body is caused by an inertial moment
+                                                             𝜔𝜔̇                   𝜔𝜔
+      𝐺𝐺             𝐺𝐺
+𝑵𝑵 = 𝑰𝑰 𝝎𝝎̇ + 𝝎𝝎 × 𝑰𝑰𝝎𝝎
+
+
+Where, 𝐺𝐺 𝑰𝑰 is the inertia tensor written in
+terms of frame {𝐺𝐺}, 𝝎𝝎 and 𝝎𝝎̇ are the                                      𝐺𝐺
+angular velocity and angular acceleration
+                                                                        𝑁𝑁
+respectively, and 𝑵𝑵 represents moment.
+
+                    MSE 429 – Advanced Kinematics for Robotics System                       Ch6 - 16
+       Iterative Newton – Euler Dynamic Formulation
+
+The Newton-Euler formulation is a recursive iteration process.
+The velocity and acceleration of the links are determined based on their propagation
+along the manipulator (base to end-effector)
+Then, a balance of forces (Newton) and moments (Euler) is performed at each link. Note
+that an actuator must apply a force/torque to balance forces that act on links that follow
+the joints (end-effector to base)
+
+
+         Balance of Forces and
+         Moments                                              Velocity Propagation
+
+
+
+
+                Gravity
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System                  Ch6 - 17
+       Iterative Newton – Euler Dynamic Formulation
+
+Outward Iteration
+Compute the angular velocity, angular acceleration, linear velocity, linear acceleration
+and the inertial forces and moments of each link in terms of its preceding link. This
+process is repeated from 𝑖𝑖 = 0 to 𝑖𝑖 = 𝑛𝑛 − 1, where 𝑛𝑛 is the number of joints.
+
+
+Set the initial velocity and acceleration values to zero, except for the acceleration of the
+base which will incorporate gravity.
+
+
+Inward Iteration
+Perform the balance of forces and moments about the joints. This process is repeated
+from 𝑖𝑖 = 𝑛𝑛 to 𝑖𝑖 = 1, where 𝑛𝑛 is the number of joints.
+
+
+Set the initial force and moment at 𝑖𝑖 = 𝑛𝑛 (frame 𝑛𝑛 + 1) be the external forces and
+moments being applied to the end-effector.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                    Ch6 - 18
+         Outward Iterations to Compute Velocities and Accelerations
+
+This iteration starts with link frame {1} and moves successively link by link until link frame
+{𝑛𝑛}, 𝑖𝑖 = 0 → 𝑛𝑛 − 1.
+
+•   Angular Velocity
+
+     •   revolute joint    𝑖𝑖+1
+                                  𝝎𝝎𝑖𝑖+1 = 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖𝜔𝜔𝑖𝑖 + 𝜃𝜃̇𝑖𝑖+1 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1
+                           𝑖𝑖+1
+     •   prismatic joint      𝝎𝝎𝑖𝑖+1 = 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖𝝎𝝎𝑖𝑖
+
+
+•   Angular Acceleration
+
+     •   revolute joint    𝑖𝑖+1
+                                  𝝎𝝎̇ 𝑖𝑖+1 = 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖𝝎𝝎̇ 𝑖𝑖 + 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖𝝎𝝎𝑖𝑖 × 𝜃𝜃̇ 𝑖𝑖+1 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1 + 𝜃𝜃̈ 𝑖𝑖+1 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1
+                           𝑖𝑖+1
+     •   prismatic joint          𝝎𝝎̇ 𝑖𝑖+1 = 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖𝝎𝝎̇ 𝑖𝑖
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                                                  Ch6 - 19
+          Outward Iterations to Compute Velocities and Accelerations
+
+•    Linear Acceleration
+                         𝑖𝑖+1                                 𝑖𝑖
+    • revolute joint            𝒗𝒗̇ 𝑖𝑖+1 = 𝑖𝑖+1𝑖𝑖𝑹𝑹                𝝎𝝎̇ 𝑖𝑖 × 𝑖𝑖𝑷𝑷𝑖𝑖+1 + 𝑖𝑖𝝎𝝎𝑖𝑖 ×            𝑖𝑖
+                                                                                                                𝝎𝝎𝑖𝑖 × 𝑖𝑖𝑷𝑷𝑖𝑖+1 + 𝑖𝑖𝒗𝒗̇ 𝑖𝑖
+                         𝑖𝑖+1                                𝑖𝑖
+    • prismatic joint           𝒗𝒗̇ 𝑖𝑖+1 = 𝑖𝑖+1𝑖𝑖𝑹𝑹               𝝎𝝎̇ 𝑖𝑖 × 𝑖𝑖𝑷𝑷𝑖𝑖+1 + 𝑖𝑖𝝎𝝎𝑖𝑖 ×            𝑖𝑖
+                                                                                                               𝝎𝝎𝑖𝑖 × 𝑖𝑖𝑷𝑷𝑖𝑖+1 + 𝑖𝑖𝒗𝒗̇ 𝑖𝑖
+
+                                              + 2 𝑖𝑖+1𝝎𝝎𝑖𝑖+1 × 𝑑𝑑̇ 𝑖𝑖+1 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1 + 𝑑𝑑̈ 𝑖𝑖+1 𝑖𝑖+1𝑍𝑍̂𝑖𝑖+1
+
+
+•    Linear Acceleration of the Center of Mass
+                                  𝑖𝑖
+    • either joint                     𝒗𝒗̇ 𝐺𝐺𝑖𝑖 = 𝑖𝑖𝝎𝝎̇ 𝑖𝑖 × 𝑖𝑖𝑷𝑷𝐺𝐺 𝑖𝑖 + 𝑖𝑖𝝎𝝎𝑖𝑖 ×             𝑖𝑖
+                                                                                                   𝝎𝝎𝑖𝑖 × 𝑖𝑖𝑷𝑷𝐺𝐺 𝑖𝑖 + 𝑖𝑖𝒗𝒗̇ 𝑖𝑖
+
+
+•    The force and torque acting on a link (inertial forces and moments)
+
+    • either joint         𝑖𝑖
+                                𝑭𝑭𝑖𝑖 = 𝑚𝑚𝑖𝑖 𝑖𝑖𝒗𝒗̇ 𝐺𝐺𝑖𝑖
+                                            𝐺𝐺𝑖𝑖                               𝐺𝐺
+    • either joint         𝑖𝑖
+                                𝑵𝑵𝑖𝑖 =             𝑰𝑰𝑖𝑖 𝑖𝑖𝛚𝛚̇ 𝐺𝐺𝑖𝑖 + 𝑖𝑖𝝎𝝎𝑖𝑖 × 𝑖𝑖𝑰𝑰𝑖𝑖 𝑖𝑖𝝎𝝎𝑖𝑖
+
+
+
+                        MSE 429 – Advanced Kinematics for Robotics System                                                               Ch6 - 20
+                  Acceleration of Rigid Body
+
+ In pervious chapters, we studied the velocity of a rigid body and defined that the
+ absolute velocity of a rigid body in space can be found as the time derivative of the
+ position vector. The linear acceleration is the second derivative;
+                                                                              𝑍𝑍̂𝐵𝐵
+                                                                                                                      P
+                       𝑍𝑍̂𝐴𝐴
+                                                                                                        𝐵𝐵
+                                                                𝐴𝐴
+                                                                     𝑷𝑷𝑃𝑃                                    𝑷𝑷𝑃𝑃
+
+                                                                                             𝑂𝑂𝐵𝐵
+                                                                                                                               𝑌𝑌�𝐵𝐵
+                                                                𝐴𝐴
+                                                                     𝑷𝑷𝑂𝑂𝐵𝐵
+          𝑋𝑋�𝐴𝐴                                                               𝑋𝑋�𝐵𝐵
+                               𝑂𝑂𝐴𝐴                     𝑌𝑌�𝐴𝐴
+
+  𝐴𝐴
+       𝑷𝑷𝑃𝑃 = 𝐴𝐴𝑷𝑷𝑂𝑂𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃
+  𝐴𝐴
+       𝑽𝑽𝑃𝑃 = 𝐴𝐴𝑽𝑽𝑂𝑂𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑽𝑽𝑃𝑃 + 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃
+   𝐴𝐴
+        𝒂𝒂𝑃𝑃 = 𝐴𝐴𝒂𝒂𝑂𝑂𝐵𝐵 + 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝒂𝒂𝑃𝑃 + 2 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑽𝑽𝑃𝑃 + 𝐴𝐴𝛀𝛀̇ 𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃 + 𝐴𝐴𝛀𝛀𝐵𝐵 × ( 𝐴𝐴𝛀𝛀𝐵𝐵 × 𝐵𝐵𝐴𝐴𝑹𝑹 𝐵𝐵𝑷𝑷𝑃𝑃 )
+Absolute        Absolute        Sliding        Coriolis                       Tangential                        Centripetal
+acceleration of acceleration of acceleration   acceleration                   acceleration                      acceleration
+point 𝑃𝑃        point 𝑂𝑂𝐵𝐵
+
+
+
+                                      MSE 429 – Advanced Kinematics for Robotics System                                                Ch6 - 21
+             Inward Iterations to Compute Forces and Torques
+
+Once the force and moments acting at the centre of mass of the links that cause the
+desired motion are found, then the joint torque or force can be evaluated with the
+following equations of balance
+
+
+
+
+ 𝑖𝑖
+      𝑭𝑭𝑖𝑖 = 𝑖𝑖𝒇𝒇𝑖𝑖 − 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖+1𝒇𝒇𝑖𝑖+1
+ 𝑖𝑖
+      𝑵𝑵𝑖𝑖 = 𝑖𝑖𝒏𝒏𝑖𝑖 − 𝑖𝑖𝒏𝒏𝑖𝑖+1 +        𝑖𝑖
+                                             𝑷𝑷𝐺𝐺𝑖𝑖 × 𝑖𝑖𝒇𝒇𝑖𝑖 +   𝑖𝑖
+                                                                      𝑷𝑷𝑖𝑖+1 − 𝑖𝑖𝑷𝑷𝐺𝐺𝑖𝑖 × 𝑖𝑖𝒇𝒇𝑖𝑖+1
+
+
+
+where
+
+                 𝒇𝒇𝑖𝑖 is the force exerted on link 𝑖𝑖 by link 𝑖𝑖 − 1
+
+                 𝒏𝒏𝑖𝑖 is the torque exerted on link 𝑖𝑖 by link 𝑖𝑖 − 1
+
+                             MSE 429 – Advanced Kinematics for Robotics System                       Ch6 - 22
+          Inward Iterations to Compute Forces and Torques
+
+This iteration starts with link frame {𝑛𝑛} and moves successively link by link until link
+frame {1}, 𝑖𝑖 = 𝑛𝑛 → 1.
+
+The forces and moments exerted on the last link 𝑛𝑛+1𝒇𝒇𝑛𝑛+1 and 𝑛𝑛+1𝒏𝒏𝑛𝑛+1 are related to
+external forces (zero if the robot moves in free space).
+
+•    Force and moment exerted on link 𝑖𝑖 (reactions at joint):
+                                         𝑖𝑖
+    either joint                              𝒇𝒇𝑖𝑖 = 𝑖𝑖𝑭𝑭𝑖𝑖 + 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖+1𝒇𝒇𝑖𝑖+1
+
+    either joint 𝑖𝑖𝒏𝒏𝑖𝑖 = 𝑖𝑖𝑵𝑵𝑖𝑖 + 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖+1𝒏𝒏𝑖𝑖+1 + 𝑖𝑖𝑷𝑷𝐺𝐺𝑖𝑖 × 𝑖𝑖𝑭𝑭𝑖𝑖 + 𝑖𝑖𝑷𝑷𝑖𝑖+1 × 𝑖𝑖+1𝑖𝑖𝑹𝑹 𝑖𝑖+1𝒇𝒇𝑖𝑖+1
+
+
+•    Required torques/forces are applied in the 𝑧𝑧-direction:
+                                                                      𝑖𝑖 ̂
+    revolute joint 𝑖𝑖 (torque)                          𝝉𝝉𝑖𝑖 = 𝑖𝑖𝒏𝒏⊤
+                                                                   𝑖𝑖   𝑍𝑍𝑖𝑖
+                                                                       𝑖𝑖 ̂
+    prismatic joint 𝑖𝑖 (force)                           𝝉𝝉𝑖𝑖 = 𝑖𝑖𝒇𝒇⊤
+                                                                    𝑖𝑖   𝑍𝑍𝑖𝑖
+
+
+
+
+                        MSE 429 – Advanced Kinematics for Robotics System                                     Ch6 - 23
+        Inclusion of Gravity Forces in the Dynamics Algorithm
+
+The effect of gravity loading on the links can be included by setting 𝑖𝑖=0𝒗𝒗̇ 𝑖𝑖=0 = 𝐺𝐺, where
+𝐺𝐺 has the magnitude of gravity vector, but points in the opposite direction.
+
+This is equivalent to saying that the based of the robot is accelerating upward with 1𝑔𝑔
+acceleration. This fictitious upward acceleration causes the same effect o the links as
+gravity would  no extra computation for including gravity effect.
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                    Ch6 - 24
+       Lagrangian Formulation
+
+Whereas the Newton-Euler formulation is based on a “force-balance” approach, the
+Lagrangian Formulation is based on a “energy balance” approach.
+
+The Lagrangian function ℒ is defined as the difference between the kinetic and potential
+energy of a mechanical system
+
+                                  ℒ 𝒒𝒒, 𝒒𝒒̇ = 𝑘𝑘 𝒒𝒒, 𝒒𝒒̇ − 𝑢𝑢 𝒒𝒒
+
+Lagrange’s equations of motion are formulated in terms of the Lagrangian function as
+
+                               𝑑𝑑 𝜕𝜕ℒ 𝒒𝒒, 𝒒𝒒̇     𝜕𝜕ℒ 𝒒𝒒, 𝒒𝒒̇
+                                                −             = 𝑸𝑸𝑖𝑖
+                              𝑑𝑑𝑡𝑡   𝜕𝜕𝒒𝒒̇           𝜕𝜕𝒒𝒒𝑖𝑖
+
+where 𝑸𝑸𝑖𝑖 is a generalized force (e.g., torque, eternal force, etc.)
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System              Ch6 - 25
+       Lagrangian Formulation
+
+Kinetic Energy
+The kinetic energy of the 𝑖𝑖-th link in terms of the inertial reference frame can be
+expressed as
+
+                                 1 0 ⊤    0     1 0 ⊤ 0 0
+                          𝑘𝑘𝑖𝑖 =    𝒗𝒗 𝑚𝑚 𝒗𝒗 +     𝝎𝝎𝑖𝑖 𝑰𝑰𝑖𝑖 𝝎𝝎𝑖𝑖
+                                 2 𝐺𝐺𝑖𝑖 𝑖𝑖 𝐺𝐺𝑖𝑖 2
+                                                                                𝐺𝐺
+where 0𝑰𝑰𝑖𝑖 is the inertia tensor of link {𝑖𝑖} referred to frame {0}. Since the 𝑖𝑖𝑰𝑰𝑖𝑖 (described
+with respect to centre of mass) is known, we have to apply the rotation transformation
+of inertia properties
+                                       0                 𝐺𝐺
+                                           𝑰𝑰𝑖𝑖 = 0𝑖𝑖 𝑹𝑹 𝑖𝑖𝑰𝑰𝑖𝑖 0𝑖𝑖 𝑹𝑹⊤
+
+Given that the links are moving, 0𝑖𝑖 𝑹𝑹 is changing and therefore the inertia 0𝑰𝑰𝑖𝑖 will be
+constantly changing.
+
+
+
+
+                    MSE 429 – Advanced Kinematics for Robotics System                     Ch6 - 26
+         Lagrangian Formulation
+
+Kinetic Energy
+The velocity of the centre of mass 0𝒗𝒗𝐺𝐺𝑖𝑖 and the angular velocity 0𝝎𝝎𝑖𝑖 of link 𝑖𝑖 can be
+found using the forward velocity problem
+                                                                       0
+                                                  0                        𝒗𝒗𝐺𝐺𝑖𝑖
+                                                       𝑽𝑽𝐺𝐺𝑖𝑖 =        0
+                                                                                    = 0𝐉𝐉𝐺𝐺𝑖𝑖 𝒒𝒒̇
+                                                                           𝝎𝝎𝑖𝑖
+
+which can also be written as                                      The velocity of the link is not affected by
+                                                                  the joints that follow the link            𝑞𝑞̇ 1
+                                                                                                             𝑞𝑞̇ 2
+                          0
+                              𝒗𝒗𝐺𝐺𝑖𝑖
+                                           0 1
+                                            𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺       0 2
+                                                            𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺        ⋯        0 𝑖𝑖
+                                                                                      𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺   𝟎𝟎   ⋯ 𝟎𝟎       ⋮
+                                       =                                                                      𝑞𝑞̇ 𝑖𝑖
+                         0                 0 1             0 2                       0 𝑖𝑖
+                             𝝎𝝎𝑖𝑖           𝐉𝐉𝜔𝜔𝑖𝑖          𝐉𝐉𝜔𝜔𝑖𝑖          ⋯          𝐉𝐉𝜔𝜔𝑖𝑖    𝟎𝟎   ⋯ 𝟎𝟎 𝑞𝑞̇ 𝑖𝑖+1
+                                                                                                                 ⋮
+                                            Only the joints that precede link 𝑖𝑖                             𝑞𝑞̇ 𝑛𝑛
+                                            affect its velocity
+ Subscript (𝑖𝑖) indicates the
+ column number.
+
+
+
+
+                              MSE 429 – Advanced Kinematics for Robotics System                                        Ch6 - 27
+      Lagrangian Formulation
+
+Kinetic Energy
+The columns of the Jacobian are found as follows
+
+                                   0̂
+                                                                 𝜕𝜕 0𝑷𝑷𝐺𝐺𝑖𝑖        Revolute
+                                   𝑍𝑍𝑖𝑖 × 0𝑷𝑷𝑖𝑖 →𝐺𝐺𝑖𝑖                                Joint
+                                                                   𝜕𝜕𝜃𝜃𝑖𝑖
+                     0 𝑖𝑖
+                      𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺 =                        or
+                                         0̂                      𝜕𝜕 0𝑷𝑷𝐺𝐺𝑖𝑖        Prismatic
+                                          𝑍𝑍𝑗𝑗                                       Joint
+                                                                   𝜕𝜕𝑑𝑑𝑗𝑗
+
+
+                                   Cross Products               Derivatives
+
+
+
+                                                        0̂
+                                                         𝑍𝑍𝑖𝑖         Revolute
+                                         0 𝑖𝑖                           Joint
+                                          𝐉𝐉𝜔𝜔𝑖𝑖 = �
+                                                        03×1           Prismatic
+                                                                         Joint
+
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System                             Ch6 - 28
+      Lagrangian Formulation
+
+Kinetic Energy
+Therefore, the kinematic equation of the overall system can be written in terms of
+Jacobians and joint rates
+
+                        1              0
+                    𝑘𝑘 = � 0𝒗𝒗⊤                  0 ⊤ 0
+                              𝐺𝐺𝑖𝑖 𝑚𝑚𝑖𝑖 𝒗𝒗𝐺𝐺𝑖𝑖 + 𝝎𝝎𝑖𝑖  𝑰𝑰𝑖𝑖 0𝝎𝝎𝑖𝑖
+                        2
+
+                            𝑛𝑛
+                       1          0                  ⊤          0                     0                ⊤ 0
+                      = �             𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺 𝒒𝒒̇       𝑚𝑚𝑖𝑖       𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺 𝒒𝒒̇ +        𝐉𝐉𝜔𝜔𝑖𝑖 𝒒𝒒̇         𝑰𝑰𝑖𝑖 0𝐉𝐉𝜔𝜔𝑖𝑖 𝒒𝒒̇
+                       2
+                           𝑖𝑖=1
+
+                                                           Mass Matrix (𝐌𝐌)
+
+                                   𝑛𝑛
+                       1              ⊤                          ⊤
+                      = 𝒒𝒒̇ ⊤ � 0𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺 𝑚𝑚𝑖𝑖 0𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺 + 0𝐉𝐉𝜔𝜔𝑖𝑖 0𝑰𝑰𝑖𝑖 0𝐉𝐉𝜔𝜔𝑖𝑖 𝒒𝒒̇
+                       2
+                                  𝑖𝑖=1
+
+                                                                                 𝑛𝑛
+      1 ⊤                                                                                       ⊤
+                                                                     𝐌𝐌 = � 0𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺 𝑚𝑚𝑖𝑖 0𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺 + 0𝐉𝐉𝜔𝜔𝑖𝑖
+                                                                                                                                ⊤   0
+                                                                                                                                        𝑰𝑰𝑖𝑖 0𝐉𝐉𝜔𝜔𝑖𝑖
+  𝑘𝑘 = 𝒒𝒒̇ 𝐌𝐌 𝒒𝒒̇
+      2                                                                        𝑖𝑖=1
+
+                     MSE 429 – Advanced Kinematics for Robotics System                                                                         Ch6 - 29
+      Lagrangian Formulation
+
+Potential Energy
+The potential energy stored in link 𝑖𝑖 is defined as the amount of work required to raise the
+centre of mass of link 𝑖𝑖 from a horizontal reference plane to its present position under the
+influence of gravity:
+                                           𝑛𝑛
+                                                         0
+                                  𝑢𝑢 = − � 𝑚𝑚𝑖𝑖 𝒈𝒈⊤          𝑷𝑷𝐺𝐺𝑖𝑖
+                                          𝑖𝑖=1
+
+
+
+
+Generalized Forces
+The generalized forces are those forces that act on the manipulator: torques, external
+forces, friction, etc.
+
+                                     𝑸𝑸 = 𝝉𝝉 − 𝑱𝑱⊤ 𝑭𝑭 − 𝒇𝒇𝒓𝒓
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                Ch6 - 30
+       Lagrangian Formulation
+
+General Form of Dynamic Equation
+As stated in the beginning the equation of motion is obtained from
+            𝑑𝑑 𝜕𝜕ℒ 𝒒𝒒,𝒒𝒒̇       𝜕𝜕ℒ 𝒒𝒒,𝒒𝒒̇
+                            −                 = 𝑸𝑸𝑖𝑖                      with             ℒ 𝒒𝒒, 𝒒𝒒̇ = 𝑘𝑘 𝒒𝒒, 𝒒𝒒̇ − 𝑢𝑢 𝒒𝒒
+           𝑑𝑑𝑡𝑡   𝜕𝜕𝒒𝒒̇            𝜕𝜕𝒒𝒒𝑖𝑖
+
+
+The differentiation of the Lagrangian equation yields
+                                                        𝑛𝑛
+
+                                                   � 𝑴𝑴𝑖𝑖𝑖𝑖 𝒒𝒒̈ 𝑗𝑗 + 𝑽𝑽𝑖𝑖 + 𝑮𝑮𝑖𝑖 = 𝑸𝑸𝑖𝑖
+                                                   𝑗𝑗=1
+where 𝑴𝑴𝑖𝑖𝑖𝑖 is a mass matrix element
+
+                                             𝜕𝜕𝑴𝑴𝑖𝑖𝑖𝑖        1 𝜕𝜕𝑴𝑴𝑗𝑗𝑗𝑗                                                 (𝑖𝑖)
+              𝑽𝑽𝑖𝑖 = ∑𝑛𝑛𝑗𝑗=1 ∑𝑛𝑛𝑘𝑘=1                    −                  𝒒𝒒̇ 𝑗𝑗 𝒒𝒒̇ 𝑘𝑘    𝑮𝑮𝑖𝑖 = ∑𝑛𝑛𝑗𝑗=1 𝑚𝑚𝑗𝑗 𝒈𝒈⊤ 0𝐉𝐉𝑉𝑉𝐺𝐺𝐺𝐺
+                                             𝜕𝜕𝒒𝒒𝑘𝑘          2 𝜕𝜕𝒒𝒒𝑖𝑖
+
+
+Finally,
+                                              𝝉𝝉 = 𝑴𝑴 𝚯𝚯 𝚯𝚯̈ + 𝑽𝑽 𝚯𝚯, 𝚯𝚯̇ + 𝑮𝑮(𝚯𝚯)
+
+
+
+                        MSE 429 – Advanced Kinematics for Robotics System                                                       Ch6 - 31
+        Lagrangian Formulation
+
+Kinetic Energy (Alternative)
+The kinetic energy of the 𝑖𝑖-th link can be expressed as
+
+                                         1 i ⊤                   1      𝐺𝐺𝑖𝑖
+                                𝑘𝑘𝑖𝑖 =      𝒗𝒗𝐺𝐺𝑖𝑖 𝑚𝑚𝑖𝑖 i𝒗𝒗𝐺𝐺𝑖𝑖 + i𝝎𝝎⊤
+                                                                     𝑖𝑖      𝑰𝑰𝑖𝑖   i
+                                                                                        𝝎𝝎𝑖𝑖
+                                         2                       2
+        𝐺𝐺𝑖𝑖
+where          𝑰𝑰𝑖𝑖 is the inertia tensor of link {𝑖𝑖} with respect to centre of mass
+
+
+
+
+                         MSE 429 – Advanced Kinematics for Robotics System                     Ch6 - 32
+MSE 429 – Advanced Kinematics for Robotics System   Ch6 - 33
+

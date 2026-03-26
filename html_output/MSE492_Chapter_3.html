@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 3: Manipulator Kinematics — MSE492 Study Pages</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}], throwOnError: false});"></script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+  <main class="main-content">
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&gt;</span>
+      <a href="index.html#chapters">MSE492</a><span class="sep">&gt;</span>
+      Chapter 3
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  CHAPTER 3: MANIPULATOR KINEMATICS                           -->
+    <!-- ============================================================ -->
+
+    <h1>Chapter 3: Manipulator Kinematics
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=1" target="_blank">PDF p.1</a>
+    </h1>
+
+    <!-- ==================== 3.1 Overview ========================== -->
+    <h2 id="sec-3-1">3.1 Overview
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=2" target="_blank">PDF p.2</a>
+    </h2>
+    <p>This chapter covers the following topics:</p>
+    <ul>
+      <li>Link Description and Link-connection description</li>
+      <li>Convention for Affixing Frames to Links</li>
+      <li>Identification of <span class="tooltip-term" tabindex="0">Denavit &amp; Hartenberg Parameters<span class="tooltip-content">A minimal set of four parameters ($a$, $\alpha$, $d$, $\theta$) that completely describe the geometry of each link and joint in a serial manipulator. Introduced by Jacques Denavit and Richard Hartenberg in 1955.<span class="tooltip-source">Denavit &amp; Hartenberg (1955), "A Kinematic Notation for Lower-Pair Mechanisms Based on Matrices"; Craig, <em>Introduction to Robotics</em>, Ch. 3</span></span></span></li>
+      <li>Manipulator Kinematics</li>
+    </ul>
+
+    <!-- ==================== 3.2 Link Description ================== -->
+    <h2 id="sec-3-2">3.2 Link Description
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=3" target="_blank">PDF p.3</a>
+    </h2>
+
+    <h3 id="sec-3-2-definitions">Definitions</h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Kinematics</strong>: The science of motion that treats objects without regard to the forces that cause it.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Manipulator</strong>: A set of bodies (called <strong>links</strong>) connected in a chain by <strong>joints</strong>.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Link</strong>: A rigid body that defines the relationship between two neighboring joint axes of a manipulator.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Joint</strong>: A connection between a neighboring pair of links. Joints form the connection that allows relative motion.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=3" target="_blank">PDF p.3</a>
+      <p><strong>Lower Pairs</strong>: Joints in which the relative motion between a pair of bodies is characterized by two surfaces sliding over one another.</p>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p3.png" alt="Figure (page 3): The six possible lower pair joints. Six 3D illustrations are shown: (1) Screw joint, (2) Spherical joint, (3) Cylindrical joint, (4) Planar joint, (5) Revolute joint, (6) Prismatic jo" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 3):</strong> The six possible lower pair joints. Six 3D illustrations are shown: (1) Screw joint, (2) Spherical joint, (3) Cylindrical joint, (4) Planar joint, (5) Revolute joint, (6) Prismatic joint. Each is depicted as a small mechanical drawing showing the type of contact surface and motion allowed.
+    </div>
+
+    <!-- Conventions -->
+    <h3 id="sec-3-2-conventions">Conventions</h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Convention</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=4" target="_blank">PDF p.4</a>
+      <p><strong>Link Numbering Convention</strong>: The links are numbered starting from the immobile base of the arm, which is called link 0. The first moving body is link 1, and so on, out to the free end of the arm, which is link $n$.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Convention</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=4" target="_blank">PDF p.4</a>
+      <p><strong>Joint Axis Convention</strong>: Joint axis $i$ is defined by a line in space, or a vector direction, about which link $i$ rotates relative to link $i - 1$.</p>
+    </div>
+
+    <!-- Link Length -->
+    <h3 id="sec-3-2-link-length">Link Length</h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=4" target="_blank">PDF p.4</a>
+      <p><strong><span class="tooltip-term" tabindex="0">Link Length<span class="tooltip-content">The distance between two consecutive joint axes, measured along their unique common perpendicular. It is a fixed geometric property of the physical link and does not change during robot motion.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;3.2; MSE492 Ch. 3, PDF p.4</span></span></span></strong> ($a_{i-1}$): For any two axes in 3-space, there exists a well-defined measure of distance, the link length $a_{i-1}$, that is along a line mutually perpendicular to both axes.</p>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p4.png" alt="Figure (page 4): A mechanical link connecting two joint axes labeled &quot;Axis $i-1$&quot; and &quot;Axis $i$&quot;. The link body is shown as a rigid member between the two bearings. The distance $a_{i-1}$ is marked al" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 4):</strong> A mechanical link connecting two joint axes labeled "Axis $i-1$" and "Axis $i$". The link body is shown as a rigid member between the two bearings. The distance $a_{i-1}$ is marked along the common perpendicular between the two axes. The link is labeled "Link $i-1$".
+    </div>
+
+    <!-- Link Twist -->
+    <h3 id="sec-3-2-link-twist">Link Twist</h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=5" target="_blank">PDF p.5</a>
+      <p><strong><span class="tooltip-term" tabindex="0">Link Twist<span class="tooltip-content">The angle between two consecutive joint axes, measured about the common perpendicular using the right-hand rule. Like link length, it is a fixed property of the link's geometry.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;3.2; MSE492 Ch. 3, PDF p.5</span></span></span></strong> ($\alpha_{i-1}$): Defines the relative location of two axes. The angle is measured from axis $a_{i-1}$ to axis $a_i$ in the right-hand sense about $a_{i-1}$.</p>
+    </div>
+
+    <p><strong>Notes on Link Twist</strong>:</p>
+    <ul>
+      <li>For right-hand sense, $a_{i-1}$ is given the direction pointing from axis $i - 1$ to axis $i$.</li>
+      <li>In the case of intersecting axes, twist is measured in the plane containing both axes, but the sense of $\alpha_{i-1}$ is lost. In this case, the sign of $\alpha_{i-1}$ can be assigned arbitrarily.</li>
+    </ul>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p5.png" alt="Figure (page 5): Same link diagram as page 4, but now also showing the link twist angle $\alpha_{i-1}$. The twist is the angle between the two joint axes (Axis $i-1$ and Axis $i$) measured about the c" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 5):</strong> Same link diagram as page 4, but now also showing the link twist angle $\alpha_{i-1}$. The twist is the angle between the two joint axes (Axis $i-1$ and Axis $i$) measured about the common perpendicular $a_{i-1}$, following the right-hand rule.
+    </div>
+
+    <!-- ENRICHMENT: Why Exactly Four DH Parameters Suffice -->
+    <div class="callout callout-enrichment" id="enrichment-four-dh">
+      <div class="callout-label">Enrichment &mdash; Proof</div>
+      <h3>Why Exactly Four DH Parameters Suffice</h3>
+
+      <p><strong>Theorem</strong>: Any two lines (joint axes) in 3D space can be related by exactly four scalar parameters: two distances and two angles.</p>
+
+      <div class="collapsible">
+        <div class="collapsible-header">Proof Outline (from the geometry of lines in $\mathbb{R}^3$)</div>
+        <div class="collapsible-body">
+          <div class="collapsible-body-inner">
+            <p>Consider two arbitrary lines $\ell_1$ and $\ell_2$ in three-dimensional Euclidean space. There are three cases:</p>
+            <ol>
+              <li><strong>Skew lines</strong> (the general case): Two lines that neither intersect nor are parallel are called <em>skew</em>. A fundamental theorem of 3D geometry states that any two skew lines possess a <strong>unique common perpendicular</strong> -- a line segment that meets both $\ell_1$ and $\ell_2$ at right angles. This is the shortest distance between the two lines. (See: <a href="https://en.wikipedia.org/wiki/Skew_lines" target="_blank">Skew Lines - Wikipedia</a>)</li>
+              <li><strong>Intersecting lines</strong>: The common perpendicular has zero length ($a = 0$), but the angle between the lines is still well-defined.</li>
+              <li><strong>Parallel lines</strong>: The angle is zero ($\alpha = 0$), but the perpendicular distance is well-defined. The common perpendicular is not unique in this case, but this freedom is absorbed by choosing the origin location.</li>
+            </ol>
+
+            <p><strong>The four parameters arise as follows.</strong> Given a common perpendicular direction (the $\hat{X}$ axis in DH convention), construct a coordinate system:</p>
+            <ul>
+              <li><strong>$a_{i-1}$</strong> (link length): The length of the common perpendicular segment between the two axes. This is the unique shortest distance between the two skew lines.</li>
+              <li><strong>$\alpha_{i-1}$</strong> (link twist): The angle between the directions of $\ell_1$ and $\ell_2$, measured in a plane perpendicular to the common perpendicular. Together, $(a, \alpha)$ fully fix the <em>relative geometry</em> of the two lines themselves.</li>
+            </ul>
+
+            <p>However, we also need to locate <em>where on each axis</em> the coordinate frame sits. This introduces two more parameters measured along the joint axis ($\hat{Z}$ direction):</p>
+            <ul>
+              <li><strong>$d_i$</strong> (link offset): The signed distance along the joint axis between the feet of two consecutive common perpendiculars.</li>
+              <li><strong>$\theta_i$</strong> (joint angle): The angle between the two consecutive common perpendiculars, measured about the joint axis.</li>
+            </ul>
+
+            <p><strong>Why not more or fewer?</strong> A general rigid-body transformation in 3D has 6 degrees of freedom (3 rotation + 3 translation). The DH convention imposes 2 constraints by requiring that the $\hat{X}_i$ axis is always perpendicular to both $\hat{Z}_i$ and $\hat{Z}_{i+1}$ and passes through (or points along) the common normal. These 2 constraints reduce $6 - 2 = 4$ free parameters, which are exactly the four DH parameters.</p>
+
+            <p><strong>This is why the DH convention is minimal</strong>: no fewer than 4 parameters can describe the general relationship between consecutive joint axes, and no more are needed.</p>
+
+            <p><em>Reference: Denavit, J. and Hartenberg, R.S. (1955). "A Kinematic Notation for Lower-Pair Mechanisms Based on Matrices." Journal of Applied Mechanics, 22, 215-221. Also see Chapter 3 of Murray, Li, and Sastry, A Mathematical Introduction to Robotic Manipulation (1994) for a modern treatment.</em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENRICHMENT: Intuitive Understanding of Link Parameters -->
+    <div class="callout callout-enrichment" id="enrichment-intuitive-link-params">
+      <div class="callout-label">Enrichment &mdash; Alternative Explanation</div>
+      <h3>Intuitive Understanding of Link Parameters</h3>
+
+      <p><strong>Think of it this way</strong>: Imagine you are standing on joint axis $i-1$ and looking toward joint axis $i$.</p>
+      <ul>
+        <li><strong>Link length</strong> $a_{i-1}$: "How far apart are the two axes?" -- measured along the unique shortest path between them (the common perpendicular).</li>
+        <li><strong>Link twist</strong> $\alpha_{i-1}$: "How tilted is the next axis relative to this one?" -- if you look end-on down the common perpendicular, this is the angle between the two axes you see.</li>
+      </ul>
+
+      <p>Now imagine you are standing on joint axis $i$, looking along it:</p>
+      <ul>
+        <li><strong>Link offset</strong> $d_i$: "How far apart are the two common perpendiculars that meet at this axis?" -- measured along the axis itself.</li>
+        <li><strong>Joint angle</strong> $\theta_i$: "How much have I rotated from one common perpendicular to the next?" -- measured about this joint axis.</li>
+      </ul>
+
+      <p><strong>Key insight</strong>: The two "link parameters" ($a$ and $\alpha$) describe the physical shape of the link -- they are constants determined by the robot's mechanical design. The "joint parameters" ($d$ and $\theta$) describe the connection at the joint -- one of them is always the <em>variable</em> (the thing that moves). For a revolute joint, $\theta_i$ is variable; for a prismatic joint, $d_i$ is variable.</p>
+    </div>
+
+    <!-- Worked Example: Link Length and Twist -->
+    <div class="callout callout-example" id="example-link-length-twist">
+      <div class="callout-label">Worked Example</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=6" target="_blank">PDF p.6</a>
+      <h3>Link Length and Twist from Mechanical Drawing</h3>
+
+      <p><strong>Problem</strong>: Figure shows the mechanical drawings of a robot link. If this link is used in a robot, with bearing "A" used for the lower-numbered joint, identify the length and twist of the link. Assume that holes are centered in each bearing.</p>
+
+      <div class="figure">
+      <img src="assets/images/ch3_p6.png" alt="Figure (page 6): Left side shows the mechanical drawing of a robot link in side view. The link has two bearings: Bearing &quot;A&quot; (left, cylindrical, 3 in. tall) and Bearing &quot;B&quot; (right, cylindrical). The h" loading="lazy">
+    </div>
+    <div class="figure-desc">
+        <strong>Figure (page 6):</strong> Left side shows the mechanical drawing of a robot link in side view. The link has two bearings: Bearing "A" (left, cylindrical, 3 in. tall) and Bearing "B" (right, cylindrical). The horizontal distance between bearing centers is: 2 in. + 5 in. + 2 in. = 7 in. (total link length). Right side shows the end-on view of the link looking along the common perpendicular. Axis "A" is vertical, Axis "B" is at 45 degrees from vertical. The link twist angle is marked as 45 degrees. The perpendicular distances from each axis to the common perpendicular are 2 in. each.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-ch3-1">Show Solution</button>
+      <div class="solution-content" id="sol-ch3-1">
+        <ul>
+          <li><strong>Link length</strong> = 7 in. (the distance along the common perpendicular between Axis A and Axis B)</li>
+          <li><strong>Link twist</strong> = $45°$ (the angle between the two joint axes, measured by viewing down the common perpendicular from Axis A to Axis B)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ==================== 3.3 Link-Connection Description ======= -->
+    <h2 id="sec-3-3">3.3 Link-Connection Description
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=7" target="_blank">PDF p.7</a>
+    </h2>
+
+    <h3 id="sec-3-3-intermediate">Intermediate Links in the Chain</h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=7" target="_blank">PDF p.7</a>
+      <p><strong><span class="tooltip-term" tabindex="0">Link Offset<span class="tooltip-content">The signed distance along a joint axis between the points where two consecutive common perpendiculars intersect that axis. For a prismatic joint, $d_i$ is the joint variable; for a revolute joint, it is a fixed constant.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;3.3; MSE492 Ch. 3, PDF p.7</span></span></span></strong> ($d_i$): The distance along the joint axis between two incident common normals ($a_{i-1}$ and $a_i$). The link offset is variable if joint $i$ is prismatic.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=7" target="_blank">PDF p.7</a>
+      <p><strong><span class="tooltip-term" tabindex="0">Joint Angle<span class="tooltip-content">The angle of rotation between two consecutive common perpendiculars, measured about the joint axis using the right-hand rule. For a revolute joint, $\theta_i$ is the joint variable that changes as the robot moves.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;3.3; MSE492 Ch. 3, PDF p.7</span></span></span></strong> ($\theta_i$): The rotation between two incident common normals about the joint axis. The joint angle is variable for revolute joints.</p>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p7.png" alt="Figure (page 7): A link diagram showing two consecutive links (Link $i-1$ and Link $i$) connected at joint axis $i$. The diagram illustrates four DH parameters: (1) $a_{i-1}$ is the common perpendicul" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 7):</strong> A link diagram showing two consecutive links (Link $i-1$ and Link $i$) connected at joint axis $i$. The diagram illustrates four DH parameters: (1) $a_{i-1}$ is the common perpendicular distance between Axis $i-1$ and Axis $i$, (2) $\alpha_{i-1}$ is the twist angle between the two axes, (3) $d_i$ is the offset distance along Axis $i$ between the two common normals, and (4) $\theta_i$ is the joint angle measured as rotation about Axis $i$ from one common normal to the next.
+    </div>
+
+    <!-- First and Last Links -->
+    <h3 id="sec-3-3-first-last">First and Last Links in the Chain
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=8" target="_blank">PDF p.8</a>
+    </h3>
+
+    <p><strong>Convention</strong>: Link length $a_i$ and link twist $\alpha_i$ depend on joint axes $i$ and $i + 1$, as shown before. At the ends of the chain, the convention is to assign zero to these quantities:</p>
+
+    $$a_0 = a_n = 0 \quad \text{and} \quad \alpha_0 = \alpha_n = 0$$
+
+    <p><strong>First link (link 0) conventions</strong>:</p>
+    <ul>
+      <li>If joint 1 is revolute, the zero position for $\theta_1$ may be chosen arbitrarily; $d_1 = 0$ is the convention used here.</li>
+      <li>If joint 1 is prismatic, the zero position of $d_1$ may be chosen arbitrarily; $\theta_1 = 0$ is the convention used here.</li>
+    </ul>
+
+    <!-- DH Parameters -->
+    <h3 id="sec-3-3-dh-params">Denavit &amp; Hartenberg Parameters
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=8" target="_blank">PDF p.8</a>
+    </h3>
+
+    <p>The four DH parameters that fully describe each link and its connection:</p>
+
+    <p><strong>Link Parameters</strong> (describe the link geometry):</p>
+    <ul>
+      <li>Link length, $a_{i-1}$</li>
+      <li>Link twist, $\alpha_{i-1}$</li>
+      <li>Link offset, $d_i$</li>
+    </ul>
+
+    <p><strong>Joint Parameter</strong> (describes the joint variable):</p>
+    <ul>
+      <li>Joint angle, $\theta_i$</li>
+    </ul>
+
+    <!-- ENRICHMENT: Video — Animated Introduction to DH Parameters -->
+    <div class="callout callout-enrichment" id="enrichment-video-dh-animation">
+      <div class="callout-label">Enrichment &mdash; Video</div>
+      <h3>Animated Introduction to DH Parameters</h3>
+      <p><strong>DH Reference Frame Layout Animation</strong> (YouTube)</p>
+      <ul>
+        <li><strong>URL</strong>: <a href="https://www.youtube.com/watch?v=rA9tm0gTln8" target="_blank">https://www.youtube.com/watch?v=rA9tm0gTln8</a></li>
+        <li><strong>Description</strong>: A widely-referenced animation that visually demonstrates how the Denavit-Hartenberg convention works. It shows, step by step, how coordinate frames are attached to links and how the four DH parameters relate to the geometric quantities between consecutive frames.</li>
+        <li><strong>Best for</strong>: Getting your first visual intuition of what $a$, $\alpha$, $d$, and $\theta$ mean geometrically.</li>
+      </ul>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why do we need exactly 4 DH parameters per joint &mdash; not 3, not 6?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>A general rigid-body transformation in 3D has <strong>6 degrees of freedom</strong> (3 translational + 3 rotational). However, the DH convention imposes <strong>2 constraints</strong> by requiring that the $\hat{X}_i$ axis is always perpendicular to both $\hat{Z}_{i-1}$ and $\hat{Z}_i$ and lies along their common normal. These 2 constraints reduce the free parameters from 6 to exactly 4.</p>
+        <p>From a geometric perspective: two arbitrary lines in 3D space (the consecutive joint axes) have a unique common perpendicular (unless they are parallel, in which case the perpendicular direction is unique but its location is not). This common perpendicular, together with the two axes, defines exactly four independent scalar measurements: two distances ($a$ along the perpendicular, $d$ along the axis) and two angles ($\alpha$ between the axes, $\theta$ between the perpendiculars).</p>
+        <p>Fewer than 4 parameters cannot capture the full generality of two skew lines in space. More than 4 would be redundant given the constraints imposed by the frame placement rules.</p>
+        <div class="why-source">Source: Denavit &amp; Hartenberg (1955), "A Kinematic Notation for Lower-Pair Mechanisms Based on Matrices," <em>J. Applied Mechanics</em> 22, pp. 215&ndash;221 · Craig, <em>Introduction to Robotics</em>, &sect;3.3 · <a href="https://en.wikipedia.org/wiki/Denavit%E2%80%93Hartenberg_parameters" target="_blank">Wikipedia: Denavit&ndash;Hartenberg parameters</a></div>
+      </div></div>
+    </div>
+
+    <!-- ENRICHMENT: Video — Peter Corke Robot Academy -->
+    <div class="callout callout-enrichment" id="enrichment-video-corke">
+      <div class="callout-label">Enrichment &mdash; Video</div>
+      <h3>Peter Corke's Robot Academy &mdash; DH Notation</h3>
+      <p><strong>Denavit-Hartenberg Notation (Robot Academy)</strong></p>
+      <ul>
+        <li><strong>URL</strong>: <a href="https://robotacademy.net.au/lesson/denavit-hartenberg-notation/" target="_blank">https://robotacademy.net.au/lesson/denavit-hartenberg-notation/</a></li>
+        <li><strong>Description</strong>: Professor Peter Corke (Queensland University of Technology) explains the DH notation method for describing the structure of a serial-link manipulator. Part of the Robot Academy series. Corke is the author of <em>Robotics, Vision and Control</em> and the creator of the widely-used Robotics Toolbox for MATLAB/Python.</li>
+        <li><strong>Best for</strong>: A systematic, textbook-level presentation of DH notation with clear examples.</li>
+        <li><strong>See also</strong>: Corke's paper <a href="https://petercorke.com/doc/simple_systematic.pdf" target="_blank">"A simple and systematic approach to assigning Denavit-Hartenberg parameters"</a></li>
+      </ul>
+    </div>
+
+    <!-- ENRICHMENT: Video — Robotics Unveiled FK -->
+    <div class="callout callout-enrichment" id="enrichment-video-fk-unveiled">
+      <div class="callout-label">Enrichment &mdash; Video</div>
+      <h3>Robotics Unveiled &mdash; Forward Kinematics with DH Parameters</h3>
+      <p><strong>Robotics Part 17: Forward Kinematics using the DH Convention</strong></p>
+      <ul>
+        <li><strong>URL</strong>: <a href="https://www.roboticsunveiled.com/robotics-forward-kinematics-denavit-hartenberg-parameters/" target="_blank">https://www.roboticsunveiled.com/robotics-forward-kinematics-denavit-hartenberg-parameters/</a></li>
+        <li><strong>Description</strong>: A detailed walkthrough of using DH parameters to solve forward kinematics problems. Covers the full process from identifying joint axes to constructing the final transformation matrix, with worked examples.</li>
+        <li><strong>Best for</strong>: Seeing the entire DH pipeline from start to finish on concrete robot examples.</li>
+      </ul>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>In the DH convention, the parameter $a_i$ (link length) represents:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">The distance along $Z_{i}$ between $X_{i-1}$ and $X_i$</button>
+        <button class="quiz-option" data-correct="true">The distance along $X_i$ between $Z_{i-1}$ and $Z_i$</button>
+        <button class="quiz-option" data-correct="false">The angle about $Z_i$ from $X_{i-1}$ to $X_i$</button>
+        <button class="quiz-option" data-correct="false">The angle about $X_i$ from $Z_{i-1}$ to $Z_i$</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The link length $a_i$ is the distance measured along $X_i$ (the common normal) between the $Z_{i-1}$ and $Z_i$ axes." data-incorrect="Not quite. Remember: $a_i$ is along $X_i$, $d_i$ is along $Z_{i-1}$, $\alpha_i$ is about $X_i$, and $\theta_i$ is about $Z_{i-1}$."></div>
+    </div>
+
+    <div class="concept-check" data-concept="dh-parameters">
+      <span class="concept-check-label">How well do you understand DH parameters?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ==================== 3.4 Convention for Affixing Frames ===== -->
+    <h2 id="sec-3-4">3.4 Convention for Affixing Frames to Links
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=9" target="_blank">PDF p.9</a>
+    </h2>
+
+    <h3 id="sec-3-4-intermediate">Frame Assignment Rules &mdash; Intermediate Links
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=9" target="_blank">PDF p.9</a>
+    </h3>
+
+    <p>The rules for attaching coordinate frame $\{i\}$ to link $i$:</p>
+    <ol>
+      <li>The $\hat{Z}$-axis of frame $\{i\}$, called $\hat{Z}_i$, is coincident with the joint axis $i$.</li>
+      <li>The origin of frame $\{i\}$ is located where the $a_i$ perpendicular intersects the joint $i$ axis.</li>
+      <li>$\hat{X}_i$ points along $a_i$ in the direction from joint $i$ to $i + 1$.
+        <ul><li>In the case of $a_i = 0$, $\hat{X}_i$ is normal to the plane of $\hat{Z}_i$ and $\hat{Z}_{i+1}$. Then, $\alpha_i$ is measured in the right-hand sense about $\hat{X}_i$.</li></ul>
+      </li>
+      <li>$\hat{Y}_i$ is formed by the right-hand rule using $\hat{X}_i$ and $\hat{Z}_i$ in Cartesian frame.</li>
+    </ol>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p9.png" alt="Figure (page 9): A detailed diagram showing two consecutive links (Link $i-1$ and Link $i$) with their joint axes (Axis $i-1$ and Axis $i$). Frame $\{i\}$ is shown attached at the intersection of the " loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 9):</strong> A detailed diagram showing two consecutive links (Link $i-1$ and Link $i$) with their joint axes (Axis $i-1$ and Axis $i$). Frame $\{i\}$ is shown attached at the intersection of the common perpendicular $a_i$ with Axis $i$. The $\hat{Z}_i$ axis lies along the joint axis, $\hat{X}_i$ points along the common perpendicular toward the next joint, and $\hat{Y}_i$ completes the right-hand frame. The parameters $a_{i-1}$, $\alpha_{i-1}$, $d_i$, and $\theta_i$ are all labeled on the diagram.
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does the DH convention place frame origins on joint axes rather than at arbitrary points?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>The key insight is <strong>minimality</strong>. By forcing $\hat{Z}_i$ to lie along joint axis $i$ and placing the origin where the common perpendicular meets that axis, the DH convention eliminates all redundant degrees of freedom in frame placement. If you placed frames at arbitrary locations, you would need up to 6 parameters per link (a full homogeneous transform), and many of those parameters would be coupled in non-obvious ways.</p>
+        <p>The specific placement rules guarantee that each of the 4 DH parameters controls exactly one geometric quantity:</p>
+        <ul>
+          <li>$\hat{Z}_i$ along the joint axis means $\theta_i$ (or $d_i$) directly represents the joint motion.</li>
+          <li>$\hat{X}_i$ along the common normal means $a_i$ and $\alpha_i$ directly measure the link's shape.</li>
+          <li>The origin at the intersection of the common normal and the joint axis means $d_i$ is a simple signed distance along one axis.</li>
+        </ul>
+        <p>This decoupling is what makes the DH convention so powerful: each parameter has a clear physical meaning, and the resulting 4&times;4 transformation matrix has a clean, systematic structure that is the same for every link.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;3.4 · Corke, P. (2014), <a href="https://petercorke.com/doc/simple_systematic.pdf" target="_blank">"A simple and systematic approach to assigning DH parameters"</a> · MSE492 Ch. 3, PDF pp. 9&ndash;13</div>
+      </div></div>
+    </div>
+
+    <!-- ENRICHMENT: Common Mistakes — Frame Assignment Pitfalls -->
+    <div class="callout callout-warning" id="enrichment-frame-pitfalls">
+      <div class="callout-label">Common Mistakes &mdash; Frame Assignment Pitfalls</div>
+
+      <p><strong>Mistake 1: Placing the origin at the wrong location</strong></p>
+      <ul>
+        <li><strong>Wrong</strong>: Placing the origin of frame $\{i\}$ at the physical joint location or at the center of the link.</li>
+        <li><strong>Right</strong>: The origin of frame $\{i\}$ goes where the common perpendicular $a_i$ (between axis $i$ and axis $i+1$) intersects axis $i$. This may not be on the physical link at all!</li>
+        <li><strong>How to check</strong>: Verify that your origin lies exactly on the $\hat{Z}_i$ axis AND on the line segment (or its extension) of the common perpendicular.</li>
+      </ul>
+
+      <p><strong>Mistake 2: Confusing which subscript goes with which parameter</strong></p>
+      <ul>
+        <li>The four DH parameters for row $i$ of the table are: $\alpha_{i-1}$, $a_{i-1}$, $d_i$, $\theta_i$.</li>
+        <li>Note the mixed subscripts! The link parameters ($a$ and $\alpha$) have subscript $i-1$, while the joint parameters ($d$ and $\theta$) have subscript $i$. This is because $a_{i-1}$ and $\alpha_{i-1}$ describe link $i-1$ (the link <em>before</em> joint $i$), while $d_i$ and $\theta_i$ describe what happens <em>at</em> joint $i$.</li>
+        <li><strong>Mnemonic</strong>: "Link parameters look back, joint parameters look here."</li>
+      </ul>
+
+      <p><strong>Mistake 3: Getting the sign of the twist angle wrong</strong></p>
+      <ul>
+        <li>$\alpha_{i-1}$ is the angle from $\hat{Z}_{i-1}$ to $\hat{Z}_i$, measured about $\hat{X}_{i-1}$ using the <strong>right-hand rule</strong>.</li>
+        <li>Students often measure the acute angle and forget the sign. Always use the right-hand rule: curl your fingers of your right hand from $\hat{Z}_{i-1}$ toward $\hat{Z}_i$ around $\hat{X}_{i-1}$. Your thumb should point in the $+\hat{X}_{i-1}$ direction for a positive angle.</li>
+        <li>Common error: getting $+90°$ vs $-90°$ confused. This flips signs in the transformation matrix and cascades errors through the entire forward kinematics.</li>
+      </ul>
+
+      <p><strong>Mistake 4: Forgetting that $\hat{X}_i$ must point along the common perpendicular</strong></p>
+      <ul>
+        <li>Students sometimes assign $\hat{X}_i$ in an arbitrary direction. It MUST point along the common perpendicular from axis $i$ toward axis $i+1$.</li>
+        <li>When axes intersect ($a_i = 0$), there is no unique common perpendicular, so $\hat{X}_i$ is chosen perpendicular to the plane containing both $\hat{Z}$ axes. This is where you have a choice of direction, and it is easy to get the sign of $\alpha$ wrong.</li>
+      </ul>
+
+      <p><strong>Mistake 5: Not applying end-link conventions</strong></p>
+      <ul>
+        <li>For the base frame $\{0\}$: it coincides with frame $\{1\}$ when the first joint variable is zero. This forces $a_0 = 0$, $\alpha_0 = 0$.</li>
+        <li>For the end-effector frame $\{N\}$: $\hat{X}_N$ aligns with $\hat{X}_{N-1}$ when $\theta_N = 0$ (revolute) or is chosen so $\theta_N = 0$ (prismatic). This forces $a_N = 0$, $\alpha_N = 0$.</li>
+        <li>Forgetting these conventions leads to extra parameters in the first or last rows of the DH table.</li>
+      </ul>
+    </div>
+
+    <!-- ENRICHMENT: A Checklist for Frame Assignment -->
+    <div class="callout callout-enrichment" id="enrichment-checklist-frame">
+      <div class="callout-label">Enrichment &mdash; Alternative Explanation</div>
+      <h3>A Checklist for Frame Assignment</h3>
+
+      <p>If you find the textbook rules hard to follow all at once, try this <strong>systematic checklist</strong> approach (adapted from <a href="https://petercorke.com/doc/simple_systematic.pdf" target="_blank">Peter Corke's method</a>):</p>
+
+      <p><strong>Step 0 &mdash; Draw the robot in its zero configuration.</strong> Sketch all joint axes as infinite lines. Label them axis 1, axis 2, ..., axis $n$.</p>
+
+      <p><strong>Step 1 &mdash; Assign all $\hat{Z}$ axes first.</strong> For each joint $i$: $\hat{Z}_i$ lies along joint axis $i$. Choose the positive direction consistently (usually "up" or "outward").</p>
+
+      <p><strong>Step 2 &mdash; Find all common perpendiculars.</strong> For each pair of consecutive axes ($i$ and $i+1$), identify the common perpendicular. Mark the point where this perpendicular meets axis $i$ &mdash; that is the origin of frame $\{i\}$.</p>
+
+      <p><strong>Step 3 &mdash; Assign all $\hat{X}$ axes.</strong> $\hat{X}_i$ points along the common perpendicular from axis $i$ toward axis $i+1$. Special cases:</p>
+      <ul>
+        <li>If axes intersect: $\hat{X}_i = \hat{Z}_i \times \hat{Z}_{i+1}$ (or its negative &mdash; your choice, but be consistent).</li>
+        <li>If axes are parallel: the common perpendicular is not unique; pick any convenient perpendicular.</li>
+      </ul>
+
+      <p><strong>Step 4 &mdash; Complete with $\hat{Y}$ axes.</strong> $\hat{Y}_i = \hat{Z}_i \times \hat{X}_i$ (right-hand rule). You never need to compute $\hat{Y}$ explicitly for the DH table, but draw it to verify your frame is right-handed.</p>
+
+      <p><strong>Step 5 &mdash; Handle base and end-effector.</strong> Apply the special conventions for frames $\{0\}$ and $\{N\}$.</p>
+
+      <p><strong>Step 6 &mdash; Read off the DH parameters.</strong> Walk through each row of the table using the definitions:</p>
+      <ul>
+        <li>$a_i$: distance from $\hat{Z}_i$ to $\hat{Z}_{i+1}$ along $\hat{X}_i$</li>
+        <li>$\alpha_i$: angle from $\hat{Z}_i$ to $\hat{Z}_{i+1}$ about $\hat{X}_i$</li>
+        <li>$d_i$: distance from $\hat{X}_{i-1}$ to $\hat{X}_i$ along $\hat{Z}_i$</li>
+        <li>$\theta_i$: angle from $\hat{X}_{i-1}$ to $\hat{X}_i$ about $\hat{Z}_i$</li>
+      </ul>
+
+      <p><em>Reference: Corke, P. (2014). "A simple and systematic approach to assigning Denavit-Hartenberg parameters." Available at: <a href="https://petercorke.com/doc/simple_systematic.pdf" target="_blank">https://petercorke.com/doc/simple_systematic.pdf</a></em></p>
+    </div>
+
+    <!-- ENRICHMENT: Interactive Tool — DH Parameter Visualizers -->
+    <div class="callout callout-enrichment" id="enrichment-dh-tools">
+      <div class="callout-label">Enrichment &mdash; Interactive Tools</div>
+      <h3>DH Parameter Visualizers</h3>
+      <p>Several interactive online tools let you experiment with DH parameters and see the resulting robot configuration in real time:</p>
+      <ol>
+        <li><strong>VisRo Robotics &mdash; DH Parameter Visualization</strong>
+          <ul>
+            <li>Standard DH: <a href="https://vis-ro.web.app/robotics/dh-model" target="_blank">https://vis-ro.web.app/robotics/dh-model</a></li>
+            <li>Modified DH: <a href="https://vis-ro.web.app/robotics/modified-dh-model" target="_blank">https://vis-ro.web.app/robotics/modified-dh-model</a></li>
+            <li>Enter DH parameter values and see the coordinate frames and robot links update in 3D.</li>
+          </ul>
+        </li>
+        <li><strong>Glowbuzzer Kinematics Visualizer</strong>
+          <ul><li><a href="https://tools.glowbuzzer.com/kinviz" target="_blank">https://tools.glowbuzzer.com/kinviz</a></li></ul>
+        </li>
+        <li><strong>MATLAB Robotics Toolbox</strong>
+          <ul>
+            <li><code>interactiveRigidBodyTree</code> lets you click and drag joints to explore kinematics.</li>
+            <li>Build a robot from DH parameters: <a href="https://www.mathworks.com/help/robotics/ug/build-manipulator-robot-using-kinematic-dh-parameters.html" target="_blank">MATLAB docs</a></li>
+          </ul>
+        </li>
+        <li><strong>Wolfram Demonstrations: DH Parameters for a Three-Link Robot</strong>
+          <ul><li><a href="https://demonstrations.wolfram.com/DenavitHartenbergParametersForAThreeLinkRobot/" target="_blank">https://demonstrations.wolfram.com/DenavitHartenbergParametersForAThreeLinkRobot/</a></li></ul>
+        </li>
+        <li><strong>Peter Corke's Robotics Toolbox for Python</strong>
+          <ul><li><a href="https://petercorke.github.io/robotics-toolbox-python/arm_dh.html" target="_blank">https://petercorke.github.io/robotics-toolbox-python/arm_dh.html</a></li></ul>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Frame {0} -->
+    <h3 id="sec-3-4-frame0">Frame Assignment Rules &mdash; First Link (Frame {0})
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=10" target="_blank">PDF p.10</a>
+    </h3>
+
+    <p><strong>First link</strong>: A non-moving frame is attached to the base of the robot, or link 0, called frame $\{0\}$. It coincides with frame $\{1\}$. Therefore, we always have $a_0 = 0$ and $\alpha_0 = 0$.</p>
+    <ul>
+      <li>If joint 1 is revolute, link offset is $d_1 = 0$.</li>
+      <li>If joint 1 is prismatic, joint angle is $\theta_1 = 0$.</li>
+    </ul>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p10.png" alt="Figure (page 10): Same two-link diagram as page 9, now additionally showing frame $\{0\}$ at the base coinciding with frame $\{1\}$. The base frame axes $\hat{X}_0$, $\hat{Y}_0$, $\hat{Z}_0$ are shown" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 10):</strong> Same two-link diagram as page 9, now additionally showing frame $\{0\}$ at the base coinciding with frame $\{1\}$. The base frame axes $\hat{X}_0$, $\hat{Y}_0$, $\hat{Z}_0$ are shown overlapping with the frame $\{1\}$ axes when joint variable is zero. The diagram illustrates how both the intermediate frame attachment and the base frame attachment conventions apply simultaneously.
+    </div>
+
+    <!-- Frame {N} -->
+    <h3 id="sec-3-4-frameN">Frame Assignment Rules &mdash; Last Link (Frame {N})
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=11" target="_blank">PDF p.11</a>
+    </h3>
+
+    <p><strong>Last link</strong>:</p>
+    <ul>
+      <li>If joint $n$ is revolute, the direction of $\hat{X}_N$ is chosen so that it aligns with $\hat{X}_{N-1}$ when $\theta_n = 0$. The origin of frame $\{N\}$ is chosen so that $d_n = 0$.</li>
+      <li>If joint $n$ is prismatic, the direction of $\hat{X}_N$ is chosen so $\theta_n = 0$. The origin of frame $\{N\}$ is chosen at the intersection of $\hat{X}_{N-1}$ and joint axis $n$ when $d_n = 0$.</li>
+    </ul>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p11.png" alt="Figure (page 11): Same two-link diagram as pages 9-10, repeated for reference, showing the complete frame assignment across all links from base to end-effector." loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 11):</strong> Same two-link diagram as pages 9-10, repeated for reference, showing the complete frame assignment across all links from base to end-effector.
+    </div>
+
+    <!-- Summary of Link Parameters -->
+    <h3 id="sec-3-4-param-summary">Summary of Link Parameters in Terms of Link Frames
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=12" target="_blank">PDF p.12</a>
+    </h3>
+
+    <p>The four DH parameters defined in terms of the assigned link frames:</p>
+    <ul>
+      <li>$a_i$ = the distance from $\hat{Z}_i$ to $\hat{Z}_{i+1}$ measured along $\hat{X}_i$.</li>
+      <li>$\alpha_i$ = the angle from $\hat{Z}_i$ to $\hat{Z}_{i+1}$ measured about $\hat{X}_i$.</li>
+      <li>$d_i$ = the distance from $\hat{X}_{i-1}$ to $\hat{X}_i$ measured along $\hat{Z}_i$.</li>
+      <li>$\theta_i$ = the angle from $\hat{X}_{i-1}$ to $\hat{X}_i$ measured about $\hat{Z}_i$.</li>
+    </ul>
+
+    <!-- Summary of Frame Attachment Procedure -->
+    <h3 id="sec-3-4-procedure">Summary of the Link-Frame Attachment Procedure
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=13" target="_blank">PDF p.13</a>
+    </h3>
+
+    <p><strong>Step-by-step procedure</strong>:</p>
+    <ol>
+      <li><strong>Identify joint axes</strong> (assume infinite lines).</li>
+      <li><strong>Identify the common normal</strong> between consecutive axes $i$ and $i + 1$. Assign the origin of the $i^{\text{th}}$ link frame at the point where the common normal intersects axis $i$. If axes $i$ and $i + 1$ intersect, assign the origin at the intersection point.</li>
+      <li><strong>Assign the $\hat{Z}_i$ axis</strong> pointing along the $i^{\text{th}}$ joint axis.</li>
+      <li><strong>Assign the $\hat{X}_i$ axis</strong> pointing along the common normal, or if the axes intersect, assign the $\hat{X}_i$ axis to be normal to the axes plane.</li>
+      <li><strong>Assign the $\hat{Y}_i$ axis</strong> to complete the right-hand frame convention.</li>
+      <li><strong>Assign frame $\{0\}$</strong> to be fixed. It coincides with frame $\{1\}$ when $\theta_1 = 0$ or $d_1 = 0$. Assign frame $\{e.e.\}$ at the end-effector's point.</li>
+    </ol>
+
+    <!-- ENRICHMENT: Video — AutomaticAddison -->
+    <div class="callout callout-enrichment" id="enrichment-video-addison">
+      <div class="callout-label">Enrichment &mdash; Video</div>
+      <h3>Step-by-Step Frame Assignment Tutorial (AutomaticAddison)</h3>
+      <p><strong>How to Assign Denavit-Hartenberg Frames to Robotic Arms</strong></p>
+      <ul>
+        <li><strong>URL</strong>: <a href="https://automaticaddison.com/how-to-assign-denavit-hartenberg-frames-to-robotic-arms/" target="_blank">https://automaticaddison.com/how-to-assign-denavit-hartenberg-frames-to-robotic-arms/</a></li>
+        <li><strong>Description</strong>: A detailed written and visual tutorial that walks through the DH frame assignment process for multiple robot configurations (2-DOF, 6-DOF arms). Includes diagrams at every step showing exactly where each frame goes and why.</li>
+        <li><strong>Companion article</strong>: <a href="https://automaticaddison.com/how-to-find-denavit-hartenberg-parameter-tables/" target="_blank">How to Find Denavit-Hartenberg Parameter Tables</a></li>
+        <li><strong>Best for</strong>: Students who want a second explanation with different diagrams than the textbook.</li>
+      </ul>
+    </div>
+
+    <!-- ENRICHMENT: Video — Robotiq -->
+    <div class="callout callout-enrichment" id="enrichment-video-robotiq">
+      <div class="callout-label">Enrichment &mdash; Video</div>
+      <h3>Five-Step Forward Kinematics (Robotiq)</h3>
+      <p><strong>How to Calculate a Robot's Forward Kinematics in 5 Easy Steps</strong></p>
+      <ul>
+        <li><strong>URL</strong>: <a href="https://blog.robotiq.com/how-to-calculate-a-robots-forward-kinematics-in-5-easy-steps" target="_blank">https://blog.robotiq.com/how-to-calculate-a-robots-forward-kinematics-in-5-easy-steps</a></li>
+        <li><strong>Description</strong>: An industry-oriented tutorial from Robotiq (a collaborative robot company) that distills the forward kinematics process into five actionable steps. Provides a practical, engineer's perspective on DH parameters.</li>
+        <li><strong>Best for</strong>: Students who find the textbook too abstract and want a more applied perspective.</li>
+      </ul>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>For a revolute joint, which DH parameter is the joint variable?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">$a_i$ (link length)</button>
+        <button class="quiz-option" data-correct="false">$\alpha_i$ (link twist)</button>
+        <button class="quiz-option" data-correct="false">$d_i$ (link offset)</button>
+        <button class="quiz-option" data-correct="true">$\theta_i$ (joint angle)</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! For revolute joints, $\theta_i$ varies. For prismatic joints, $d_i$ varies. The other two parameters are always constant." data-incorrect="For revolute joints, the rotation about $Z_{i-1}$ varies, which is $\theta_i$. For prismatic joints, the translation along $Z_{i-1}$ varies, which is $d_i$."></div>
+    </div>
+
+    <div class="concept-check" data-concept="frame-assignment">
+      <span class="concept-check-label">How well do you understand frame assignment?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ==================== Worked Example: 3-Link Planar Arm ===== -->
+    <div class="callout callout-example" id="example-3link-planar">
+      <div class="callout-label">Worked Example</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=14" target="_blank">PDF p.14</a>
+      <h3>Three-Link Planar Arm (RRR Mechanism)</h3>
+
+      <p><strong>Problem</strong>: Figure shows a three-link planar arm. Because all three joints are revolute, this manipulator is sometimes called an $\boldsymbol{RRR}$ (or $\boldsymbol{3R}$) mechanism. A schematic representation is presented.</p>
+      <p>a) Assign link frames to the mechanism.<br>
+         b) Find the Denavit-Hartenberg parameters.</p>
+
+      <div class="figure">
+      <img src="assets/images/ch3_p14.png" alt="Figure (page 14): (a) A physical drawing of a three-link planar arm showing three revolute joints connecting links of lengths $L_1$, $L_2$, and $L_3$. The arm lies in a plane with joints marked by cir" loading="lazy">
+    </div>
+    <div class="figure-desc">
+        <strong>Figure (page 14):</strong> (a) A physical drawing of a three-link planar arm showing three revolute joints connecting links of lengths $L_1$, $L_2$, and $L_3$. The arm lies in a plane with joints marked by circles. Joint angles $\theta_1$, $\theta_2$, $\theta_3$ are shown at each joint. (b) A schematic representation showing the same mechanism as a chain of three revolute joints (depicted as cylinders) connected by links.
+      </div>
+
+      <button class="solution-toggle" data-target="sol-ch3-2">Show Solution</button>
+      <div class="solution-content" id="sol-ch3-2">
+
+        <h4>a) Link Frame Assignment
+          <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=15" target="_blank">PDF p.15</a>
+        </h4>
+        <div class="figure">
+      <img src="assets/images/ch3_p15.png" alt="Figure (page 15): The three-link planar arm with all coordinate frames assigned. Frame $\{0\}$ is at the base with $\hat{X}_0$ pointing right and $\hat{Y}_0$ pointing up (green arrows). Frame $\{1\}$ " loading="lazy">
+    </div>
+    <div class="figure-desc">
+          <strong>Figure (page 15):</strong> The three-link planar arm with all coordinate frames assigned. Frame $\{0\}$ is at the base with $\hat{X}_0$ pointing right and $\hat{Y}_0$ pointing up (green arrows). Frame $\{1\}$ is co-located with frame $\{0\}$ at the base joint, with $\hat{X}_1$ along the first link direction and $\hat{Y}_1$ perpendicular (yellow/orange arrows); $\theta_1$ is measured from $\hat{X}_0$ to $\hat{X}_1$. Frame $\{2\}$ is at the second joint with $\hat{X}_2$ along the second link direction and $\hat{Y}_2$ perpendicular (red arrows); $\theta_2$ is measured from $\hat{X}_1$ to $\hat{X}_2$. Frame $\{3\}$ is at the third joint with $\hat{X}_3$ along the third link direction and $\hat{Y}_3$ perpendicular (dark red arrows); $\theta_3$ is measured from $\hat{X}_2$ to $\hat{X}_3$. All $\hat{Z}$ axes point out of the page since all joints are revolute about the same parallel axis. Link lengths $L_1$, $L_2$, $L_3$ are labeled along each link.
+        </div>
+
+        <h4>b) Denavit-Hartenberg Parameters
+          <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=16" target="_blank">PDF p.16</a>
+        </h4>
+        <table>
+          <thead>
+            <tr><th>$i$</th><th>$\alpha_{i-1}$</th><th>$a_{i-1}$</th><th>$d_i$</th><th>$\theta_i$</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>$0$</td><td>$0$</td><td>$0$</td><td>$\theta_1$</td></tr>
+            <tr><td>2</td><td>$0$</td><td>$L_1$</td><td>$0$</td><td>$\theta_2$</td></tr>
+            <tr><td>3</td><td>$0$</td><td>$L_2$</td><td>$0$</td><td>$\theta_3$</td></tr>
+            <tr><td>e.e.</td><td>$0$</td><td>$L_3$</td><td>$0$</td><td>$0$</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Observations</strong>:</p>
+        <ul>
+          <li>All $\alpha_{i-1} = 0$ because all joint axes are parallel (all $\hat{Z}$ axes point in the same direction, out of the plane).</li>
+          <li>All $d_i = 0$ because all joints are revolute and the arm is planar (no offset along any joint axis).</li>
+          <li>The link lengths $a_{i-1}$ correspond to the physical link lengths $L_1$, $L_2$, $L_3$.</li>
+          <li>For the end-effector row, $\theta = 0$ because $\hat{X}_{e.e.}$ is chosen to align with $\hat{X}_3$ by convention.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ==================== 3.5 Manipulator Kinematics ============ -->
+    <h2 id="sec-3-5">3.5 Manipulator Kinematics &mdash; Derivation of Link Transformations
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=17" target="_blank">PDF p.17</a>
+    </h2>
+
+    <h3 id="sec-3-5-motivation">Motivation</h3>
+    <p>Now that the frames are attached to the links and the Denavit and Hartenberg parameters are identified, the next step is to establish a quantitative connection between each link frame and its precedent. This process is called <span class="tooltip-term" tabindex="0">forward kinematics<span class="tooltip-content">The problem of computing the position and orientation of a robot's end-effector given all the joint variables. It is solved by multiplying the sequence of DH transformation matrices from base to tool. The inverse problem (given end-effector pose, find joint angles) is called inverse kinematics.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;3.5; <a href="https://en.wikipedia.org/wiki/Forward_kinematics" target="_blank">Wikipedia: Forward kinematics</a></span></span></span>.</p>
+
+    <p>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=17" target="_blank">PDF p.17</a>
+      The homogeneous transform ${}^{i-1}_i T$ is obtained through a series of intermediate frames, each containing a parameter.
+    </p>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p17.png" alt="Figure (page 17): Diagram showing two consecutive links with their frames. Between frame $\{i-1\}$ and frame $\{i\}$, four intermediate frames are introduced: frame at $\hat{X}_{i-1}$ origin, frame af" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 17):</strong> Diagram showing two consecutive links with their frames. Between frame $\{i-1\}$ and frame $\{i\}$, four intermediate frames are introduced: frame at $\hat{X}_{i-1}$ origin, frame after rotation by $\theta_i$ about $\hat{Z}_i$, frame after translation by $d_i$ along $\hat{Z}_i$, frame after translation by $a_{i-1}$ along $\hat{X}_{i-1}$, and frame after rotation by $\alpha_{i-1}$ about $\hat{X}_{i-1}$. The chain of intermediate transformations connects frame $\{i-1\}$ to frame $\{i\}$.
+    </div>
+
+    <p>It is desirable to write the transformation that transforms vectors defined in $\{i\}$ to their description in $\{i-1\}$.</p>
+
+    <!-- Super-Sub-Script Cancellation Law -->
+    <h3 id="sec-3-5-cancellation">Super-Sub-Script Cancellation Law
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=18" target="_blank">PDF p.18</a>
+    </h3>
+
+    <p>Applying the "super-sub-script cancellation law":</p>
+
+    $${}^{i-1}_i T = {}^{i-1}_R T \; {}^R_Q T \; {}^Q_P T \; {}^P_i T$$
+
+    <p>Hence:</p>
+
+    $${}^{i-1}\boldsymbol{P} = {}^{i-1}_i T \; {}^{i}\boldsymbol{P}$$
+
+    <div class="figure">
+      <img src="assets/images/ch3_p18.png" alt="Figure (page 18): Same two-link diagram as page 17, now with intermediate frames labeled $R$, $Q$, and $P$ between frames $\{i-1\}$ and $\{i\}$. The intermediate frame origins and axes are marked, sho" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 18):</strong> Same two-link diagram as page 17, now with intermediate frames labeled $R$, $Q$, and $P$ between frames $\{i-1\}$ and $\{i\}$. The intermediate frame origins and axes are marked, showing the chain of transformations: frame $\{i-1\}$ to $R$ (rotation about $X$ by $\alpha_{i-1}$), $R$ to $Q$ (translation along $X$ by $a_{i-1}$), $Q$ to $P$ (rotation about $Z$ by $\theta_i$), $P$ to $\{i\}$ (translation along $Z$ by $d_i$).
+    </div>
+
+    <!-- Derivation of the General DH Transformation Matrix -->
+    <h3 id="sec-3-5-derivation">Derivation of the General DH Transformation Matrix
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=19" target="_blank">PDF p.19</a>
+    </h3>
+
+    <p>For ${}^{i-1}_i T = {}^{i-1}_R T \; {}^R_Q T \; {}^Q_P T \; {}^P_i T$, the four component transformations are:</p>
+
+    <div class="derivation-steps" id="deriv-ch3-dh-components">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Rotation about $X$ by $\alpha_{i-1}$ (from frame $\{i-1\}$ to $\{R\}$)</div>
+        $${}^{i-1}_R T = \begin{bmatrix} R_X(\alpha_{i-1}) & \boldsymbol{0} \\ \boldsymbol{0}^T & 1 \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & c\alpha_{i-1} & -s\alpha_{i-1} & 0 \\ 0 & s\alpha_{i-1} & c\alpha_{i-1} & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Translation along $X$ by $a_{i-1}$ (from $\{R\}$ to $\{Q\}$)</div>
+        $${}^R_Q T = \begin{bmatrix} I_3 & \begin{smallmatrix} a_{i-1} \\ 0 \\ 0 \end{smallmatrix} \\ \boldsymbol{0}^T & 1 \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 & a_{i-1} \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Rotation about $Z$ by $\theta_i$ (from $\{Q\}$ to $\{P\}$)</div>
+        $${}^Q_P T = \begin{bmatrix} R_Z(\theta_i) & \boldsymbol{0} \\ \boldsymbol{0}^T & 1 \end{bmatrix} = \begin{bmatrix} c\theta_i & -s\theta_i & 0 & 0 \\ s\theta_i & c\theta_i & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Translation along $Z$ by $d_i$ (from $\{P\}$ to $\{i\}$)</div>
+        $${}^P_i T = \begin{bmatrix} I_3 & \begin{smallmatrix} 0 \\ 0 \\ d_i \end{smallmatrix} \\ \boldsymbol{0}^T & 1 \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & d_i \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous Step</button>
+        <span class="step-counter">Step 1 of 4</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <!-- Key Equation: General DH Transformation Matrix -->
+    <h3 id="sec-3-5-key-dh-matrix">Key Equation: General DH Transformation Matrix
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=19" target="_blank">PDF p.19</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Key Equation</div>
+      <p>Multiplying the four component matrices yields the general link transformation:</p>
+      $${}^{i-1}_i T = \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i \, c\alpha_{i-1} & c\theta_i \, c\alpha_{i-1} & -s\alpha_{i-1} & -d_i \, s\alpha_{i-1} \\ s\theta_i \, s\alpha_{i-1} & c\theta_i \, s\alpha_{i-1} & c\alpha_{i-1} & d_i \, c\alpha_{i-1} \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+      <p>where:</p>
+      <ul>
+        <li>$c\theta_i = \cos\theta_i$, $s\theta_i = \sin\theta_i$</li>
+        <li>$c\alpha_{i-1} = \cos\alpha_{i-1}$, $s\alpha_{i-1} = \sin\alpha_{i-1}$</li>
+      </ul>
+    </div>
+
+    <!-- ENRICHMENT: Proof — Deriving the DH Matrix by Explicit Matrix Multiplication -->
+    <div class="callout callout-enrichment" id="enrichment-dh-matrix-proof">
+      <div class="callout-label">Enrichment &mdash; Proof</div>
+      <h3>Deriving the DH Matrix by Explicit Matrix Multiplication</h3>
+
+      <p>The general DH transformation matrix can be verified by carrying out the $4 \times 4$ matrix multiplication explicitly. Here is the full derivation:</p>
+
+      $${}^{i-1}_i T = {}^{i-1}_R T \cdot {}^R_Q T \cdot {}^Q_P T \cdot {}^P_i T$$
+
+      <div class="collapsible">
+        <div class="collapsible-header">Full Derivation Steps</div>
+        <div class="collapsible-body">
+          <div class="collapsible-body-inner">
+            <p><strong>Step 1</strong>: Multiply ${}^{i-1}_R T \cdot {}^R_Q T$ (rotation about $X$ by $\alpha_{i-1}$, then translate along $X$ by $a_{i-1}$):</p>
+
+            $${}^{i-1}_R T \cdot {}^R_Q T = \begin{bmatrix} 1 & 0 & 0 & a_{i-1} \\ 0 & c\alpha_{i-1} & -s\alpha_{i-1} & 0 \\ 0 & s\alpha_{i-1} & c\alpha_{i-1} & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+            <p>Note: The rotation does not affect the translation along $X$ because $R_X$ leaves the $x$-component unchanged.</p>
+
+            <p><strong>Step 2</strong>: Multiply the result by ${}^Q_P T$ (rotation about $Z$ by $\theta_i$):</p>
+
+            $$\begin{bmatrix} 1 & 0 & 0 & a_{i-1} \\ 0 & c\alpha_{i-1} & -s\alpha_{i-1} & 0 \\ 0 & s\alpha_{i-1} & c\alpha_{i-1} & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} c\theta_i & -s\theta_i & 0 & 0 \\ s\theta_i & c\theta_i & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} = \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i \, c\alpha_{i-1} & c\theta_i \, c\alpha_{i-1} & -s\alpha_{i-1} & 0 \\ s\theta_i \, s\alpha_{i-1} & c\theta_i \, s\alpha_{i-1} & c\alpha_{i-1} & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+            <p><strong>Step 3</strong>: Multiply by ${}^P_i T$ (translate along $Z$ by $d_i$):</p>
+
+            $$\begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i \, c\alpha_{i-1} & c\theta_i \, c\alpha_{i-1} & -s\alpha_{i-1} & 0 \\ s\theta_i \, s\alpha_{i-1} & c\theta_i \, s\alpha_{i-1} & c\alpha_{i-1} & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & d_i \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+            <p>The rotation submatrix is unchanged. Only the translation vector changes: the new fourth column is the old fourth column plus $d_i$ times the third column of the rotation submatrix:</p>
+
+            $$= \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} + 0 \cdot d_i \\ s\theta_i \, c\alpha_{i-1} & c\theta_i \, c\alpha_{i-1} & -s\alpha_{i-1} & 0 + (-s\alpha_{i-1}) d_i \\ s\theta_i \, s\alpha_{i-1} & c\theta_i \, s\alpha_{i-1} & c\alpha_{i-1} & 0 + c\alpha_{i-1} \cdot d_i \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+            $$= \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i \, c\alpha_{i-1} & c\theta_i \, c\alpha_{i-1} & -s\alpha_{i-1} & -d_i \, s\alpha_{i-1} \\ s\theta_i \, s\alpha_{i-1} & c\theta_i \, s\alpha_{i-1} & c\alpha_{i-1} & d_i \, c\alpha_{i-1} \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+            <p>This matches the general DH transformation matrix exactly, confirming the result.</p>
+
+            <p><strong>Sanity checks</strong>:</p>
+            <ul>
+              <li>The upper-left $3 \times 3$ block is a valid rotation matrix (its columns are orthonormal and its determinant is $+1$).</li>
+              <li>Setting all parameters to zero gives the $4 \times 4$ identity matrix, as expected.</li>
+              <li>Setting only $\theta_i \neq 0$ with all others zero gives a pure rotation about $Z$, which is correct for a revolute joint with no link offset or twist.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 3.5 Forward Kinematics ================ -->
+    <h2 id="sec-3-5-fk">3.5 Manipulator Kinematics &mdash; Forward Kinematics
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=20" target="_blank">PDF p.20</a>
+    </h2>
+
+    <!-- Worked Example: FK of 3-Link Planar Arm -->
+    <div class="callout callout-example" id="example-fk-3link">
+      <div class="callout-label">Worked Example</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=20" target="_blank">PDF p.20</a>
+      <h3>Forward Kinematics of the Three-Link Planar Arm</h3>
+
+      <p><strong>Problem</strong>: Consider the three-link planar arm from slide 14. Use the Denavit-Hartenberg parameters found in slide 16 to solve for the forward kinematics.</p>
+
+      <p><strong>Recalling the DH parameters</strong>:</p>
+      <table>
+        <thead>
+          <tr><th>$i$</th><th>$\alpha_{i-1}$</th><th>$a_{i-1}$</th><th>$d_i$</th><th>$\theta_i$</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>$0$</td><td>$0$</td><td>$0$</td><td>$\theta_1$</td></tr>
+          <tr><td>2</td><td>$0$</td><td>$L_1$</td><td>$0$</td><td>$\theta_2$</td></tr>
+          <tr><td>3</td><td>$0$</td><td>$L_2$</td><td>$0$</td><td>$\theta_3$</td></tr>
+          <tr><td>e.e.</td><td>$0$</td><td>$L_3$</td><td>$0$</td><td>$0$</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Recalling the general DH transformation</strong> ${}^{i-1}_i T$ from slide 19:</p>
+
+      $${}^{i-1}_i T = \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i \, c\alpha_{i-1} & c\theta_i \, c\alpha_{i-1} & -s\alpha_{i-1} & -d_i \, s\alpha_{i-1} \\ s\theta_i \, s\alpha_{i-1} & c\theta_i \, s\alpha_{i-1} & c\alpha_{i-1} & d_i \, c\alpha_{i-1} \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+      <button class="solution-toggle" data-target="sol-ch3-3">Show Solution</button>
+      <div class="solution-content" id="sol-ch3-3">
+
+        <div class="derivation-steps" id="deriv-ch3-fk">
+          <div class="derivation-step visible">
+            <div class="step-label">Step 1: Compute ${}^0_1 T$</div>
+            <p>Substitute $i = 1$: $\alpha_0 = 0$, $a_0 = 0$, $d_1 = 0$, $\theta_1 = \theta_1$:</p>
+            $${}^0_1 T = \begin{bmatrix} c\theta_1 & -s\theta_1 & 0 & 0 \\ s\theta_1 & c\theta_1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+          </div>
+
+          <div class="derivation-step">
+            <div class="step-label">Step 2: Compute ${}^1_2 T$</div>
+            <p>Substitute $i = 2$: $\alpha_1 = 0$, $a_1 = L_1$, $d_2 = 0$, $\theta_2 = \theta_2$:</p>
+            $${}^1_2 T = \begin{bmatrix} c\theta_2 & -s\theta_2 & 0 & L_1 \\ s\theta_2 & c\theta_2 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+          </div>
+
+          <div class="derivation-step">
+            <div class="step-label">Step 3: Compute ${}^2_3 T$</div>
+            <p>Substitute $i = 3$: $\alpha_2 = 0$, $a_2 = L_2$, $d_3 = 0$, $\theta_3 = \theta_3$:</p>
+            $${}^2_3 T = \begin{bmatrix} c\theta_3 & -s\theta_3 & 0 & L_2 \\ s\theta_3 & c\theta_3 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+          </div>
+
+          <div class="derivation-step">
+            <div class="step-label">Step 4: Compute ${}^3_{e.e.} T$</div>
+            <p>Substitute end-effector row: $\alpha_3 = 0$, $a_3 = L_3$, $d_{e.e.} = 0$, $\theta_{e.e.} = 0$:</p>
+            $${}^3_{e.e.} T = \begin{bmatrix} 1 & 0 & 0 & L_3 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+          </div>
+
+          <div class="derivation-step">
+            <div class="step-label">Step 5: Compute the full forward kinematics</div>
+            <p>Chain the transforms:</p>
+            $${}^0_{e.e.} T = {}^0_1 T \; {}^1_2 T \; {}^2_3 T \; {}^3_{e.e.} T$$
+          </div>
+
+          <div class="step-controls">
+            <button class="step-btn step-prev" disabled>Previous Step</button>
+            <span class="step-counter">Step 1 of 5</span>
+            <button class="step-btn step-next">Next Step</button>
+            <button class="step-btn step-show-all">Show All</button>
+          </div>
+        </div>
+
+        <h4>Forward Kinematics Result
+          <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=20" target="_blank">PDF p.20</a>
+        </h4>
+
+        <div class="callout callout-theorem">
+          <div class="callout-label">Key Result</div>
+          $${}^0_{e.e.} T = \begin{bmatrix} c(\theta_1 + \theta_2 + \theta_3) & -s(\theta_1 + \theta_2 + \theta_3) & 0 & L_1 c\theta_1 + L_2 c(\theta_1 + \theta_2) + L_3 c(\theta_1 + \theta_2 + \theta_3) \\ s(\theta_1 + \theta_2 + \theta_3) & c(\theta_1 + \theta_2 + \theta_3) & 0 & L_1 s\theta_1 + L_2 s(\theta_1 + \theta_2) + L_3 s(\theta_1 + \theta_2 + \theta_3) \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        </div>
+
+        <p><strong>Interpretation</strong>:</p>
+        <ul>
+          <li>The rotation submatrix shows a pure rotation about $\hat{Z}$ by the total angle $(\theta_1 + \theta_2 + \theta_3)$, confirming the planar nature.</li>
+          <li>The position of the end-effector is:
+            <ul>
+              <li>$x = L_1 \cos\theta_1 + L_2 \cos(\theta_1 + \theta_2) + L_3 \cos(\theta_1 + \theta_2 + \theta_3)$</li>
+              <li>$y = L_1 \sin\theta_1 + L_2 \sin(\theta_1 + \theta_2) + L_3 \sin(\theta_1 + \theta_2 + \theta_3)$</li>
+              <li>$z = 0$ (planar arm in the $XY$-plane)</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>The forward kinematics of an $n$-DOF manipulator ${}^0_n T$ is computed as:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">${}^0_1 T + {}^1_2 T + \cdots + {}^{n-1}_n T$</button>
+        <button class="quiz-option" data-correct="true">${}^0_1 T \cdot {}^1_2 T \cdot \; \cdots \; \cdot {}^{n-1}_n T$</button>
+        <button class="quiz-option" data-correct="false">${}^{n-1}_n T \cdot \; \cdots \; \cdot {}^1_2 T \cdot {}^0_1 T$</button>
+        <button class="quiz-option" data-correct="false">${}^0_1 T \times {}^1_2 T \times \cdots \times {}^{n-1}_n T$</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! Forward kinematics is the sequential product of individual link transforms, computed left to right from base to end-effector." data-incorrect="Remember: forward kinematics uses matrix multiplication (not addition or cross product), and the order matters — base frame (0) to end-effector (n), left to right."></div>
+    </div>
+
+    <div class="concept-check" data-concept="forward-kinematics">
+      <span class="concept-check-label">How well do you understand forward kinematics?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ==================== 3.8 Standard Names for Frames ========= -->
+    <h2 id="sec-3-8">3.8 Standard Names for Frames
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=21" target="_blank">PDF p.21</a>
+    </h2>
+
+    <h3 id="sec-3-8-definitions">Definitions</h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=21" target="_blank">PDF p.21</a>
+      <p><strong>The Base Frame</strong> ($\{B\}$): Located at the base of the manipulator. Another name for frame $\{0\}$. Sometimes, it is called link 0.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=21" target="_blank">PDF p.21</a>
+      <p><strong>The Station Frame</strong> ($\{S\}$): Located in a task-relevant location. Sometimes it is called the <em>task frame</em>, the <em>world frame</em>, or the <em>universe frame</em>.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=21" target="_blank">PDF p.21</a>
+      <p><strong>The Wrist Frame</strong> ($\{W\}$): Affixed to the last link of the manipulator. Often, $\{W\}$ has its origin fixed at a point called the <em>wrist</em> of the manipulator and moves with the last link.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=21" target="_blank">PDF p.21</a>
+      <p><strong>The Tool Frame</strong> ($\{T\}$): Affixed to the end of any tool the robot happens to be holding.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=21" target="_blank">PDF p.21</a>
+      <p><strong>The Goal Frame</strong> ($\{G\}$): A description of the location to which the robot is to move the tool.</p>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch3_p21.png" alt="Figure (page 21): A robot manipulator (articulated arm on a base) is shown with the five standard frames labeled. $\{B\}$ is at the base of the robot on the ground. $\{W\}$ is at the wrist (last joint" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure (page 21):</strong> A robot manipulator (articulated arm on a base) is shown with the five standard frames labeled. $\{B\}$ is at the base of the robot on the ground. $\{W\}$ is at the wrist (last joint) of the manipulator. $\{T\}$ is at the tip of the tool/gripper attached to the wrist. $\{S\}$ is shown as a fixed frame on the ground/table surface in the workspace. $\{G\}$ is shown at a target location on the table surface where the robot needs to move the tool.
+    </div>
+
+    <div class="quiz-score"></div>
+
+    <!-- ==================== Key Equations Summary ================= -->
+    <h2 id="sec-key-equations">Key Equations Summary</h2>
+
+    <h3 id="sec-key-dh-defs">DH Parameter Definitions (in terms of link frames)
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=12" target="_blank">PDF p.12</a>
+    </h3>
+
+    <table>
+      <thead>
+        <tr><th>Parameter</th><th>Definition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>$a_i$</td><td>Distance from $\hat{Z}_i$ to $\hat{Z}_{i+1}$ measured along $\hat{X}_i$</td></tr>
+        <tr><td>$\alpha_i$</td><td>Angle from $\hat{Z}_i$ to $\hat{Z}_{i+1}$ measured about $\hat{X}_i$</td></tr>
+        <tr><td>$d_i$</td><td>Distance from $\hat{X}_{i-1}$ to $\hat{X}_i$ measured along $\hat{Z}_i$</td></tr>
+        <tr><td>$\theta_i$</td><td>Angle from $\hat{X}_{i-1}$ to $\hat{X}_i$ measured about $\hat{Z}_i$</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="sec-key-general-dh">General DH Transformation Matrix
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=19" target="_blank">PDF p.19</a>
+    </h3>
+
+    $${}^{i-1}_i T = \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i \, c\alpha_{i-1} & c\theta_i \, c\alpha_{i-1} & -s\alpha_{i-1} & -d_i \, s\alpha_{i-1} \\ s\theta_i \, s\alpha_{i-1} & c\theta_i \, s\alpha_{i-1} & c\alpha_{i-1} & d_i \, c\alpha_{i-1} \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+    <h3 id="sec-key-fk-chain">Forward Kinematics Chain
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=18" target="_blank">PDF p.18</a>
+    </h3>
+
+    $${}^0_N T = {}^0_1 T \; {}^1_2 T \; {}^2_3 T \; \cdots \; {}^{N-1}_N T$$
+
+    <div class="why-box">
+      <button class="why-toggle">Why do we multiply T matrices in the order base-to-tip (left-to-right), and why can't we reorder them?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>Each transformation matrix ${}^{i-1}_i T$ converts coordinates expressed in frame $\{i\}$ into coordinates expressed in frame $\{i-1\}$. When you chain them as ${}^0_1 T \cdot {}^1_2 T \cdot \ldots \cdot {}^{N-1}_N T$, the superscript-subscript cancellation law ensures the intermediate frames "cancel out," giving a single transform from frame $\{N\}$ to frame $\{0\}$.</p>
+        <p>Matrix multiplication is <strong>not commutative</strong> ($AB \neq BA$ in general for rotation/transformation matrices). The order encodes the physical chain of the robot: base to link 1 to link 2 to ... to end-effector. Reversing or rearranging the order would correspond to a different (non-physical) chain of transformations.</p>
+        <p>An intuitive way to see this: if you have a point ${}^N P$ expressed in the end-effector frame, you first transform it into frame $\{N-1\}$ using ${}^{N-1}_N T$, then into frame $\{N-2\}$ using ${}^{N-2}_{N-1} T$, and so on. The rightmost matrix acts on the vector first, so the chain reads left-to-right as "from base toward tip" but acts right-to-left on vectors: ${}^0 P = {}^0_1 T \cdot {}^1_2 T \cdots {}^{N-1}_N T \cdot {}^N P$.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;3.5 · MSE492 Ch. 3, PDF pp. 18&ndash;20 · <a href="https://en.wikipedia.org/wiki/Forward_kinematics" target="_blank">Wikipedia: Forward kinematics</a></div>
+      </div></div>
+    </div>
+
+    <h3 id="sec-key-cancellation">Superscript-Subscript Cancellation Law
+      <a class="source-link" href="../Slides/MSE492 - Chapter3.pdf#page=18" target="_blank">PDF p.18</a>
+    </h3>
+
+    $${}^{i-1}_i T = {}^{i-1}_R T \; {}^R_Q T \; {}^Q_P T \; {}^P_i T$$
+
+    <!-- ==================== ENRICHMENT: Standard vs Modified DH === -->
+    <div class="callout callout-enrichment" id="enrichment-standard-vs-modified">
+      <div class="callout-label">Enrichment &mdash; Alternative Explanation</div>
+      <h3>Standard DH vs. Modified DH Convention</h3>
+
+      <p>Students using different textbooks will encounter two versions of the DH convention. This is a major source of confusion. Here is a clear comparison:</p>
+
+      <p><strong>Standard (Classical / Distal) DH Convention</strong></p>
+      <ul>
+        <li>Used by: Spong, Hutchinson &amp; Vidyasagar; Paul; the original Denavit &amp; Hartenberg (1955)</li>
+        <li>Frame $\{i\}$ is attached at the <strong>distal</strong> end of link $i$ (i.e., at joint $i+1$)</li>
+        <li>Transformation order: $\text{Rot}_{Z}(\theta_i) \cdot \text{Trans}_{Z}(d_i) \cdot \text{Trans}_{X}(a_i) \cdot \text{Rot}_{X}(\alpha_i)$</li>
+        <li>The transform describes frame $\{i\}$ relative to frame $\{i-1\}$</li>
+      </ul>
+
+      <p><strong>Modified (Proximal) DH Convention</strong></p>
+      <ul>
+        <li>Used by: <strong>Craig</strong> (<em>Introduction to Robotics: Mechanics and Control</em>) &mdash; likely your course textbook</li>
+        <li>Frame $\{i\}$ is attached at the <strong>proximal</strong> end of link $i$ (i.e., at joint $i$)</li>
+        <li>Transformation order: $\text{Rot}_{X}(\alpha_{i-1}) \cdot \text{Trans}_{X}(a_{i-1}) \cdot \text{Rot}_{Z}(\theta_i) \cdot \text{Trans}_{Z}(d_i)$</li>
+        <li>The transform describes frame $\{i\}$ relative to frame $\{i-1\}$</li>
+      </ul>
+
+      <p><strong>Key differences at a glance</strong>:</p>
+      <table>
+        <thead>
+          <tr><th>Aspect</th><th>Standard DH</th><th>Modified DH (Craig)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Frame origin on</td><td>Joint $i+1$</td><td>Joint $i$</td></tr>
+          <tr><td>Parameters in row $i$</td><td>$\theta_i, d_i, a_i, \alpha_i$</td><td>$\alpha_{i-1}, a_{i-1}, d_i, \theta_i$</td></tr>
+          <tr><td>Transformation order</td><td>$R_z \cdot T_z \cdot T_x \cdot R_x$</td><td>$R_x \cdot T_x \cdot R_z \cdot T_z$</td></tr>
+          <tr><td>Subscript pattern</td><td>All subscript $i$</td><td>Mixed: $i-1$ for link params, $i$ for joint params</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Critical point</strong>: Both conventions produce the <strong>same final result</strong> (${}^0_N T$) when applied correctly. They are mathematically equivalent. The difference is in how intermediate frames are placed and how the parameter table is organized.</p>
+
+      <p><strong>This course uses the Modified (Craig) convention</strong>, which is why you see $\alpha_{i-1}$ and $a_{i-1}$ (with subscript $i-1$) in the DH table columns alongside $d_i$ and $\theta_i$ (with subscript $i$).</p>
+
+      <p><strong>How to tell which convention a source uses</strong>: Look at the DH table column headers. If you see $a_{i-1}$ and $\alpha_{i-1}$, it is the modified (Craig) convention. If you see $a_i$ and $\alpha_i$ (all same subscript), it is the standard convention. Mixing conventions in a single problem will give wrong answers.</p>
+
+      <p><em>References:</em></p>
+      <ul>
+        <li>Craig, J.J. <em>Introduction to Robotics: Mechanics and Control</em>, 4th ed. Pearson, 2018.</li>
+        <li>Comparison paper: <a href="https://avestia.com/MCM2016_Proceedings/files/paper/ICMIE/118.pdf" target="_blank">"Comparison between Standard and Modified Denavit-Hartenberg Methods in Robotics Modelling"</a></li>
+        <li>Wikipedia: <a href="https://en.wikipedia.org/wiki/Denavit%E2%80%93Hartenberg_parameters" target="_blank">Denavit-Hartenberg parameters</a></li>
+        <li>Side-by-side visualization: <a href="https://vis-ro.web.app/robotics/modified-dh-model" target="_blank">VisRo Modified DH Model</a></li>
+      </ul>
+    </div>
+
+    <!-- ENRICHMENT: Additional Reading -->
+    <div class="callout callout-enrichment" id="enrichment-additional-reading">
+      <div class="callout-label">Enrichment &mdash; Additional Reading</div>
+      <h3>Textbook References</h3>
+
+      <p><strong>Primary textbook</strong> (likely used in this course):</p>
+      <ul>
+        <li>Craig, J.J. <em>Introduction to Robotics: Mechanics and Control</em>, 4th ed. Pearson, 2018. Chapter 3 covers DH parameters in detail using the modified convention.</li>
+      </ul>
+
+      <p><strong>Alternative textbooks with DH parameter coverage</strong>:</p>
+      <ul>
+        <li>Spong, M.W., Hutchinson, S., and Vidyasagar, M. <em>Robot Modeling and Control</em>, 2nd ed. Wiley, 2020. Uses the standard DH convention. Chapter 3.</li>
+        <li>Siciliano, B. et al. <em>Robotics: Modelling, Planning and Control</em>. Springer, 2009. Chapter 2.8. Covers both conventions.</li>
+        <li>Murray, R.M., Li, Z., and Sastry, S.S. <em>A Mathematical Introduction to Robotic Manipulation</em>. CRC Press, 1994. Freely available online. Provides the most rigorous mathematical treatment including the geometric proof of DH parameter sufficiency.</li>
+        <li>Corke, P. <em>Robotics, Vision and Control</em>. Springer, 2nd ed., 2017. Chapter 7. Emphasizes MATLAB-based computation.</li>
+      </ul>
+
+      <p><strong>Online course notes</strong>:</p>
+      <ul>
+        <li>Duke University: <a href="https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf" target="_blank">Chapter 3 - Forward Kinematics: The DH Convention</a></li>
+        <li>ASU Robotics Course: <a href="https://wanxinjin.github.io/asu-robotics/lec6-8/fk.html" target="_blank">Forward Kinematics (Wanxin Jin)</a></li>
+        <li>Pranav Bhounsule's Handout: <a href="https://pab47.github.io/robotics/f20/Lectures/Lec28_Denavit_Hartenberg_Handout.pdf" target="_blank">DH Convention Handout</a></li>
+      </ul>
+    </div>
+
+    <div class="flashcard-deck">
+      <div class="flashcard-deck-header">Key Concept Flashcards</div>
+      <div class="flashcard-container">
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Definition</div>
+            <div class="flashcard-text">What are the 4 DH parameters?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$a_i$ = link length (along $X_i$)<br>$\alpha_i$ = link twist (about $X_i$)<br>$d_i$ = link offset (along $Z_{i-1}$)<br>$\theta_i$ = joint angle (about $Z_{i-1}$)</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Formula</div>
+            <div class="flashcard-text">DH link transform ${}^{i-1}_i T$?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">${}^{i-1}_i T = R_z(\theta_i) \cdot T_z(d_i) \cdot T_x(a_i) \cdot R_x(\alpha_i)$<br><br>Rotate about $Z$, translate along $Z$, translate along $X$, rotate about $X$.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Rule</div>
+            <div class="flashcard-text">Where does the $Z_i$ axis point?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$Z_i$ is always along the axis of joint $i+1$.<br><br>For revolute: axis of rotation.<br>For prismatic: axis of translation.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Concept</div>
+            <div class="flashcard-text">Revolute vs. prismatic joint variable?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">Revolute: $\theta_i$ varies (rotation about $Z_{i-1}$)<br>Prismatic: $d_i$ varies (translation along $Z_{i-1}$)<br><br>The other 3 parameters are always constants determined by the link geometry.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Formula</div>
+            <div class="flashcard-text">Forward kinematics equation?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">${}^0_n T = {}^0_1 T \cdot {}^1_2 T \cdot \; \cdots \; \cdot {}^{n-1}_n T$<br><br>Chain multiplication of individual link transforms from base to end-effector.</div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="flashcard-btn flashcard-prev">Prev</button>
+        <span class="flashcard-counter">1 / 5</span>
+        <button class="flashcard-btn flashcard-next">Next</button>
+        <button class="flashcard-shuffle">Shuffle</button>
+      </div>
+    </div>
+
+    <!-- ==================== Related Practice ====================== -->
+    <div class="related-practice">
+      <h3>Related Practice</h3>
+      <p>The following tutorials and assignments cover material from this chapter:</p>
+      <ul>
+        <li><a href="MSE429_Tutorial_3.html">Tutorial 3</a> &mdash; DH parameter identification and forward kinematics problems</li>
+        <li><a href="MSE429_Tutorial_4.html">Tutorial 4</a> &mdash; Additional forward kinematics and frame assignment practice</li>
+        <li><a href="MSE429_Assignment_2.html">Assignment 2</a> &mdash; DH parameters and manipulator kinematics</li>
+      </ul>
+    </div>
+
+    <p style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 2rem;">
+      <em>Source: MSE 492 &mdash; Advanced Kinematics for Robotics System, Chapter 3 (22 slides)</em>
+    </p>
+
+    <button class="quick-ref-toggle" title="Quick Reference">&Sigma;</button>
+    <div class="quick-ref-panel">
+      <h3>Ch 3 Quick Reference</h3>
+      <div class="ref-item">
+        <div class="ref-name">DH Parameters</div>
+        <div class="ref-eq">$a_i, \alpha_i, d_i, \theta_i$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Link Transform</div>
+        <div class="ref-eq">${}^{i-1}_i T = R_z(\theta_i) T_z(d_i) T_x(a_i) R_x(\alpha_i)$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Forward Kinematics</div>
+        <div class="ref-eq">${}^0_n T = \prod_{i=1}^{n} {}^{i-1}_i T$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Joint Variable</div>
+        <div class="ref-eq">Revolute: $\theta_i$, Prismatic: $d_i$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">$Z_i$ Axis Rule</div>
+        <div class="ref-eq">$Z_i$ aligns with joint $i+1$ axis</div>
+      </div>
+    </div>
+
+    <nav class="page-nav"></nav>
+  </main>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

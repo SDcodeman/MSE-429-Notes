@@ -1,0 +1,123 @@
+                                                                School of Mechatronic Systems Engineering
+
+                            MSE 429/894 – Assignment 1
+Problem 1: Consider the frames at the corners of a wedge as shown below. Find the value of 𝑇,
+ 𝑇, 𝑇, and 𝑇.
+
+
+
+
+Solution:
+                                               𝑅           𝑃
+                                    𝑇
+                                         0     0 0          1
+
+alpha = 180;                                       alpha = 180 - atan(3/4;
+beta = 0;                                          beta = 0;
+gamma = 90;                                        gamma = -90;
+
+
+
+
+alpha = -atan(3/4);                                alpha = -atan(3/4);
+beta = 0;                                          beta = 0;
+gamma = 180;                                       gamma = 180;
+
+
+
+
+                                             Page 1 of 6
+                                                         School of Mechatronic Systems Engineering
+
+
+Problem 2: Determine
+  a) The rotation matrix, 𝑅, that describes frame 𝐵 relative to 𝐴 if
+                                          𝑋      1 0 0
+                                          𝑌     0 0    1
+                                           𝑍     0 1 0
+  b) The 𝑍 𝑌 𝑍 Euler angles required for such a rotation.
+
+Solution:
+
+
+
+
+                                         Page 2 of 6
+                                                           School of Mechatronic Systems Engineering
+
+Problem 3: A coordinate frame, 𝐵 , is located at the base of a robot manipulator. 𝑍 points
+upward. Three cameras are used to view the manipulator. Coordinate frames 𝐶 , 𝐷 , and 𝐸
+describe the camera positions and orientations. The origin of 𝐶 is on the 𝑋     𝑍 plane. The
+cameras are mounted on tripods 1.5 units tall placed at the vertices of an equilateral triangle
+having 𝐵 at the incenter. The robot frame is on the focal axis of each camera (the camera’s 𝑍-
+axis), and the Euclidean distance from 𝐵 to any camera is 5 units, thus
+                               𝑃       𝑃        𝑃        0 0 5
+Compute the camera transformation matrices: 𝑇, 𝑇, and 𝑇.
+
+Solution:
+
+
+
+
+                                           Page 3 of 6
+              School of Mechatronic Systems Engineering
+
+
+
+
+Page 4 of 6
+                                                             School of Mechatronic Systems Engineering
+
+Problem 4: The position and velocity of an object are known to be 𝑃          0 0.5    0    and
+  𝑉    1.9 0.1    0.3 at time 𝑡 , respectively. If the velocity is constant and
+                                  0.0722     0.963       0.259      5.00
+                                  0.954     0.00868 0.298           6.50
+                            𝑇
+                                   0.290     0.269      0.919      8.00
+                                     0         0           0         1
+then what is 𝑃 after 5 units of time?
+
+Solution:
+
+
+
+
+Problem 5: A vector 𝑃 is rotated about 𝑍 by 𝜃 degrees, and is subsequently rotated about 𝑌
+by 𝜙 degrees. Give the rotation matrix that accomplishes theses rotations in the given order.
+
+Solution:
+
+
+
+
+                                            Page 5 of 6
+                                                           School of Mechatronic Systems Engineering
+
+Problem 6: A velocity vector is given by 𝑉    30.0 40.0 50.0 . Given
+                                    0.707    0     0.707 11.0
+                                     0.612 0.500   0.612   3.0
+                              𝑇
+                                    0.353 0.866 0.353      9.0
+                                      0      0      0      1
+compute 𝑉 .
+
+Solution:
+
+
+
+
+Problem 7: Given
+                                   0.25    0.43     0.86   5.0
+                                   0.87     0.50    0.00    4.0
+                              𝑇
+                                   0.43    0.75      0.5   3.0
+                                    0        0       0      1
+what is     𝑃   ?
+
+Solution:
+
+
+
+
+                                          Page 6 of 6
+

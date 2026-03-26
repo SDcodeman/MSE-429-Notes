@@ -1,0 +1,128 @@
+                                                               School of Mechatronic Systems Engineering
+
+
+    30                          MSE 429/894 – Assignment 2
+    Problem 1: Consider the 𝟑𝑹 non-planar robot arm shown below. Derive Denavit-Hartenberg
+    parameters and use them to identify kinematic equations for 𝑇. Note that no 𝐿 need be defined.
+
+
+
+
+    Solutions:
+
+
+
+                               6
+
+6                                                        6
+6                                                       3
+                                                             3
+
+                                               Page 1 of 6
+                                                                School of Mechatronic Systems Engineering
+
+Problem 2: Shown below is an arm with three degrees of freedom for which, joints 1 and 2 are
+perpendicular, and joints 2 and 3 are parallel. All joints are at their zero location. Note that the
+positive sense of the joint angle is indicated. Assign link frames 0 through 3 for this arm
+(sketch the arm and show the attachment of the frames.) Derive Denavit-Hartenberg parameters
+and use them to find the transformation matrices 𝑇, 𝑇, and 𝑇.
+
+
+
+15
+
+
+
+
+Solutions:
+
+
+
+                                     6
+                                3
+                             3
+                             3
+                                              Page 2 of 6
+                                                             School of Mechatronic Systems Engineering
+
+Problem 3: For the two-link manipulator shown below, the link transformation matrices 𝑇 and
+ 𝑇 were constructed. Their product is:
+
+
+  10
+                                      𝑐𝜃 𝑐𝜃     𝑐𝜃 𝑠𝜃      𝑠𝜃    𝐿 𝑐𝜃
+                                      𝑠𝜃 𝑐𝜃     𝑠𝜃 𝑠𝜃       𝑐𝜃 𝐿 𝑠𝜃
+                                𝑇
+                                        𝑠𝜃       𝑐𝜃         0      0
+                                         0         0        0      1
+The link-fame assignments are indicated in figure (b). Note that frame 0 is coincident with frame
+ 1 when 𝜃       0. The length of the second link is 𝐿 . Find an expression for the vector 𝑃 , which
+locates the tip of the arm relative to the 0 frame.
+
+
+
+
+Solutions:
+
+
+                                    5
+
+
+                                    5
+
+
+                                            Page 3 of 6
+                                                        School of Mechatronic Systems Engineering
+
+Problem 4: Show the attachment of link frames for the 5-DoF 𝟐𝑹𝑷𝟐𝑹 manipulator shown
+schematically below.
+
+
+
+  15
+
+
+
+Solutions:
+
+
+
+
+                                        Page 4 of 6
+               15                                       School of Mechatronic Systems Engineering
+
+Problem 5: Show the attachment of link frames on the 𝑷𝟑𝑹 shown below. Given your frame
+assignments, what are the signs of 𝑑 , 𝑑 , and 𝑎 ?
+
+
+
+
+Solutions:
+
+
+
+
+                                         Page 5 of 6
+                 15                                      School of Mechatronic Systems Engineering
+
+Problem 6: Three manipulators are shown below. Find the Denavit-Hartenberg parameters for
+each one of them.
+
+
+
+
+         a) Three-link 𝑹𝑹𝑷 manipulator.                 b) Three-link 𝑹𝑷𝑷 manipulator.
+
+
+
+
+                                c) Three-link 𝑷𝑹𝑹 manipulator.
+
+ Solutions:
+
+
+
+
+          5                                    5                                   5
+                                          Page 6 of 6
+

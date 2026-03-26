@@ -1,0 +1,831 @@
+            Chapter 7
+
+
+Trajectory Generation
+
+
+             (Slides courtesy: Dr. F. Firmani)
+
+MSE 429 – Advanced Kinematics for Robotics System   Ch7 - 1
+         Overview
+
+In this chapter the following topics will be covered:
+
+•   Types of Trajectory Generation
+
+• Definition of Trajectory Generation
+
+•   Types of Motion: Point to Point and Continuous Path
+
+• Point to Point
+     –   Cubic, Quintic and Trapezoidal Schemes
+
+• Continuous Path
+     –   Via Point and Cartesian
+
+
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System   Ch7 - 2
+        Types of Path Generation
+
+The tasks of industrial robots can be taught in three different ways:
+   1. Online programming
+   2. Off-line programming
+   3. Sensor-based programming
+
+Online Programming:
+
+The task of the robot is programmed online using a teach pendant. Several
+points (configurations of the manipulator) are defined and saved. Then the robot
+is asked to move sequentially through all the points.
+
+
+
+
+                                (Directindustry.com, 2016)
+                  MSE 429 – Advanced Kinematics for Robotics System          Ch7 - 3
+        Types of Path Generation
+
+Off-line Programming:
+Software is used to generate the codes that provide the trajectory of the task.
+Displacements are input as codes. Each manufacturer of robot hardware uses
+their own software (see Table).
+Other Languages such as C, Java, Python, are also commonly used.
+
+
+
+                    Robot brand                 Language name
+                         ABB                           RAPID
+                        Comau                              PDL2
+                        Fanuc                              Karel
+                       Kawasaki                             AS
+                         Kuka                              KRL
+                        Stäubli                            VAL3
+                       Yaskawa                             Inform
+                                       (Wikipedia, 2016)
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System               Ch7 - 4
+        Types of Path Generation
+
+Sensor-based Programming:
+This can be accomplished by hand guiding the manipulator through space and
+the sensors record each position. The robot will eventually replicate the motion.
+Autonomous robots accomplish tasks in hostile environments by making
+decisions depending on the readings captured by sensors.
+
+
+
+
+                                   (Robotiq.com, 2016)
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System            Ch7 - 5
+        Path Generation
+
+In the MSE 429’s project, the configurations will be established by defining the
+desired path of the end-effector.
+
+
+
+
+                                                     Courtesy of Andy Huerlimann and
+                                                       Alex Vargas, Box Taper 2012
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System               Ch7 - 6
+       Trajectory Generation
+
+The basic problem of trajectory generation is how to move the manipulator from
+an initial to a final position and orientation.
+A trajectory describes the desired motion of the manipulator. This is position,
+velocity and acceleration of each degree of freedom.
+
+
+
+
+                             (Trajectory Generation, Craig 2003)
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System           Ch7 - 7
+        Mathematical Schemes
+
+In order to establish the time history of a change in the position and orientation
+of the manipulator, mathematical functions or schemes are employed. Common
+schemes are polynomials.
+
+
+By taking the time derivative of the mathematical schemes, also the time history
+of the velocity and acceleration can be determined.
+
+
+       𝜃 𝑡    𝑓 𝑡                     𝜃 𝑡     𝑓′ 𝑡                  𝜃 𝑡   𝑓′′ 𝑡
+
+
+In order to have a smooth motion, the second time derivative of the scheme
+function (acceleration) must be continuous, rough jerky motions tend to wear out
+the device.
+This approach is applied for each joint individually, say joint 𝑘:
+
+
+       𝜃 𝑡     𝑓 𝑡                    𝜃 𝑡      𝑓′ 𝑡                𝜃 𝑡    𝑓′′ 𝑡
+
+                     MSE 429 – Advanced Kinematics for Robotics System            Ch7 - 8
+        Types of Motion
+
+There are two types of motion between two desired configurations:
+
+
+Point-to-point (PTP): This trajectory is based on the joint variables. Each
+joint moves independently from each other, therefore the resulting end-effector
+path is not controlled.
+Continuous path (CP): The goal is to move the end-effector linearly along a
+particular path.
+
+
+
+
+        (Kuka’s Motion Types, the tool centre point (TCP) can connect two points moving PTP or CP)
+
+
+
+                     MSE 429 – Advanced Kinematics for Robotics System                               Ch7 - 9
+        Point-to-point Motion
+
+In point-to-point (PTP) motion, each joint moves independently from each other,
+consequently the path followed is a function of the joint displacements.
+Since the desired path is usually established in terms of the end-effector space
+variables, the inverse kinematics is applied to describe the path in terms of the
+joint variables.
+
+
+
+
+The time required to move from point 𝑃 to
+point 𝑃 must be the same for each joint. For
+example, for a 2 revolute jointed robot, let
+𝑃     30 45 and 𝑃          70 25 , thus the
+change of displacement between postures is
+∆𝑃     40    20 implying that joint 1 has to
+move twice as fast as joint 2.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System            Ch7 - 10
+        Cubic Polynomial Scheme (PTP)
+
+This is the simplest mathematical scheme. The goal is to establish the history of
+change in displacement, velocity and acceleration of a joint during a specific
+period of type using a cubic polynomial of the form:
+
+
+                      𝑞 𝑡     𝑎       𝑎 𝑡   𝑎 𝑡      𝑎 𝑡 (Eq. 1)
+
+
+where, 𝑞 is the type of joint (𝜃 for revolute and 𝑑 for prismatic), 𝑘 is the joint
+number, 𝑎 are coefficients (to be determined) and 𝑡 varies from an initial time 𝑡
+to a final time 𝑡 . If 𝑎 are known the position of the joint at any time between
+𝑡 and 𝑡 can be determined.
+
+
+The velocity and acceleration of the joint are given by
+                        𝑞 𝑡       𝑎     2𝑎 𝑡      3𝑎 𝑡 (Eq. 2)
+                            𝑞 𝑡       2𝑎       6𝑎 𝑡 (Eq. 3)
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System            Ch7 - 11
+        Cubic Polynomial Scheme (PTP) – cont’d
+
+In order to evaluate coefficients, we require as many constraints as needed. Thus,
+for a cubic polynomial with four coefficients, four constraints can be satisfied.
+Two constraints define the initial and final positions of the joint, i.e.
+                         𝑞 𝑡      𝑞                   (Eq. 4)
+
+                         𝑞 𝑡       𝑞                  (Eq. 5)
+
+
+The other two constraints can be used to specify the velocity of the joints, for
+example assume that the initial and final velocity are zero.
+                       𝑞 𝑡      0                   (Eq. 6)
+
+                         𝑞 𝑡       0                  (Eq. 7)
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System           Ch7 - 12
+        Cubic Polynomial Scheme (PTP) – cont’d
+
+By combining the four constraints, Eqs. (4-7), with the Eqs. (1-2), the following
+equations for the coefficients result:
+             𝑎     𝑞
+             𝑎     0
+             𝑎         𝑞       𝑞                                            (Eq. 8)
+
+             𝑎             𝑞       𝑞
+
+
+For a generic case, 𝑞 𝑡        𝑞   and 𝑞 𝑡       𝑞       the coefficients are
+             𝑎     𝑞
+             𝑎     𝑞
+             𝑎         𝑞       𝑞       𝑞         𝑞                          (Eq. 9)
+
+             𝑎             𝑞       𝑞         𝑞       𝑞
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System                   Ch7 - 13
+       Cubic Polynomial Scheme (PTP)
+
+Example: Assume a two-revolute jointed manipulator that starts from rest and
+stops at the end of the trajectory. The initial joint angles are 𝜃 10 25 and
+the final joint angles are 𝜃    75 60 , the duration of the trajectory is 5 sec.
+Determine the trajectory of the manipulator
+
+
+                                            Robot Configurations
+
+                        2.5
+
+
+
+                         2
+
+
+
+                        1.5
+                   y0
+
+                         1
+
+
+
+                        0.5
+
+
+
+                         0
+                              -0.5    0       0.5    1     1.5     2   2.5
+                                     BASE            x0
+
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System           Ch7 - 14
+                        Cubic Polynomial Scheme (PTP)
+
+Example – cont’d: Assume a two-revolute jointed manipulator that starts from
+rest and stops at the end of the trajectory. The initial joint angles are 𝜃
+ 10 25 and the final joint angles are 𝜃        75 60 , the duration of the
+trajectory is 5 sec.
+
+
+
+                       Time vs Displacement                                          Time vs Velocity
+          80                                                            20
+
+                                                                        18
+          70
+                                              joint 1
+                                                                        16
+
+          60                                                            14
+                                              joint 2
+                                                                                                        joint 1
+                                                                        12
+
+
+                                                                                                                      a (deg/s2)
+          50
+
+d (deg)                                                     v (deg/s)
+                                                                        10
+          40
+                                                                        8
+                                                                                                        joint 2
+          30                                                            6
+
+                                                                        4
+          20
+                                                                        2
+
+          10                                                            0
+               0   1         2           3    4         5                    0   1      2           3   4         5
+                                 t (s)                                                      t (s)
+
+
+
+
+  Unfortunately, the acceleration profile is discontinuous at the beginning and
+  end, joints would require infinite jerks.
+
+
+                                              MSE 429 – Advanced Kinematics for Robotics System                                    Ch7 - 15
+        Quintic Polynomial Scheme (PTP)
+
+Higher polynomial schemes are often used in industrial applications.
+
+
+                  𝑞 𝑡            𝑎     𝑎 𝑡        𝑎 𝑡       𝑎 𝑡          𝑎 𝑡          𝑎 𝑡
+                    𝑞 𝑡          𝑎         2𝑎 𝑡     3𝑎 𝑡            4𝑎 𝑡          5𝑎 𝑡
+                           𝑞 𝑡        2𝑎      6𝑎 𝑡          12𝑎 𝑡            20𝑎 𝑡
+This allows satisfying two more constraints: the initial and final conditions of the
+accelerations. Thus, the general coefficients are
+
+  𝑎    𝑞
+  𝑎    𝑞
+  𝑎    𝑞 /2
+  𝑎     20 𝑞       𝑞             8𝑞         12𝑞         𝑡           𝑞        3𝑞       𝑡       /2𝑡
+
+  𝑎        30 𝑞        𝑞             14𝑞          16𝑞       𝑡           2𝑞         3𝑞        𝑡      /2𝑡
+
+  𝑎     12 𝑞       𝑞             6𝑞         6𝑞      𝑡           𝑞        𝑞        𝑡         /2𝑡
+
+                  MSE 429 – Advanced Kinematics for Robotics System                                       Ch7 - 16
+       Quintic Polynomial Scheme (PTP)
+
+Example: Assume a two-revolute jointed manipulator that starts from rest and
+stops at the end of the trajectory. The initial joint angles are 𝜃 10 25 and
+the final joint angles are 𝜃    75 60 , the duration of the trajectory is 5 sec.
+Determine the trajectory of the manipulator using a quintic polynomial scheme.
+
+
+                                          Robot Configurations
+
+                      2.5
+
+
+
+                       2
+
+
+
+                      1.5
+                 y0
+
+                       1
+
+
+
+                      0.5
+
+
+
+                       0
+                            -0.5    0       0.5    1     1.5     2   2.5
+                                   BASE            x0
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System          Ch7 - 17
+                  Quintic Polynomial Scheme (PTP)
+
+          Example: The displacement, velocity and acceleration profiles. Initial joint angles
+          𝜃     10 25 and final joint angles 𝜃      75 60 . Manipulator starts and
+          ends at rest. Duration 5s.
+
+
+
+
+                                       v (deg/s)                       a (deg/s2)
+d (deg)
+
+
+
+
+          Now both velocity and acceleration start and end at zero.
+
+
+
+                            MSE 429 – Advanced Kinematics for Robotics System            Ch7 - 18
+        Trapezoidal Scheme (PTP)
+
+This scheme is based on having a linear function with parabolic blends to
+maintain a smooth path, consequently the velocity profile will have a trapezoidal
+shape (linear-constant-linear) – Linear segment with parabolic blends.
+The resulting trajectory is composed of three phases: acceleration in the initial
+phase, constant velocity in the middle phase and deceleration in the final phase.
+
+
+
+
+In general, the duration of the acceleration
+
+
+                                                     Acceleration
+and deceleration phases is equal, i.e., 𝑡 .
+
+
+Note: here the variables used are 𝜃’s but                           Constant   Deceleration
+the same approach can be followed for                               Velocity
+prismatic joints, 𝑑’s
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System                           Ch7 - 19
+        Trapezoidal Scheme (PTP)
+
+Since the duration of the acceleration and deceleration phases is equal, the
+magnitude of the acceleration in both phases is also equal, i.e.,
+
+                              𝜃 𝑡         𝜃 𝑡       𝑡
+Similarly, the magnitude of the velocity during the transition of the phases must
+be the same, therefore
+                                         𝜃      𝜃
+                                 𝜃 𝑡
+                                          𝑡     𝑡
+where the subscript ℎ represents the halfway point of the trajectory.
+
+𝜃
+
+and,
+                                     𝜃
+𝑡
+
+
+
+                                                        𝑡
+                  MSE 429 – Advanced Kinematics for Robotics System            Ch7 - 20
+        Trapezoidal Scheme (PTP)
+
+Since the blends are parabolic and 𝜃 𝑡        0, then 𝜃     is given by
+                                            1
+                               𝜃      𝜃       𝜃 𝑡
+                                            2
+Combining the previous two equations yields
+
+                  𝜃 𝑡      𝜃 𝑡 𝑡       𝜃      𝜃         0       (Eq. ※)
+
+
+
+where 𝑡 and 𝜃     are unknown variables.
+
+
+Usually, 𝜃   is prescribed and 𝑡 is found with eq (Eq. ※), i.e.,
+
+
+                           𝑡       𝜃 𝑡       4𝜃     𝜃       𝜃
+                      𝑡
+                           2                 2𝜃
+Make sure the term inside the square root is positive.
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System       Ch7 - 21
+              Trapezoidal Scheme (PTP)
+
+An approach to ensure the real solution of 𝑡 , 𝜃                                  can be defined as
+                                      4 𝜃           𝜃
+                              𝜃                          𝑓                with     𝑓     1
+                                            𝑡
+
+Set 𝑓 , find 𝜃 , solve for 𝑡 as follows,
+
+                                  𝑡    min 𝑟𝑜𝑜𝑡𝑠 𝜃                        𝜃 𝑡      𝜃         𝜃
+Thus,
+
+
+
+      Phase                                 Displacement                           Velocity            Acceleration
+
+                                                              1
+      0       𝑡       𝑡                  𝜃 𝑡        𝜃           𝜃 𝑡                𝜃 𝑡       𝜃 𝑡         𝜃 𝑡   𝜃
+                                                              2
+
+                                                                      𝑡
+  𝑡       𝑡       𝑡       𝑡           𝜃 𝑡       𝜃       𝜃 𝑡     𝑡                 𝜃 𝑡        𝜃 𝑡         𝜃 𝑡   0
+                                                                      2
+
+                                                        1
+  𝑡       𝑡       𝑡       𝑡           𝜃 𝑡       𝜃         𝜃     𝑡     𝑡          𝜃 𝑡     𝜃    𝑡    𝑡    𝜃 𝑡    𝜃
+                                                        2
+
+
+                                  MSE 429 – Advanced Kinematics for Robotics System                                Ch7 - 22
+       Trapezoidal Scheme (PTP)
+
+Example: Assume a two-revolute jointed manipulator that starts from rest and
+stops at the end of the trajectory. The initial joint angles are 𝜃 10 25 and
+the final joint angles are 𝜃    75 60 , the duration of the trajectory is 5 sec.
+Determine the trajectory of the manipulator using a trapezoidal scheme.
+
+
+                                          Robot Configurations
+
+                      2.5
+
+
+
+                       2
+
+
+
+                      1.5
+                 y0
+
+                       1
+
+
+
+                      0.5
+
+
+
+                       0
+                            -0.5    0       0.5    1     1.5     2   2.5
+                                   BASE            x0
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System          Ch7 - 23
+          Trapezoidal Scheme (PTP)
+
+ Example: The displacement, velocity and acceleration profiles. Initial joint angles
+ 𝜃     10 25 and final joint angles 𝜃      75 60 . Manipulator starts and
+ ends at rest. Duration 5s.
+
+
+
+
+                                                               a (deg/s2)
+d (deg)                        v (deg/s)
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System            Ch7 - 24
+        Continuous Path (CP) Motion
+
+There are applications in which the end-effector must follow a straight line, like
+in arc welding, spray painting, etc., in such cases continuous path motion is
+employed.
+In continuous path motion (CP) motion, joints have to work together to
+accomplish the desired path.
+
+
+A continuous path can be generated following two different methods
+•   Via Points Scheme (Joint Space)
+•   Cartesian Scheme (Task Space)
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System             Ch7 - 25
+        Via Points (CP)
+
+A practical solution to generating a straight path is to divide the line into
+multiple points that are connected. Let the path followed by the end-effector be
+represented by the next animation:
+
+
+
+
+This approach can be implemented with the schemes seen before. However,
+having individual segments implies that the manipulator stops at every point,
+which is not desired. In order to have a continuous motion without stopping, two
+approaches can be taken
+    •    Prescribed Velocity
+    •    Matching Velocity and Accelerations
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System          Ch7 - 26
+         Via Points: Prescribed Velocity (CP)
+
+Prescribed Velocity:
+A simple solution is to prescribe the velocity between two joint segments, where
+a joint segment is defined by a polynomial scheme.
+For example, assume that joint 𝑘 starts from an initial configuration, passes
+through a via point, and ends its trajectory by reaching a final point. Each
+segment is represented by a different cubic scheme.
+
+
+ 𝑞   𝑡    𝑎     𝑎 𝑡      𝑎 𝑡    𝑎 𝑡                         𝑞   𝑡   𝑎   𝑎 𝑡    𝑎 𝑡    𝑎 𝑡
+                                        Intermediate
+                                        Configuration                        Final
+            Initial                      (Via Point)                      Configuration
+         Configuration
+                                  𝑞     𝑞   𝑡     𝑞     0
+
+
+If the velocity at the via point is prescribed 𝑞 , then this velocity is the same as
+the velocity at the end of the first segment and at the beginning of the second
+segment. Each segment 𝑖 duration is 0 𝑡 𝑡 .
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System                   Ch7 - 27
+              Via Points: Prescribed Velocity (CP)
+
+Prescribed Velocity:
+Polynomials
+  𝑞       𝑡        𝑎       𝑎 𝑡          𝑎 𝑡         𝑎 𝑡   𝑞    𝑡       𝑎           𝑎 𝑡         𝑎 𝑡         𝑎 𝑡
+
+Conditions                 𝑞     0          𝑞                              𝑞       0           𝑞
+
+                       𝑞        𝑡           𝑞                              𝑞       𝑡           𝑞
+                           𝑞        0       0                              𝑞       0           𝑞
+                       𝑞        𝑡           𝑞                              𝑞           𝑡           0
+
+Coefficients
+   𝑎      𝑞                                               𝑎        𝑞
+      𝑎        0                                          𝑎        𝑞
+      𝑎                𝑞            𝑞           𝑞         𝑎                𝑞           𝑞               𝑞
+
+      𝑎                    𝑞            𝑞             𝑞   𝑎                    𝑞           𝑞               𝑞
+
+
+                               MSE 429 – Advanced Kinematics for Robotics System                               Ch7 - 28
+       Via Points: Prescribed Velocity (CP)
+
+Example: Let 𝜃    5 ,𝜃    15 , and 𝜃       10 . Assume the velocity at the via
+point is 𝜃  0. The duration per segment is 2 seconds.
+
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System        Ch7 - 29
+       Via Points: Prescribed Velocity (CP)
+
+Example – cont’d:
+
+                                                                       Prescribed Velocity
+                                 40
+                                         position (deg)
+                                         velocity (deg/s)
+                                         acceleration (deg/s2)
+                                 30
+
+
+
+                                 20
+
+
+
+                                 10
+
+
+
+
+            Displacement (deg)
+                                  0
+
+
+
+                                 -10
+
+
+
+                                 -20
+
+
+
+                                 -30
+
+
+
+                                 -40
+                                    0         0.5           1    1.5            2            2.5   3   3.5   4
+                                                                            time (s)
+
+
+
+
+                                        MSE 429 – Advanced Kinematics for Robotics System                        Ch7 - 30
+       Via Points: Prescribed Velocity (CP)
+
+Example – cont’d: For the same problem, now assume the velocity at the via
+point is 𝜃   10.
+
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System           Ch7 - 31
+             Via Points: Match Vel/Acc (CP)
+
+    Matching Velocities and Accelerations
+    By prescribing the velocity at the via points and using cubic schemes the
+    acceleration profile is discontinuous.
+    As an alternative, let us combine conditions between segments and define that
+    the velocity and the accelerations between segments must be the same.
+    For example, for a two-cubic polynomial trajectory, there are 8 coefficients,
+    therefore 8 conditions that can be satisfied:
+
+     𝑞   𝑡    𝑎     𝑎 𝑡      𝑎 𝑡    𝑎 𝑡
+                                               Intermediate
+                                               Configuration                     Final
+                Initial                         (Via Point)                   Configuration
+             Configuration
+𝑞   0    𝑞                                 𝑞     𝑡      𝑞   0                          𝑞      𝑡    𝑞
+                        𝑞    𝑡     𝑞                               𝑞   0   𝑞
+𝑞   0    0                                 𝑞     𝑡      𝑞      0                       𝑞      𝑡    0
+
+
+
+
+                          MSE 429 – Advanced Kinematics for Robotics System                   Ch7 - 32
+         Via Points: Match Vel/Acc (CP)
+
+Matching Velocities and Accelerations – cont’d
+Polynomials:
+ 𝑞   𝑡        𝑎   𝑎 𝑡                 𝑎 𝑡       𝑎 𝑡   𝑞    𝑡        𝑎     𝑎 𝑡     𝑎 𝑡       𝑎 𝑡
+Conditions:
+                      𝑞       0         𝑞             𝑎        𝑞
+ Segment I        𝑞           𝑡         𝑞             𝑎        𝑎 𝑡        𝑎 𝑡     𝑎 𝑡        𝑞
+
+                      𝑞           0     0             𝑎        0
+
+                      𝑞           0     𝑞             𝑎        𝑞
+
+ Segment II           𝑞       𝑡             𝑞         𝑎        𝑎 𝑡        𝑎 𝑡      𝑎 𝑡        𝑞
+
+                      𝑞           𝑡         0         𝑎        2𝑎 𝑡        3𝑎 𝑡         0
+
+                  𝑞       𝑡            𝑞        0     𝑎        2𝑎 𝑡        3𝑎 𝑡         𝑎
+ Matching
+ Vel/Acc          𝑞       𝑡             𝑞       0     2𝑎           6𝑎 𝑡     2𝑎
+
+
+                      MSE 429 – Advanced Kinematics for Robotics System                       Ch7 - 33
+       Via Points: Match Vel/Acc (CP)
+
+Matching Velocities and Accelerations – cont’d
+Consequently, all the equations must be solved simultaneously. This can be done
+in matrix form as follows:
+             1    0       0       0   0    0       0     0    𝑎       𝑞
+             1   𝑡    𝑡       𝑡       0    0       0     0    𝑎       𝑞
+             0    1       0       0   0    0       0     0    𝑎         0
+             0    0       0       0   1    0       0     0    𝑎       𝑞
+             0    0       0       0   1   𝑡       𝑡     𝑡     𝑎       𝑞
+             0   0     0        0     0       1   2𝑡    3𝑡    𝑎         0
+             0   1    2𝑡      3𝑡      0       1     0     0   𝑎         0
+                                                              𝑎         0
+             0   0     2      6𝑡      0       0     2     0
+The solution of the system when 𝑡         𝑡       𝑡 is given in Craig’s book.
+
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System              Ch7 - 34
+       Via Points: Match Vel/Acc (CP)
+
+Example: Let 𝜃       5 ,𝜃    15 , and 𝜃       10 . Match velocities &
+accelerations at the via. The duration per segment is 2 seconds.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System     Ch7 - 35
+       Via Points: Match Vel/Acc (CP)
+
+Example: Let 𝜃       5 ,𝜃    15 , and 𝜃       10 . Match velocities &
+accelerations at the via. The duration per segment is 2 seconds.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System     Ch7 - 36
+        Cartesian Scheme (CP)
+
+Another way to establish the motion of a desired path of the end-effector is to
+generate the trajectory in the task space, 𝐓 → 𝐓 .
+Note that one cannot generate a trajectory of a rotation matrix 𝐑 because by
+generating a trajectory for each element, nothing ensures that the resulting
+matrix maintains the properties of 𝐑.
+Thus, the trajectory is generated with the independent elements of the position
+vector x, y, z and the Euler angles α, β, and γ, or the parameters of the
+equivalent angle/axis method or quaternions.
+Since the joint variables are the input variables of a manipulator, then the
+inverse kinematics and the inverse velocity/acceleration problems must be solved
+at each moment
+                                     𝒒    𝐉   𝒙
+
+     This solution fails in case the manipulator is in a singular configuration
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System               Ch7 - 37
+               Cartesian Scheme (CP)
+
+        A common scheme adopted for in the Cartesian space is the Trapezoidal scheme.
+        The main advantage is that during the constant phase, the inverse velocity has
+        to be solved only once. The linear part can be determined based on 𝑡 .
+
+
+
+
+d (x)                              v (x/s)                         a (x/s2)
+
+
+
+
+                         MSE 429 – Advanced Kinematics for Robotics System          Ch7 - 38
+MSE 429 – Advanced Kinematics for Robotics System   Ch7 - 39
+

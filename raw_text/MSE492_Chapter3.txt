@@ -1,0 +1,376 @@
+             Chapter 3
+
+
+Manipulator Kinematics
+
+
+
+ MSE 429 – Advanced Kinematics for Robotics System   Ch3 - 1
+        Overview
+
+This chapter covers the following topics:
+
+• Link Description and Link-connection description
+• Convention for Affixing Frames to Links
+• Identification of Denavit & Hartenberg Parameters
+• Manipulator Kinematics
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System   Ch3 - 2
+        3.2 Link Description
+
+Kinematics is the science of motion that treats the objects without regard to
+the forces that cause it.
+
+A manipulator is thought of as a set of bodies (called links) connected in a
+chain by joints. A link is considered only as a rigid body that defined the
+relationship between two neighboring joint axes of a manipulator.
+
+Joints form a connection between a neighboring pair of links.
+
+In lower pairs, the relative motion between a pair of bodies is characterized by
+two surfaces sliding over one another.
+
+
+
+
+                            The six possible lower pair joints.
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System             Ch3 - 3
+        3.2 Link Description
+
+Convention: The links are numbered starting from the immobile base of the arm,
+which might be called link 0. The first moving body is link 1, and so on, out to
+the free end of the arm, which is link 𝑛.
+
+Convention: Joint axis 𝑖 is defined by a line in space, or a vector direction, about
+which link 𝑖 rotates relative to link 𝑖 1.
+
+For any two axes in 3-space, there exists a well-defined measure of distance, the
+link length 𝑎     , that is along a line mutually perpendicular to both axes.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System              Ch3 - 4
+        3.2 Link Description
+
+The link twist, 𝛼 , defines the relative location of two axes. The angle is
+measured from axis 𝑎  to axis 𝑎 in the right-hand sense about 𝑎 .
+
+Note: for right-hand sense, 𝑎    is given the direction pointing from axis 𝑖   1 to
+axis 𝑖 .
+
+Note: In the case of intersecting axes, twist is measured in the plane containing
+both axes, but the sense of 𝛼     is lost. In this case, the sign of the 𝛼 can be
+assigned arbitrarily.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System              Ch3 - 5
+        3.2 Link Description
+
+Example: Figure below shows the mechanical drawings of a robot link. If this
+link is used in a robot, with bearing “A” used for the lower-numbered joint,
+identify the length and twist of the link. Assume that holes are centered in each
+bearing.                                                       Axis “A”
+
+
+                                                                        Axis “B”
+
+
+
+
+                                                          Link twist
+
+
+
+
+                     Link length = 7 𝑖𝑛.
+
+                  MSE 429 – Advanced Kinematics for Robotics System                Ch3 - 6
+        3.3 Link-Connection Description – Intermediate Links in the Chain
+
+The distance along the joint axis between two incident common normals (𝑎
+and 𝑎 ) is called link offset, 𝑑 . The link offset is variable if joint 𝑖 is prismatic.
+
+The rotation between two incident normal about the joint axis is called joint
+angle, 𝜃 . The joint angle is variable for revolute joints .
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System                 Ch3 - 7
+        3.3 Link-Connection Description – First & Last Links in the Chain
+
+Convention: Link length, 𝑎 , and link twist, 𝛼 , depend on joint axes 𝑖 and 𝑖 1,
+as shown before. At the ends of the chain, the convention is to assign zero to
+these quantities, that is, 𝑎  𝑎     0 and 𝛼      𝛼    0.
+
+- If joint 1 is revolute, the zero position for 𝜃 may be chosen arbitrarily;
+  𝑑     0 is the convention used here.
+
+- If joint 1 is prismatic, the zero position of 𝑑 may be chosen arbitrarily;
+  𝜃     0 is the convention used here.
+
+
+Denavit & Hartenberg Parameters:
+
+• Link Parameters:
+    Link length, 𝑎
+    Link twist, 𝛼
+    Link offset, 𝑑
+
+• Joint Parameter
+    Joint angle, 𝜃
+
+                  MSE 429 – Advanced Kinematics for Robotics System            Ch3 - 8
+        3.4 Convention for Affixing Frames to Links – Intermediate Links
+
+• The 𝑍     axis of frame 𝑖 , called 𝑍 , is coincident with the joint axis 𝑖 .
+• The origin of frame 𝑖 is located where the 𝑎 perpendicular intersects the
+  joint 𝑖 axis.
+• 𝑋 points along 𝑎 in the direction from joint 𝑖 to 𝑖      1
+    • In the case of 𝑎   0, 𝑋 is normal to the plane of 𝑍 and 𝑍          . Then, 𝛼 is
+      measured in the right-hand sense about 𝑋 .
+• 𝑌 is formed by the right-hand rule using 𝑋 and 𝑍 in Cartesian frame.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System               Ch3 - 9
+        3.4 Convention for Affixing Frames to Links – First & Last Links
+
+First link: A non-moving frame is attached to the base of the robot, or link 0,
+called frame 0 . It coincides with frame 1 . Therefore, we always have 𝑎     0
+and 𝛼     0.
+    • If joint 1 is revolute, link offset is 𝑑    0.
+    • If joint 1 is prismatic, joint angle is 𝜃    0.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System         Ch3 - 10
+        3.4 Convention for Affixing Frames to Links – First & Last Links
+
+Last link:
+• If joint 𝑛 is revolute, the direction of 𝑋 is chosen so that it aligns with 𝑋
+  when 𝜃       0. The origin of frame 𝑁 is chosen so that 𝑑       0.
+• If joint 𝑛 is prismatic, the direction of 𝑋 is chosen so 𝜃    0. The origin of
+  frame 𝑁 is chosen at the intersection of 𝑋        and joint axis 𝑛 when 𝑑     0.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System               Ch3 - 11
+      3.4 Convention for Affixing Frames to Links
+
+Summary of the Link Parameters in Terms of the Link Frames:
+
+
+• 𝑎   the distance from 𝑍 to 𝑍     measured along 𝑋 .
+• 𝛼   the angle from 𝑍 to 𝑍      measured about 𝑋 .
+• 𝑑   the distance from 𝑋     to 𝑋 measured along 𝑍 .
+• 𝜃   the angle from 𝑋      to 𝑋 measured about 𝑍 .
+
+
+
+
+                MSE 429 – Advanced Kinematics for Robotics System   Ch3 - 12
+        3.4 Convention for Affixing Frames to Links
+
+Summary of the Link-Frame Attachment Procedure:
+
+
+1. Identify joint axes (assume infinite lines)
+2. Identify the common normal between consecutive axes 𝑖 and 𝑖 1. Assign the
+   origin of the 𝑖 link frame at the point where the common normal intersects
+   axis 𝑖 . If axes 𝑖 and 𝑖 1 intersect, assign the origin at the intersection point.
+3. Assign the 𝑍 axis pointing along the 𝑖        joint axis.
+4. Assign the 𝑋 axis pointing along the common normal, or if the axes intersect,
+   assign the 𝑋 axis to be normal to the axes plane.
+5. Assign the 𝑌 axis to complete the right-hand frame convention.
+6. Assign frame 0 to be fixed. It coincides with frame 1 when 𝜃           0 or 𝑑
+   0. Assign frame 𝑒. 𝑒. at the end-effector’s point.
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System               Ch3 - 13
+       3.4 Convention for Affixing Frames to Links
+
+Example: Figure below shows a three-link planar arm. Because all three joints
+are revolute, this manipulator is sometimes called an 𝑹𝑹𝑹 (or 𝟑𝑹) mechanism. A
+schematic representation is presented in (b).
+a) Assign link frames to the mechanism
+b) Find the Denavit – Hartenberg parameters.
+
+
+
+
+                 MSE 429 – Advanced Kinematics for Robotics System        Ch3 - 14
+       3.4 Convention for Affixing Frames to Links
+
+Example: cont’d.
+a) Link frame assignment
+
+
+                                     𝑋
+
+
+
+
+                                      𝑌    𝑋
+                       𝑌
+
+                               𝑌
+              𝑌
+
+                                          𝑋
+
+
+                                                 𝑋
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System   Ch3 - 15
+         3.4 Convention for Affixing Frames to Links
+
+Example: cont’d.
+a) Denavit – Hartenberg Parameters
+
+                                                               𝑋
+
+
+
+
+                                                              𝑌        𝑋
+   𝑖       𝛼       𝑎         𝑑        𝜃           𝑌
+
+   1           0       0      0       𝜃                  𝑌
+
+   2           0       𝐿      0       𝜃       𝑌
+                                                                       𝑋
+   3           0       𝐿      0       𝜃
+
+  e.e.         0       𝐿      0        0                                   𝑋
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System           Ch3 - 16
+        3.5 Manipulator Kinematics – Derivation of Link Transformations
+
+Now that the frames are attached to the links and the Denavit and Hartenberg
+parameters are identified, the next step is to establish a quantitative connection
+between each link frame and its precedent.
+
+The homogeneous transform      𝑇 is obtained through a series of intermediate
+frames, each containing a parameter.
+
+
+
+
+It is desirable to write the transformation that transforms vectors defined in 𝑖
+to their description in 𝑖 1 .
+                  MSE 429 – Advanced Kinematics for Robotics System            Ch3 - 17
+         3.5 Manipulator Kinematics – Derivation of Link Transformations
+
+Applying the “super-sub-script cancellation law”,
+
+                                 𝑇        𝑇   𝑇    𝑇 𝑇
+Hence:
+
+                                      𝑃       𝑇 𝑃
+
+
+
+
+                   MSE 429 – Advanced Kinematics for Robotics System       Ch3 - 18
+             3.5 Manipulator Kinematics – Derivation of Link Transformations
+
+For      𝑇               𝑇        𝑇           𝑇 𝑇 we have
+
+
+                             0            1         0         0    0                                0     𝑐𝜃        𝑠𝜃       0   0
+             𝑅 𝛼             0            0       𝑐𝛼         𝑠𝛼    0                     𝑅 𝜃        0     𝑠𝜃       𝑐𝜃        0   0
+     𝑇                                    0       𝑠𝛼        𝑐𝛼     0
+                                                                           𝑇                               0        0        1   0
+                             0                                                                      0
+             0   0   0       1            0         0         0    1                 0    0    0    1      0        0        0   1
+                     𝑎                1       0     0   𝑎                                          0      1    0   0     0
+             𝐼           0            0       1     0       0                            𝐼         0      0    1   0     0
+ 𝑇                       0            0       0     1       0
+                                                                           𝑇                       𝑑      0    0   1     𝑑
+         0   0   0       1            0       0     0       1                    0       0    0    1      0    0   0     1
+
+
+
+Hence,
+                                                  𝑐𝜃                  𝑠𝜃         0                  𝑎
+                                               𝑠𝜃 𝑐𝛼              𝑐𝜃 𝑐𝛼         𝑠𝛼                 𝑑 𝑠𝛼
+                                 𝑇
+                                               𝑠𝜃 𝑠𝛼              𝑐𝜃 𝑠𝛼        𝑐𝛼                 𝑑 𝑐𝛼
+                                                   0                  0          0                    1
+
+
+
+
+                                 MSE 429 – Advanced Kinematics for Robotics System                                                   Ch3 - 19
+             3.5 Manipulator Kinematics – Forward Kinematics
+
+Example: Consider the three-link planar arm from slide 14.
+Use the Denavit – Hartenberg parameters found in slide 16
+to solve for the forward kinematics.
+
+Recalling            𝑇 from slide 19,
+           𝑐𝜃                 𝑠𝜃              0           𝑎
+         𝑠𝜃 𝑐𝛼             𝑐𝜃 𝑐𝛼             𝑠𝛼          𝑑 𝑠𝛼
+    𝑇
+         𝑠𝜃 𝑠𝛼             𝑐𝜃 𝑠𝛼            𝑐𝛼          𝑑 𝑐𝛼
+             0                 0              0             1
+        𝑐𝜃      𝑠𝜃         0   0                   𝑐𝜃        𝑠𝜃   0 𝐿
+        𝑠𝜃     𝑐𝜃          0   0                   𝑠𝜃       𝑐𝜃    0 0
+𝑇                                ,      𝑇
+         0      0          1   0                    0        0    1 0
+         0      0          0   1                    0        0    0 1
+        𝑐𝜃      𝑠𝜃         0 𝐿                     1    0   0 𝐿
+        𝑠𝜃     𝑐𝜃          0 0                     0    1   0 0
+𝑇                              ,       . 𝑇
+         0      0          1 0                     0    0   1 0
+         0      0          0 1                     0    0   0 1
+
+. 𝑇     𝑇 𝑇 𝑇        . 𝑇
+
+         𝑐 𝜃     𝜃         𝜃          𝑠 𝜃      𝜃        𝜃     0 𝐿 𝑐𝜃    𝐿 𝑐 𝜃   𝜃       𝐿 𝑐 𝜃   𝜃   𝜃
+         𝑠 𝜃     𝜃         𝜃         𝑐 𝜃      𝜃        𝜃      0 𝐿 𝑠𝜃    𝐿 𝑠 𝜃   𝜃       𝐿 𝑠 𝜃   𝜃   𝜃
+. 𝑇
+                 0                            0               1                     0
+                 0                            0               0                     1
+
+                               MSE 429 – Advanced Kinematics for Robotics System                        Ch3 - 20
+        3.8 Standard Names for Frames
+
+The Base Frame, 𝑩 – is located at the base of the manipulator. Another
+name for frame 0 . Sometimes, it is called link 0.
+The Station Frame, 𝑺 – is located in a task relevant location. Sometimes it
+is called the task frame, the world frame, or the universe frame.
+The Wrist Frame, 𝑾 – is affixed to the last link of the manipulator. Often,
+ 𝑊 has its origin fixed at a point called the wrist of the manipulator and moves
+with the last link.
+The Tool Frame, 𝑻 – is affixed
+to the end of any tool the robot
+happens to be holding.
+The Goal Frame, 𝑮 – is a
+description of the location to which
+the robot is to move the tool.
+
+
+
+
+                  MSE 429 – Advanced Kinematics for Robotics System          Ch3 - 21
+MSE 429 – Advanced Kinematics for Robotics System   Ch3 - 22
+

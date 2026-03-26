@@ -1,0 +1,42 @@
+Problem 1: Check the properties of the following rotation matrix
+       0.82364        0.1      0.5582
+ 𝑅      0.4755     0.41456      0.7759
+        0.30902     0.9045     0.2939
+
+
+
+
+                                          Problem 1 Page 1
+Problem 2: Determine 𝑃⬚ , if the position vectors 𝑃        , 𝑃   , and 𝑃⬚ and the rotation matrices
+ 𝑅 and 𝑅 are known.
+
+
+
+
+                                        Problem 2 Page 1
+Problem 3: A manipulator requires to pick up a workpiece, determine   𝑇 based on the other homogeneous
+transforms.
+
+
+
+
+                                         Problem 3 Page 1
+Problem 4: Determine the following homogeneous transforms of the frames attached to the corners
+of a wedge. 𝑇, 𝑇, 𝑇, and 𝑇.
+
+
+
+
+                                      Problem 4 Page 1
+Problem 5: First rotate 𝐵 about 𝑋 by an angle 𝛾 30 , then rotate 𝐵 about 𝑌 by an angle
+𝛽     15 , and then rotate 𝐵 about 𝑍 by an angle 𝛼 120 .
+  • Find the numerical rotation matrix.
+  • What would be the values of the angles if the 𝑍 𝑌 𝑍 Euler angle representation was used?
+  • What would be the values of 𝐾       𝑘 𝑘      𝑘 and 𝜃 if equivalent angle‐axis representation
+    was used?
+
+
+
+
+                                      Problem 5 Page 1
+

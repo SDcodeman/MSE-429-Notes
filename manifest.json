@@ -1,0 +1,333 @@
+{
+  "project": "MSE491 - Advanced Kinematics for Robotics Study Pages",
+  "courses": [
+    "MSE429",
+    "MSE492"
+  ],
+  "pipeline_version": "1.0",
+  "last_updated": "2026-03-05",
+  "stage0_complete": true,
+  "stage0_notes": "Dedup done via MD5. 5 duplicates skipped. 1 anomaly: Assignment 1 (1) differs from original despite same page count \u2014 using original as canonical.",
+  "canonical_processing_order": [
+    "MSE429 - Chapter2.pdf",
+    "MSE492 - Chapter3.pdf",
+    "MSE492 - Chapter4 - rev2.pdf",
+    "MSE492 - Chapter5-rev2.pdf",
+    "MSE429 - Tutorial 1 (Solutions).pdf",
+    "MSE429 - Tutorials 3 (Solutions).pdf",
+    "MSE429 - Tutorials 4 (Solutions).pdf",
+    "MSE429 - Tutorials 5 (Solutions).pdf",
+    "MSE 429 - Assignment 1 (Solutions).pdf",
+    "MSE 429 - Assignment 2 (Solutions)_rubric.pdf",
+    "MSE 429 - Midterm 1.pdf"
+  ],
+  "files": {
+    "MSE429 - Chapter2.pdf": {
+      "category": "chapter",
+      "course": "MSE429",
+      "chapter": 2,
+      "title": "Spatial Descriptions and Transformation",
+      "md5": "74206f9d7c36b8449040c8c252ce3af5",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Chapter_2.md",
+      "extraction_stats": {
+        "lines": 659,
+        "source_tags": 48
+      },
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": true,
+        "content_verified": true,
+        "html_generated": true,
+        "html_audited": true
+      }
+    },
+    "MSE429 - Chapter2 (1).pdf": {
+      "md5": "74206f9d7c36b8449040c8c252ce3af5",
+      "status": "skip",
+      "skip_reason": "Exact duplicate of MSE429 - Chapter2.pdf"
+    },
+    "MSE492 - Chapter3.pdf": {
+      "category": "chapter",
+      "course": "MSE492",
+      "chapter": 3,
+      "title": "Manipulator Kinematics",
+      "md5": "ed68584c21882ad90dc10db2d1341528",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE492_Chapter_3.md",
+      "extraction_stats": {
+        "lines": 380,
+        "source_tags": 45
+      },
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": true,
+        "content_verified": true,
+        "html_generated": true,
+        "html_audited": true
+      }
+    },
+    "MSE492 - Chapter4.pdf": {
+      "md5": "81e1acbb204b29abebf70fae33aa43f0",
+      "status": "skip",
+      "skip_reason": "Superseded by MSE492 - Chapter4 - rev2.pdf"
+    },
+    "MSE492 - Chapter4 (1).pdf": {
+      "md5": "81e1acbb204b29abebf70fae33aa43f0",
+      "status": "skip",
+      "skip_reason": "Duplicate of Ch4 original, which is itself superseded by rev2"
+    },
+    "MSE492 - Chapter4 - rev2.pdf": {
+      "category": "chapter",
+      "course": "MSE492",
+      "chapter": 4,
+      "title": "Chapter 4 (revision 2)",
+      "md5": "17a16366a1c00eb7ba853a4129c27ed8",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE492_Chapter_4.md",
+      "extraction_stats": {
+        "lines": 614,
+        "source_tags": 63
+      },
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": true,
+        "content_verified": true,
+        "html_generated": true,
+        "html_audited": true
+      }
+    },
+    "MSE492 - Chapter4 - rev2 (1).pdf": {
+      "md5": "17a16366a1c00eb7ba853a4129c27ed8",
+      "status": "skip",
+      "skip_reason": "Exact duplicate of MSE492 - Chapter4 - rev2.pdf"
+    },
+    "MSE492 - Chapter5-rev2.pdf": {
+      "category": "chapter",
+      "course": "MSE492",
+      "chapter": 5,
+      "title": "Jacobians: Velocities and Static Forces",
+      "md5": "7451a0fad951cebf17538bbadd6cfbb6",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE492_Chapter_5.md",
+      "extraction_stats": {
+        "lines": 961,
+        "source_tags": 59
+      },
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": true,
+        "content_verified": true,
+        "html_generated": true,
+        "html_audited": true
+      }
+    },
+    "MSE492 - Chapter5-rev2 (1).pdf": {
+      "md5": "7451a0fad951cebf17538bbadd6cfbb6",
+      "status": "skip",
+      "skip_reason": "Exact duplicate of MSE492 - Chapter5-rev2.pdf"
+    },
+    "MSE429 - Tutorial 1 (Solutions).pdf": {
+      "category": "tutorial",
+      "course": "MSE429",
+      "tutorial": 1,
+      "title": "Tutorial 1 Solutions",
+      "md5": "29db7c309298405bd4ebcfa040158beb",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Tutorial_1.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "extraction_stats": {
+        "lines": 241,
+        "tags": 11
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE429 - Tutorials 3 (Solutions).pdf": {
+      "category": "tutorial",
+      "course": "MSE429",
+      "tutorial": 3,
+      "title": "Tutorial 3 Solutions",
+      "md5": "58db9c4652e68df8f11173147b9e934c",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Tutorial_3.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "extraction_stats": {
+        "lines": 341,
+        "tags": 14
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE429 - Tutorials 4 (Solutions).pdf": {
+      "category": "tutorial",
+      "course": "MSE429",
+      "tutorial": 4,
+      "title": "Tutorial 4 Solutions",
+      "md5": "c1d47eae62018128375a75681b6954d6",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Tutorial_4.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "extraction_stats": {
+        "lines": 260,
+        "tags": 14
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE429 - Tutorials 5 (Solutions).pdf": {
+      "category": "tutorial",
+      "course": "MSE429",
+      "tutorial": 5,
+      "title": "Tutorial 5 Solutions",
+      "md5": "ae4af6f4d28b4be2549f4a7658de3af5",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Tutorial_5.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "extraction_stats": {
+        "lines": 364,
+        "tags": 17
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE 429 - Assignment 1 (Solutions).pdf": {
+      "category": "assignment",
+      "course": "MSE429",
+      "assignment": 1,
+      "title": "Assignment 1 Solutions",
+      "md5": "48bdf87eabea977fdd74b9ca1bc38032",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Assignment_1.md",
+      "notes": "WARNING: (1) version has different hash c0b2a203 \u2014 may be alternate version. Using this as canonical.",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE 429 - Assignment 1 (Solutions) (1).pdf": {
+      "md5": "c0b2a203ff9c3b6a246eb33a41dcf3d5",
+      "status": "skip",
+      "skip_reason": "Different hash from original (anomaly). Keeping original as canonical. May revisit if content issues found."
+    },
+    "MSE 429 - Assignment 2 (Solutions)_rubric.pdf": {
+      "category": "assignment",
+      "course": "MSE429",
+      "assignment": 2,
+      "title": "Assignment 2 Solutions with Rubric",
+      "md5": "28a3a03699a9b49094719ae6b46f5ac0",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Assignment_2.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE 429 - Midterm 1.pdf": {
+      "category": "exam",
+      "course": "MSE429",
+      "title": "Midterm 1",
+      "md5": "15f8e442d85f664c988140652d196b50",
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Midterm_1.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE492 - Chapter6-rev2.pdf": {
+      "category": "chapter",
+      "course": "MSE492",
+      "chapter": 6,
+      "title": "Chapter 6 (revision 2)",
+      "md5": "a5d189c5ffdbf0fafe598646e996dcb7",
+      "pages": 33,
+      "status": "canonical",
+      "stages": {
+        "extracted": false,
+        "extraction_audited": false,
+        "enriched": false,
+        "content_verified": false,
+        "html_generated": false,
+        "html_audited": false
+      }
+    },
+    "MSE492 - Chapter7.pdf": {
+      "category": "chapter",
+      "course": "MSE492",
+      "chapter": 7,
+      "title": "Chapter 7",
+      "md5": "dda5489805afc3a163664b0f9cde1fea",
+      "pages": 39,
+      "status": "canonical",
+      "stages": {
+        "extracted": false,
+        "extraction_audited": false,
+        "enriched": false,
+        "content_verified": false,
+        "html_generated": false,
+        "html_audited": false
+      }
+    },
+    "MSE492 - Chapter8.pdf": {
+      "category": "chapter",
+      "course": "MSE492",
+      "chapter": 8,
+      "title": "Chapter 8",
+      "md5": "78a4f63a6056e9c7d5219dd2597589ea",
+      "pages": 22,
+      "status": "canonical",
+      "stages": {
+        "extracted": false,
+        "extraction_audited": false,
+        "enriched": false,
+        "content_verified": false,
+        "html_generated": false,
+        "html_audited": false
+      }
+    }
+  }
+}

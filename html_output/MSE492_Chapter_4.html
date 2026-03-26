@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 4: Inverse Kinematics — MSE 492</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+      ],
+      throwOnError: false
+    });"></script>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+
+  <main class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&rsaquo;</span>
+      MSE492<span class="sep">&rsaquo;</span>
+      Chapter 4
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Chapter 4: Inverse Manipulator Kinematics
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=1" target="_blank">PDF p.1</a>
+    </h1>
+
+    <!-- ============================================================ -->
+    <!-- 4.1 OVERVIEW -->
+    <!-- ============================================================ -->
+    <h2 id="s4-1">4.1 Overview
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=2" target="_blank">PDF p.2</a>
+    </h2>
+
+    <p>This chapter covers the following topics:</p>
+    <ul>
+      <li>Definition of inverse kinematics</li>
+      <li>Workspace definition</li>
+      <li>Algebraic vs. geometric</li>
+      <li>Algebraic solution by reduction to polynomial</li>
+      <li>The wrist-partitioned (Pieper's) method</li>
+    </ul>
+
+    <!-- ============================================================ -->
+    <!-- 4.2 DEFINITION OF INVERSE KINEMATICS -->
+    <!-- ============================================================ -->
+    <h2 id="s4-2">4.2 Definition of Inverse Kinematics
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=3" target="_blank">PDF p.3</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition — Inverse Kinematics
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=3" target="_blank">PDF p.3</a>
+      </div>
+      <p><strong><span class="tooltip-term" tabindex="0">Inverse Kinematics<span class="tooltip-content">The problem of computing joint variables (angles or displacements) from a desired end-effector pose. Unlike forward kinematics, IK generally requires solving systems of nonlinear transcendental equations and may yield zero, one, or multiple solutions.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, 4th ed., Ch. 4</span></span></span></strong>: The inverse kinematics computes the values of the joint variables that would result in a desired position or orientation of the end-effector.</p>
+      <p>Generally, it is desired for the manipulator to follow a particular path. For example, pick up an object and place it elsewhere. Therefore, a numerical desired position and orientation of the end-effector must be established.</p>
+      <p>In inverse kinematic calculations, given the numerical value of ${}^{0}_{N}T$, it is desired to find the set of joint translation/rotational displacements that will result in such numerical matrix.</p>
+      <p>Each ${}^{i-1}_{i}T$ is a function of the $q_i$ joint displacement ($\theta_i$ for revolute and $d_i$ for prismatic joints).</p>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why is inverse kinematics harder than forward kinematics?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p><strong>Forward kinematics</strong> is a straightforward chain of matrix multiplications: given $\theta_1, \ldots, \theta_n$, compute ${}^0_n T = {}^0_1 T(\theta_1) \cdots {}^{n-1}_n T(\theta_n)$. Each step is a well-defined function evaluation, there is exactly one answer, and the computation is $O(n)$ matrix multiplies.</p>
+        <p><strong>Inverse kinematics</strong> reverses this mapping, but the reversal is fundamentally harder for three reasons:</p>
+        <ol>
+          <li><strong>Nonlinearity.</strong> The forward map involves products of sines and cosines of the joint angles. Inverting these yields systems of coupled transcendental (trigonometric) equations that have no general closed-form solution. For a 6-DOF robot, the 12 scalar equations from ${}^0_6 T$ are all coupled through shared unknowns $\theta_1, \ldots, \theta_6$.</li>
+          <li><strong>Non-uniqueness.</strong> Multiple joint configurations can produce the same end-effector pose (up to 16 for a general 6R manipulator). The forward map is many-to-one, so its "inverse" is one-to-many.</li>
+          <li><strong>Existence is not guaranteed.</strong> A desired pose may lie outside the workspace, in which case no solution exists. The forward map always produces a valid pose, but not every pose is reachable.</li>
+        </ol>
+        <p>In mathematical terms, the forward kinematics map $f: \mathbb{R}^n \to SE(3)$ is a smooth, surjective-onto-its-image function. Its inverse $f^{-1}$ is a <em>set-valued</em> mapping that may be empty, and computing it requires solving a system of nonlinear equations.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, 4th ed., &sect;4.1&ndash;4.2 &middot; <a href="https://en.wikipedia.org/wiki/Inverse_kinematics" target="_blank">Wikipedia: Inverse kinematics</a></div>
+      </div></div>
+    </div>
+
+    <h3>Key Equations
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=3" target="_blank">PDF p.3</a>
+    </h3>
+
+    <p>The forward kinematics chain:</p>
+    $${}^{0}_{e.e}T = {}^{0}_{1}T(q_1) \; {}^{1}_{2}T(q_2) \; \cdots \; {}^{n-1}_{n}T(q_n) \; {}^{n}_{e.e}T$$
+
+    <p>Therefore, the problem of inverse kinematics lies in comparing each element of the matrices and solving for all the joint displacements, $q_i$'s.</p>
+
+    <h3>Remarks
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=4" target="_blank">PDF p.4</a>
+    </h3>
+    <ul>
+      <li>The desired position/orientation to be calculated for inverse kinematics should be within the workspace of the manipulator -- which is based on the length of the links, joint kinematic layout, and joint limits.</li>
+      <li>Redundant manipulators (more than 6-DoF) have an infinite number of solutions (configurations).</li>
+      <li>Depending on the number of joints and the structure of the manipulator, the inverse kinematics may have no solutions, one solution, or multiple solutions.</li>
+      <li>In the problem of inverse kinematics, normally, a set of nonlinear equations should be solved, for which, special attention should be given to the existence of the solution, number of solutions, and the method of solutions.</li>
+    </ul>
+
+    <!-- Enrichment: Intro to IK video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Video: Introduction to Inverse Kinematics</div>
+      <p>The following video from Robot Academy (Prof. Peter Corke, Queensland University of Technology) provides an excellent visual introduction to the inverse kinematics problem. It explains why IK is fundamentally harder than forward kinematics -- forward kinematics is a simple chain of matrix multiplications (one answer), whereas inverse kinematics requires solving nonlinear equations that may have zero, one, or multiple solutions.</p>
+      <p><strong>Robot Academy -- Introduction to Inverse Kinematics</strong><br>
+      <a href="https://robotacademy.net.au/lesson/introduction-to-inverse-kinematics/" target="_blank">https://robotacademy.net.au/lesson/introduction-to-inverse-kinematics/</a></p>
+      <p>Key takeaways from the video:</p>
+      <ul>
+        <li>Forward kinematics: given joint angles, find end-effector pose (easy, unique answer)</li>
+        <li>Inverse kinematics: given end-effector pose, find joint angles (hard, possibly multiple or no answers)</li>
+        <li>The "inverse" in IK is not a simple matrix inverse -- it requires solving transcendental (trigonometric) equations</li>
+        <li>For a 6-DOF robot, this means solving 12 coupled nonlinear equations (from the elements of ${}^{0}_{6}T$)</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.3 MANIPULATOR WORKSPACE -->
+    <!-- ============================================================ -->
+    <h2 id="s4-3">4.3 Manipulator Workspace
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=5" target="_blank">PDF p.5</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition — Workspace
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=5" target="_blank">PDF p.5</a>
+      </div>
+      <p><strong><span class="tooltip-term" tabindex="0">Workspace<span class="tooltip-content">The set of all positions (and possibly orientations) that a robot's end-effector can reach. It is subdivided into the <em>reachable workspace</em> (at least one orientation) and the <em>dexterous workspace</em> (all orientations). Workspace boundaries are determined by link lengths, joint types, and joint limits.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, 4th ed., &sect;4.3 &middot; Sciavicco &amp; Siciliano, <em>Modeling and Control of Robot Manipulators</em></span></span></span></strong>: The workspace of a robot manipulator is defined as the set of points that can be reached by its end-effector.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition — Reachable Workspace
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=5" target="_blank">PDF p.5</a>
+      </div>
+      <p><strong>Reachable Workspace</strong>: A region that the manipulator can reach in at least one orientation.</p>
+    </div>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition — Dextrous Workspace
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=5" target="_blank">PDF p.5</a>
+      </div>
+      <p><strong>Dextrous Workspace</strong>: A region that the manipulator can reach with all the orientations.</p>
+    </div>
+
+    <h3>Workspace Examples -- Equal Link Lengths ($l_1 = l_2$)
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=5" target="_blank">PDF p.5</a>
+    </h3>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p5.png" alt="Figure: Two-link planar manipulator with equal link lengths ($l_1 = l_2$). Left diagram: Shows the two links $l_1$ and $l_2$ connected at a revolute joint with angle $\theta$. The reachable workspace " loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Two-link planar manipulator with equal link lengths ($l_1 = l_2$). <em>Left diagram:</em> Shows the two links $l_1$ and $l_2$ connected at a revolute joint with angle $\theta$. The reachable workspace is a circle (disk) of radius $2l_1$ centered at the base. <em>Right diagram:</em> Shows the same manipulator with $\theta = 360°$, illustrating that when both links can sweep a full rotation, the dexterous workspace is a single point at the origin (base), since only at that point can the end-effector achieve all orientations by folding the links.
+    </div>
+
+    <ul>
+      <li>Reachable workspace $= 2l_1$ (full disk)</li>
+      <li>Dexterous workspace $=$ single point, the origin</li>
+    </ul>
+
+    <h3>Workspace Examples -- Unequal Link Lengths ($l_1 \neq l_2$)
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=6" target="_blank">PDF p.6</a>
+    </h3>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p6.png" alt="Figure: Two-link planar manipulator with unequal link lengths ($l_1 \neq l_2$). Left diagram: Shows the reachable workspace as a ring (annulus) between inner radius $|l_1 - l_2|$ and outer radius $l_1" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Two-link planar manipulator with unequal link lengths ($l_1 \neq l_2$). <em>Left diagram:</em> Shows the reachable workspace as a ring (annulus) between inner radius $|l_1 - l_2|$ and outer radius $l_1 + l_2$. Multiple configurations shown as dashed lines reaching different points on the boundary. <em>Right diagram:</em> Shows two possible configurations (elbow-up and elbow-down, depicted as solid and dashed lines) reaching the same point inside the reachable workspace, demonstrating two possible orientations of the end-effector.
+    </div>
+
+    <ul>
+      <li>Reachable workspace: ring (annulus)</li>
+      <li>Dexterous workspace: does not exist</li>
+      <li>Inside the reachable workspace, there are two possible orientations of the end-effector</li>
+    </ul>
+
+    <h3>Workspace Examples -- 3-DoF Manipulators
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=7" target="_blank">PDF p.7</a>
+    </h3>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p7.png" alt="Figure: Reachable workspace for a Cartesian manipulator -- a rectangular prism (box) shape. The manipulator has three prismatic joints arranged along orthogonal axes.
+      PDF p.7" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Reachable workspace for a <strong>Cartesian</strong> manipulator -- a rectangular prism (box) shape. The manipulator has three prismatic joints arranged along orthogonal axes.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=7" target="_blank">PDF p.7</a>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p7.png" alt="Figure: Reachable workspace for a Cylindrical manipulator -- a cylindrical shell shape. The manipulator has one revolute joint at the base and two prismatic joints.
+      PDF p.7" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Reachable workspace for a <strong>Cylindrical</strong> manipulator -- a cylindrical shell shape. The manipulator has one revolute joint at the base and two prismatic joints.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=7" target="_blank">PDF p.7</a>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p7.png" alt="Figure: Reachable workspace for a Spherical manipulator -- a thick spherical shell (partial sphere) shape. The manipulator has two revolute joints and one prismatic joint.
+      PDF p.8" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Reachable workspace for a <strong>Spherical</strong> manipulator -- a thick spherical shell (partial sphere) shape. The manipulator has two revolute joints and one prismatic joint.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=8" target="_blank">PDF p.8</a>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p8.png" alt="Figure: Reachable workspace for a SCARA manipulator -- a flat cylindrical ring shape. The manipulator has two revolute joints with parallel axes and one prismatic joint.
+      PDF p.8" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Reachable workspace for a <strong>SCARA</strong> manipulator -- a flat cylindrical ring shape. The manipulator has two revolute joints with parallel axes and one prismatic joint.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=8" target="_blank">PDF p.8</a>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p8.png" alt="Figure: Reachable workspace for an Anthropomorphic manipulator -- a spherical shell shape. The manipulator has three revolute joints.
+      PDF p.8" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Reachable workspace for an <strong>Anthropomorphic</strong> manipulator -- a spherical shell shape. The manipulator has three revolute joints.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=8" target="_blank">PDF p.8</a>
+    </div>
+
+    <p><em>Illustrations from book: Modeling and control of robot manipulators, by L. Sciavicco and B. Siciliano</em></p>
+
+    <!-- Enrichment: Workspace boundaries -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Workspace Boundaries and What Causes Them</div>
+      <p>Understanding <strong>why</strong> workspaces have the shapes they do is essential for inverse kinematics, because a point outside the workspace has <strong>no IK solution</strong>.</p>
+      <p><strong>What determines workspace shape:</strong></p>
+      <ol>
+        <li><strong>Link lengths</strong> -- The maximum reach is the sum of all link lengths (fully extended). The minimum reach (inner boundary) is determined by the difference in link lengths (fully folded). For a 2-link arm: outer radius $= l_1 + l_2$, inner radius $= |l_1 - l_2|$.</li>
+        <li><strong>Joint types</strong> -- Revolute joints create curved (circular/spherical) workspace boundaries. Prismatic joints create flat (linear/planar) boundaries. This is why a Cartesian robot has a box-shaped workspace while an anthropomorphic robot has a spherical shell.</li>
+        <li><strong>Joint limits</strong> -- Physical stops on joints reduce the theoretical workspace. A joint with $\pm 180°$ range sweeps a full circle, but a joint limited to $\pm 90°$ only sweeps a quarter.</li>
+        <li><strong>Link offsets and twists ($d_i$, $\alpha_i$)</strong> -- Non-zero DH parameters create asymmetries. The PUMA 560's workspace is not a perfect sphere because of its shoulder offset and elbow offset.</li>
+      </ol>
+      <p><strong>Why the dexterous workspace is so small (or empty):</strong></p>
+      <p>The dexterous workspace requires reaching a point with <strong>every possible orientation</strong>. At the boundary of the reachable workspace, the arm is fully extended -- there is only one possible configuration, hence only one orientation. The deeper inside the workspace, the more configurations exist. For a 2R planar arm with $l_1 = l_2$, the only point reachable with all orientations is the origin (where the arm can fold in any direction).</p>
+      <p><strong>Reference</strong>: Sciavicco, L. and Siciliano, B., <em>Modeling and Control of Robot Manipulators</em>, Springer. Also see Mecharithm's interactive workspace visualization: <a href="https://mecharithm.com/learning/lesson/task-space-and-workspace-for-robots-102" target="_blank">mecharithm.com</a></p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>The dexterous workspace of a manipulator is the set of points that can be reached:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">With at least one orientation</button>
+        <button class="quiz-option" data-correct="true">With all possible orientations of the end-effector</button>
+        <button class="quiz-option" data-correct="false">Only at maximum arm extension</button>
+        <button class="quiz-option" data-correct="false">Without any joint limits</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The dexterous workspace requires all orientations to be achievable. The reachable workspace only requires at least one orientation." data-incorrect="The dexterous workspace is more restrictive than the reachable workspace — every orientation must be achievable at each point."></div>
+    </div>
+
+    <div class="concept-check" data-concept="workspace">
+      <span class="concept-check-label">How well do you understand workspace concepts?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.4 MULTIPLE SOLUTIONS -->
+    <!-- ============================================================ -->
+    <h2 id="s4-4">4.4 Multiple Solutions
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=9" target="_blank">PDF p.9</a>
+    </h2>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties / Theorems
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=9" target="_blank">PDF p.9</a>
+      </div>
+      <p>A good choice would be the solution that minimizes the amount that each joint is required to move. In practice, other dynamic considerations like the weight of the arms should be taken into account.</p>
+      <ul>
+        <li>In the absence of an obstacle, the upper dashed configuration is preferred.</li>
+        <li>In the presence of an obstacle on the path of the preferred configuration, the farther solution should be selected.</li>
+      </ul>
+    </div>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p9.png" alt="Figure: A two-link manipulator reaching a goal point with two possible configurations (elbow-up shown as dashed lines, elbow-down shown as solid lines). Points A and B mark the end-effector positions " loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> A two-link manipulator reaching a goal point with two possible configurations (elbow-up shown as dashed lines, elbow-down shown as solid lines). Points A and B mark the end-effector positions of the two configurations. An obstacle is shown between the two paths. The manipulator base is at the bottom, demonstrating why the farther solution may be necessary when obstacles are present.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=9" target="_blank">PDF p.9</a>
+    </div>
+
+    <h3>PUMA 560 Multiple Solutions
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=10" target="_blank">PDF p.10</a>
+    </h3>
+
+    <p>Number of possible solutions to reach a point in the reachable workspace of a PUMA 560 robot:</p>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p10.png" alt="Figure: Four different configurations of a PUMA 560 robot reaching the same point in its reachable workspace. The four configurations show different combinations of shoulder left/right and elbow up/do" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Four different configurations of a PUMA 560 robot reaching the same point in its reachable workspace. The four configurations show different combinations of shoulder left/right and elbow up/down positions. Each configuration shows the robot's arm segments and joints in different orientations, all converging to the same end-effector location.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=10" target="_blank">PDF p.10</a>
+    </div>
+
+    <h3>Number of Solutions vs. Link Parameters
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=11" target="_blank">PDF p.11</a>
+    </h3>
+
+    <p><strong>Note:</strong> In general, the more nonzero link parameters there are, the more ways there will be to reach a certain point in the reachable workspace. The more that are nonzero, the bigger is the maximum number of solutions.</p>
+
+    <table>
+      <thead>
+        <tr><th>$a_i$</th><th>Number of solutions</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>$a_1 = a_3 = a_5 = 0$</td><td>$\leq 4$</td></tr>
+        <tr><td>$a_3 = a_5 = 0$</td><td>$\leq 8$</td></tr>
+        <tr><td>$a_3 = 0$</td><td>$\leq 16$</td></tr>
+        <tr><td>All $a_i \neq 0$</td><td>$\leq 16$</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Note:</strong> For a completely generally rotary-jointed manipulator with six degrees of freedom, there are up to sixteen solutions possible.</p>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does inverse kinematics generally have multiple solutions?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>Multiple solutions arise because the trigonometric functions in the forward kinematics are <strong>periodic and symmetric</strong>. Specifically:</p>
+        <ol>
+          <li><strong>Elbow up / elbow down.</strong> When you solve for $\theta_2$ from $c_2 = \frac{x^2 + y^2 - l_1^2 - l_2^2}{2l_1 l_2}$, the sine is $s_2 = \pm\sqrt{1 - c_2^2}$. The $\pm$ sign gives two valid values of $\theta_2$, corresponding to the elbow bending "up" or "down." Each choice of sign propagates through the remaining equations, producing a distinct full configuration.</li>
+          <li><strong>Shoulder left / shoulder right.</strong> For 3D manipulators, the base joint $\theta_1$ can often be set to point the shoulder on either side of the target, since $\text{Atan2}(y, x)$ and $\text{Atan2}(-y, -x)$ differ by $\pi$, and the remaining joints can compensate.</li>
+          <li><strong>Wrist flip.</strong> The three wrist joints ($\theta_4, \theta_5, \theta_6$) can often achieve the same final orientation by "flipping" -- rotating $\theta_5$ by $\pi$ and adjusting $\theta_4$ and $\theta_6$ by $\pi$ to compensate. This doubles the solution count.</li>
+        </ol>
+        <p>Algebraically, each binary choice (elbow, shoulder, wrist) creates a factor of 2 in the total. For the PUMA 560: $2 \times 2 \times 2 = 8$ solutions. For the most general 6R robot (where additional link parameter choices create more branching), the polynomial system has degree 16, yielding up to 16 real solutions.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, 4th ed., &sect;4.4 &middot; Pieper, D.L., Stanford AI Memo 72, 1968 &middot; MSE 492 slides p.9&ndash;11</div>
+      </div></div>
+    </div>
+
+    <h3>Classes of Solution Methods
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=12" target="_blank">PDF p.12</a>
+    </h3>
+
+    <ul>
+      <li><strong>Numerical solutions</strong>: Slow due to their iterative nature. Not interested.</li>
+      <li><strong>Closed-form solutions</strong>: A solution method based on analytical expressions or the solution of a polynomial of degree 4 or less.
+        <ul>
+          <li><span class="tooltip-term" tabindex="0">Algebraic<span class="tooltip-content">A closed-form IK approach that starts from the forward kinematics matrix equation, equates individual matrix elements to the desired pose, and manipulates the resulting trigonometric equations using techniques like squaring-and-adding and half-angle substitution to isolate each joint variable.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, 4th ed., &sect;4.5 &middot; MSE 492 slides p.13&ndash;17</span></span></span></li>
+          <li><span class="tooltip-term" tabindex="0">Geometric<span class="tooltip-content">A closed-form IK approach that decomposes the robot's spatial geometry into planar triangles and applies the law of cosines and basic trigonometric identities to solve for joint angles. It gives more physical intuition than the algebraic method but is harder to apply systematically to 3D robots.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, 4th ed., &sect;4.5 &middot; MSE 492 slides p.18</span></span></span></li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Pieper's Condition
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=12" target="_blank">PDF p.12</a>
+      </div>
+      <p>A sufficient condition that a manipulator with six revolute joints have a closed-form solution is that three neighboring joint axes intersect at a point. (<span class="tooltip-term" tabindex="0">Pieper's method<span class="tooltip-content">A closed-form inverse kinematics technique developed by Donald Pieper (Stanford, 1968) that exploits the fact that when three consecutive joint axes intersect at a point (forming a "spherical wrist"), the 6-DOF IK problem decouples into a 3-DOF position subproblem (first three joints) and a 3-DOF orientation subproblem (last three joints, solved via Euler angle decomposition).<span class="tooltip-source">Pieper, D.L., "The Kinematics of Manipulators Under Computer Control," Stanford AI Memo 72, 1968 &middot; Craig &sect;4.7</span></span></span>, discussed later in this chapter).</p>
+      <p>Almost every manipulator with 6-DoF built today has three intersecting axes.</p>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why is Pieper's method limited to robots with 3 intersecting wrist axes?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>The entire power of Pieper's method comes from <strong>kinematic decoupling</strong>: separating the 6-unknown IK problem into a 3-unknown position problem and a 3-unknown orientation problem. This decoupling is only possible when the last three joint axes meet at a single point (a "spherical wrist").</p>
+        <p><strong>Why the intersection is essential:</strong></p>
+        <ol>
+          <li>When three axes intersect, the origins of frames $\{4\}$, $\{5\}$, and $\{6\}$ coincide at the wrist center point. This means that rotating joints 4, 5, 6 changes the end-effector's <em>orientation</em> but does <strong>not move the wrist center</strong>.</li>
+          <li>Therefore the wrist center position depends only on $\theta_1, \theta_2, \theta_3$. We can solve for these three angles from the three position equations $(x, y, z)$ alone -- a tractable 3-equation, 3-unknown system.</li>
+          <li>Once $\theta_1, \theta_2, \theta_3$ are known, the rotation ${}^0_3 R$ is fully determined. The remaining orientation ${}^3_6 R = ({}^0_3 R)^T {}^0_6 R$ is a known rotation matrix, and extracting $\theta_4, \theta_5, \theta_6$ from it is the standard Z-Y-Z Euler angle decomposition.</li>
+        </ol>
+        <p><strong>What goes wrong without the intersection:</strong> If the three wrist axes do <em>not</em> intersect, then $\theta_4, \theta_5, \theta_6$ affect the end-effector position (not just orientation). Position and orientation become coupled through all six unknowns simultaneously. The resulting system of six coupled transcendental equations generally cannot be reduced to polynomials of degree $\leq 4$, so no closed-form solution is guaranteed. One must fall back to numerical iterative methods or handle higher-degree polynomial systems (up to degree 16).</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, 4th ed., &sect;4.7 &middot; Pieper, D.L., "The Kinematics of Manipulators Under Computer Control," Stanford AI Memo 72, 1968 &middot; <a href="https://en.wikipedia.org/wiki/Inverse_kinematics#Analytical_solutions" target="_blank">Wikipedia: Inverse kinematics &mdash; Analytical solutions</a></div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Multiple IK solutions video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Video: Multiple IK Solutions on a Real Robot Arm</div>
+      <p>The Robot Academy masterclass on "Inverse Kinematics and Robot Motion" includes a video lesson that demonstrates inverse kinematics for a general-purpose 6-DOF robot arm (the classical PUMA 560) in 3D. The video visually shows how the same end-effector pose can be reached by different joint configurations.</p>
+      <p><strong>Robot Academy -- Inverse Kinematics for a General Purpose Robot Arm That Moves in 3D</strong><br>
+      <a href="https://robotacademy.net.au/lesson/inverse-kinematics-for-a-general-purpose-robot-arm-that-moves-in-3d/" target="_blank">robotacademy.net.au</a></p>
+      <p>The PUMA 560 has up to <strong>8 solutions</strong> for a given end-effector pose (4 from the first three joints x 2 from the wrist). These correspond to combinations of:</p>
+      <ul>
+        <li><strong>Shoulder left / shoulder right</strong> -- the base joint ($\theta_1$) can point the shoulder to either side</li>
+        <li><strong>Elbow up / elbow down</strong> -- the elbow joint ($\theta_3$) bends in two opposite directions</li>
+        <li><strong>Wrist flipped / not flipped</strong> -- the wrist ($\theta_5$) can achieve the same final orientation by flipping 180 degrees and adjusting $\theta_4$ and $\theta_6$</li>
+      </ul>
+      <p><strong>How to choose among solutions in practice:</strong></p>
+      <ol>
+        <li><strong>Closest to current configuration</strong> -- minimizes joint travel (fastest motion, least energy)</li>
+        <li><strong>Avoid joint limits</strong> -- reject solutions where any joint is near its mechanical stop</li>
+        <li><strong>Avoid singularities</strong> -- reject configurations where the Jacobian becomes singular (<a href="MSE492_Chapter_5.html">Chapter 5</a>)</li>
+        <li><strong>Obstacle avoidance</strong> -- reject solutions whose intermediate links collide with known obstacles</li>
+        <li><strong>Manipulability</strong> -- prefer configurations that maximize the robot's ability to move in all directions</li>
+      </ol>
+    </div>
+
+    <!-- Enrichment: Why closed-form matters -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Why Closed-Form Solutions Matter for Real-Time Control</div>
+      <p>The slides dismiss numerical solutions as "slow" and "not interested." Here is the deeper engineering reason why this matters.</p>
+      <p><strong>The real-time control loop:</strong></p>
+      <p>In a typical robot controller, inverse kinematics must be computed at the <strong>servo rate</strong> -- typically 1 kHz (1000 times per second) for modern industrial robots, or at minimum 30 Hz as mentioned in Section 4.8. Each IK computation must complete in under <strong>1 ms</strong> (or ~33 ms at 30 Hz).</p>
+      <p><strong>Closed-form (analytical) solutions:</strong></p>
+      <ul>
+        <li>Fixed number of arithmetic operations (additions, multiplications, <code>atan2</code> calls)</li>
+        <li>Execution time is <strong>deterministic</strong> and <strong>constant</strong> -- always the same number of operations</li>
+        <li>Typical computation: ~10-50 microseconds on modern hardware</li>
+        <li>Returns <strong>all</strong> solutions simultaneously, allowing the controller to pick the best one</li>
+        <li>Average speedup factor: <strong>5-8x faster</strong> than numerical methods</li>
+      </ul>
+      <p><strong>Numerical solutions (Newton-Raphson, Jacobian pseudoinverse):</strong></p>
+      <ul>
+        <li>Iterative: require multiple passes, each involving a Jacobian computation and matrix inversion</li>
+        <li>Execution time is <strong>variable</strong> -- depends on how far the initial guess is from the solution</li>
+        <li>May <strong>fail to converge</strong> if the initial guess is poor or near a singularity</li>
+        <li>Typically finds only <strong>one</strong> solution per run (whichever is nearest to the initial guess)</li>
+        <li>Average: 4-20 iterations, each involving $O(n^3)$ matrix operations</li>
+      </ul>
+      <p><strong>When numerical methods are necessary:</strong></p>
+      <ul>
+        <li>Redundant manipulators (7+ DOF) where closed-form solutions generally do not exist</li>
+        <li>Robots that do not satisfy Pieper's condition (no three intersecting axes)</li>
+        <li>When additional constraints (obstacle avoidance, joint limit penalties) must be embedded in the solver</li>
+      </ul>
+      <p><strong>Reference</strong>: Lynch, K. and Park, F., <em>Modern Robotics: Mechanics, Planning, and Control</em>, Cambridge University Press, Chapter 6. Free video lectures: <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/6-2-numerical-inverse-kinematics-part-1-of-2/" target="_blank">modernrobotics.northwestern.edu</a></p>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>A 6-DOF manipulator with all revolute joints can have up to how many IK solutions?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">2</button>
+        <button class="quiz-option" data-correct="false">4</button>
+        <button class="quiz-option" data-correct="false">8</button>
+        <button class="quiz-option" data-correct="true">16</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! A general 6R manipulator can have up to 16 solutions. This comes from the degree of the polynomial system that arises in the algebraic approach." data-incorrect="Not quite. For a general 6R manipulator, up to 16 solutions are possible. The combinations arise from shoulder/elbow/wrist configurations and other geometric choices."></div>
+    </div>
+
+    <div class="concept-check" data-concept="multiple-solutions">
+      <span class="concept-check-label">How well do you understand multiple IK solutions?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.5 ALGEBRAIC VS. GEOMETRIC -->
+    <!-- ============================================================ -->
+    <h2 id="s4-5">4.5 Inverse Kinematics -- Algebraic vs. Geometric
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=13" target="_blank">PDF p.13</a>
+    </h2>
+
+    <!-- 4.5.1 Algebraic Solution -->
+    <h3 id="s4-5-1">4.5.1 Algebraic Solution
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=13" target="_blank">PDF p.13</a>
+    </h3>
+
+    <p>Consider the three-link planar manipulator studied in <a href="MSE492_Chapter_3.html">Chapter 3</a> with the following link parameters.</p>
+
+    <table>
+      <thead>
+        <tr><th>$i$</th><th>$a_{i-1}$</th><th>$\alpha_{i-1}$</th><th>$d_i$</th><th>$\theta_i$</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>$\theta_1$</td></tr>
+        <tr><td>2</td><td>$L_1$</td><td>0</td><td>0</td><td>$\theta_2$</td></tr>
+        <tr><td>3</td><td>$L_2$</td><td>0</td><td>0</td><td>$\theta_3$</td></tr>
+      </tbody>
+    </table>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p13.png" alt="Figure: Three-link planar manipulator showing three links connected by revolute joints. Frame assignments are shown: $\{\hat{X}_0, \hat{Y}_0\}$ at the base, $\{\hat{X}_1, \hat{Y}_1\}$ at joint 2, $\{\" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Three-link planar manipulator showing three links connected by revolute joints. Frame assignments are shown: $\{\hat{X}_0, \hat{Y}_0\}$ at the base, $\{\hat{X}_1, \hat{Y}_1\}$ at joint 2, $\{\hat{X}_2, \hat{Y}_2\}$ at joint 3, and $\{\hat{X}_3, \hat{Y}_3\}$ at the end-effector. The links are shown as connected segments forming a planar chain. The base is fixed (indicated by hatching).
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=13" target="_blank">PDF p.13</a>
+    </div>
+
+    <h4>Goal Point Specification
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=14" target="_blank">PDF p.14</a>
+    </h4>
+
+    <p>The goal point is a specification of the wrist frame relative to the base frame, that is:</p>
+
+    $${}^{BT}_{W}T = {}^{0}_{3}T = \begin{bmatrix} c_{123} & -s_{123} & 0.0 & l_1 c_1 + l_2 c_{12} \\ s_{123} & c_{123} & 0.0 & l_1 s_1 + l_2 s_{12} \\ 0.0 & 0.0 & 1.0 & 0.0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+    <p>Given the planar nature of motion for this manipulator, the goal point can be specified using $x$, $y$, and $\phi$ where $\phi$ is the orientation of link 3 in the plane (relative to the $+\hat{X}$ axis).</p>
+
+    $${}^{BT}_{W}T = \begin{bmatrix} c_\phi & -s_\phi & 0.0 & x \\ s_\phi & c_\phi & 0.0 & y \\ 0.0 & 0.0 & 1.0 & 0.0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+
+    <div class="figure">
+      <img src="assets/images/ch4_p14.png" alt="Figure: Same three-link planar manipulator from a different perspective showing the frames $\{\hat{X}_0, \hat{Y}_0\}$, $\{\hat{X}_1, \hat{Y}_1\}$, $\{\hat{X}_2, \hat{Y}_2\}$, $\{\hat{X}_3, \hat{Y}_3\}" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Same three-link planar manipulator from a different perspective showing the frames $\{\hat{X}_0, \hat{Y}_0\}$, $\{\hat{X}_1, \hat{Y}_1\}$, $\{\hat{X}_2, \hat{Y}_2\}$, $\{\hat{X}_3, \hat{Y}_3\}$ at each joint and the end-effector, with the end-effector position $(x, y)$ and orientation $\phi$ marked.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=14" target="_blank">PDF p.14</a>
+    </div>
+
+    <!-- Algebraic derivation: step-by-step -->
+    <h4>Algebraic Solution: Solving the Four Nonlinear Equations
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=15" target="_blank">PDF p.15</a>
+    </h4>
+
+    <p>Four nonlinear equations must be solved:</p>
+    $$c_\phi = c_{123}$$
+    $$s_\phi = s_{123}$$
+    $$x = l_1 c_1 + l_2 c_{12}$$
+    $$y = l_1 s_1 + l_2 s_{12}$$
+
+    <div class="figure">
+      <img src="assets/images/ch4_p15.png" alt="Figure: Three-link planar manipulator with frame labels showing the geometric relationships between the links and joints.
+      PDF p.15" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> Three-link planar manipulator with frame labels showing the geometric relationships between the links and joints.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=15" target="_blank">PDF p.15</a>
+    </div>
+
+    <div class="derivation-steps" id="deriv-algebraic">
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous</button>
+        <span class="step-counter">Step 1 of 4</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Find $c_2$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=15" target="_blank">PDF p.15</a>
+        </div>
+        <p>Squaring and adding the last two equations gives:</p>
+        $$x^2 + y^2 = l_1^2 + l_2^2 + 2 l_1 l_2 c_2$$
+        <p>where we made use of:</p>
+        $$c_{12} = c_1 c_2 - s_1 s_2$$
+        $$s_{12} = c_1 s_2 + s_1 c_2$$
+        <p>Solving for $c_2$:</p>
+        $$c_2 = \frac{x^2 + y^2 - l_1^2 - l_2^2}{2 l_1 l_2}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Find $\theta_2$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=16" target="_blank">PDF p.16</a>
+        </div>
+        <p>Assuming the goal is in the workspace, for $s_2$ we obtain:</p>
+        $$s_2 = \pm\sqrt{1 - c_2^2}$$
+        <p>Hence, $\theta_2$ can be found:</p>
+        $$\theta_2 = \text{Atan2}(s_2, c_2)$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Find $\theta_1$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=16" target="_blank">PDF p.16</a>
+        </div>
+        <p>Having found $\theta_2$, $\theta_1$ can be found. Rewrite the position equations as:</p>
+        $$x = k_1 c_1 - k_2 s_1$$
+        $$y = k_1 s_1 + k_2 c_1$$
+        <p>where:</p>
+        $$k_1 = l_1 + l_2 c_2$$
+        $$k_2 = l_2 s_2$$
+        <p>Performing a change of variable $r = +\sqrt{k_1^2 + k_2^2}$ and $\gamma = \text{Atan2}(k_2, k_1)$:</p>
+        $$k_1 = r \cos\gamma$$
+        $$k_2 = r \sin\gamma$$
+        <p>Substituting:
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=17" target="_blank">PDF p.17</a>
+        </p>
+        $$\frac{x}{r} = \cos\gamma \cos\theta_1 - \sin\gamma \sin\theta_1$$
+        $$\frac{y}{r} = \cos\gamma \sin\theta_1 + \sin\gamma \cos\theta_1$$
+        <p>So:</p>
+        $$\cos(\gamma + \theta_1) = \frac{x}{r}$$
+        $$\sin(\gamma + \theta_1) = \frac{y}{r}$$
+        <p>Using the two-argument arctangent:</p>
+        $$\gamma + \theta_1 = \text{Atan2}\left(\frac{y}{r}, \frac{x}{r}\right) = \text{Atan2}(y, x)$$
+        <p>And so:</p>
+        $$\theta_1 = \text{Atan2}(y, x) - \text{Atan2}(k_2, k_1)$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Find $\theta_3$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=17" target="_blank">PDF p.17</a>
+        </div>
+        <p>Solving for the sum of $\theta_1$ through $\theta_3$:</p>
+        $$\theta_1 + \theta_2 + \theta_3 = \text{Atan2}(s_\phi, c_\phi) = \phi$$
+        <p>Therefore:</p>
+        $$\theta_3 = \phi - \theta_1 - \theta_2$$
+      </div>
+    </div>
+
+    <!-- Enrichment: Algebraic vs Geometric video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Video: Algebraic vs. Geometric IK -- Side-by-Side Comparison</div>
+      <p>Robot Academy provides two companion video lessons that solve the <strong>exact same 2-link robot problem</strong> using both methods:</p>
+      <p><strong>1. Geometric approach:</strong><br>
+      <a href="https://robotacademy.net.au/lesson/inverse-kinematics-for-a-2-joint-robot-arm-using-geometry/" target="_blank">robotacademy.net.au -- Geometric approach</a></p>
+      <ul>
+        <li>Starts by drawing the triangle formed by the two links and the line to the goal</li>
+        <li>Uses the law of cosines directly to find $\theta_2$</li>
+        <li>Finds $\theta_1$ using angles $\beta$ and $\psi$ from the geometry</li>
+      </ul>
+      <p><strong>2. Algebraic approach:</strong><br>
+      <a href="https://robotacademy.net.au/lesson/inverse-kinematics-for-a-2-joint-robot-arm-using-algebra/" target="_blank">robotacademy.net.au -- Algebraic approach</a></p>
+      <ul>
+        <li>Starts from the forward kinematics matrix ${}^{0}_{2}T$</li>
+        <li>Equates matrix elements to the desired pose</li>
+        <li>Manipulates the resulting trigonometric equations algebraically</li>
+      </ul>
+      <p><strong>Key insight:</strong> Both methods arrive at <strong>the same equations</strong> (e.g., $c_2 = \frac{x^2 + y^2 - l_1^2 - l_2^2}{2l_1 l_2}$). The geometric approach gives more physical intuition; the algebraic approach is more systematic and scales to 3D robots where geometric visualization becomes difficult.</p>
+    </div>
+
+    <!-- 4.5.2 Geometric Solution -->
+    <h3 id="s4-5-2">4.5.2 Geometric Solution
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=18" target="_blank">PDF p.18</a>
+    </h3>
+
+    <div class="figure">
+      <img src="assets/images/ch4_p18.png" alt="Figure: A two-link portion of the three-link planar manipulator shown in an X-Y coordinate frame. The end-effector position is at coordinates $(x, y)$. Links $l_1$ and $l_2$ form a triangle with the l" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> A two-link portion of the three-link planar manipulator shown in an X-Y coordinate frame. The end-effector position is at coordinates $(x, y)$. Links $l_1$ and $l_2$ form a triangle with the line from the origin to $(x, y)$. The angle $\beta$ is measured from the positive X-axis to the line from the origin to the goal point. The angle $\psi$ is the angle at the base joint between the first link and the line to the goal point. The interior angle at the elbow is $(180° + \theta_2)$.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=18" target="_blank">PDF p.18</a>
+    </div>
+
+    <p><strong>Applying the law of cosines:</strong></p>
+    $$x^2 + y^2 = l_1^2 + l_2^2 - 2 l_1 l_2 \cos(180° + \theta_2)$$
+
+    <p>Since $\cos(180° + \theta_2) = -\cos(\theta_2)$:</p>
+    $$c_2 = \frac{x^2 + y^2 - l_1^2 - l_2^2}{2 l_1 l_2}$$
+
+    <div class="callout callout-warning">
+      <div class="callout-label">Existence Condition</div>
+      <p>In order for the triangle to exist, $\sqrt{x^2 + y^2} \leq l_1 + l_2$ -- a condition that can be checked in a computational algorithm to verify the existence of the solution.</p>
+    </div>
+
+    <p><strong>Finding $\theta_1$:</strong></p>
+    $$\beta = \text{Atan2}(y, x)$$
+    $$\cos\psi = \frac{x^2 + y^2 + l_1^2 - l_2^2}{2 l_1 \sqrt{x^2 + y^2}}$$
+    <p>So:</p>
+    $$\theta_1 = \begin{cases} \beta + \psi & , \; \theta_2 < 0 \\ \beta - \psi & , \; \theta_2 > 0 \end{cases}$$
+
+    <p><strong>Finding $\theta_3$ from orientation:</strong></p>
+    $$\theta_1 + \theta_2 + \theta_3 = \phi$$
+
+    <!-- Enrichment: Squaring-and-adding proof -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Proof: The Squaring-and-Adding Trick (Why It Eliminates $\theta_1$)</div>
+
+      <div class="collapsible">
+        <div class="collapsible-header">Show proof details</div>
+        <div class="collapsible-body">
+          <div class="collapsible-body-inner">
+            <p><strong>Starting point</strong> -- the position equations:</p>
+            $$x = l_1 \cos\theta_1 + l_2 \cos(\theta_1 + \theta_2)$$
+            $$y = l_1 \sin\theta_1 + l_2 \sin(\theta_1 + \theta_2)$$
+
+            <p><strong>Squaring both:</strong></p>
+            $$x^2 = l_1^2 \cos^2\theta_1 + 2l_1 l_2 \cos\theta_1 \cos(\theta_1 + \theta_2) + l_2^2 \cos^2(\theta_1 + \theta_2)$$
+            $$y^2 = l_1^2 \sin^2\theta_1 + 2l_1 l_2 \sin\theta_1 \sin(\theta_1 + \theta_2) + l_2^2 \sin^2(\theta_1 + \theta_2)$$
+
+            <p><strong>Adding (and using $\cos^2\alpha + \sin^2\alpha = 1$):</strong></p>
+            $$x^2 + y^2 = l_1^2 + l_2^2 + 2l_1 l_2 \left[\cos\theta_1 \cos(\theta_1 + \theta_2) + \sin\theta_1 \sin(\theta_1 + \theta_2)\right]$$
+
+            <p><strong>The key identity</strong> -- the bracketed term is a cosine difference:</p>
+            $$\cos\theta_1 \cos(\theta_1 + \theta_2) + \sin\theta_1 \sin(\theta_1 + \theta_2) = \cos\left[(\theta_1 + \theta_2) - \theta_1\right] = \cos\theta_2$$
+
+            <p><strong>Result:</strong></p>
+            $$x^2 + y^2 = l_1^2 + l_2^2 + 2l_1 l_2 \cos\theta_2$$
+
+            <p>The geometric interpretation: $x^2 + y^2$ is the squared distance from the base to the end-effector. This distance depends only on how much the elbow is bent ($\theta_2$), not on which direction the arm is pointing ($\theta_1$). This is obvious geometrically -- rotating the entire arm about the base changes $\theta_1$ but not the distance to the tip.</p>
+
+            <p>This same principle -- that the squared distance from the origin eliminates the base rotation angle -- is exactly what Pieper exploits in Step 5 (equation $r = g_1^2 + g_2^2 + g_3^2$) to eliminate $\theta_1$ from the 6-DOF problem.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-check" data-concept="algebraic-ik">
+      <span class="concept-check-label">How well do you understand algebraic vs. geometric IK?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.6 ALGEBRAIC SOLUTION BY REDUCTION TO POLYNOMIAL -->
+    <!-- ============================================================ -->
+    <h2 id="s4-6">4.6 Algebraic Solution by Reduction to Polynomial
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=19" target="_blank">PDF p.19</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition — Transcendental Function
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=19" target="_blank">PDF p.19</a>
+      </div>
+      <p><strong>Transcendental Function</strong>: In mathematics, a transcendental function is an analytic function that does not satisfy a polynomial equation, in contrast to an algebraic function.</p>
+    </div>
+
+    <h3>Key Technique -- Half-Angle Substitution</h3>
+
+    <p>Transcendental equations are difficult to solve. The following substitutions are often used:</p>
+
+    $$u = \tan\frac{\theta}{2}$$
+    $$\cos\theta = \frac{1 - u^2}{1 + u^2}$$
+    $$\sin\theta = \frac{2u}{1 + u^2}$$
+
+    <p>These substitutions convert transcendental equations in $\sin\theta$ and $\cos\theta$ into polynomial equations in $u$, which can then be solved using standard algebraic techniques.</p>
+
+    <!-- Half-Angle Substitution Proof — collapsible -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Proof: Derivation of the Half-Angle (Weierstrass) Substitution Identities</div>
+
+      <div class="collapsible">
+        <div class="collapsible-header">Show derivation of half-angle identities</div>
+        <div class="collapsible-body">
+          <div class="collapsible-body-inner">
+            <p>The half-angle substitution used in this chapter is also known as the <strong>Weierstrass substitution</strong> in calculus. Here is a self-contained derivation of why $u = \tan(\theta/2)$ converts $\sin\theta$ and $\cos\theta$ into rational functions of $u$.</p>
+
+            <p><strong>Starting point</strong> -- the double-angle identities:</p>
+            $$\cos\theta = \cos^2\frac{\theta}{2} - \sin^2\frac{\theta}{2}$$
+            $$\sin\theta = 2\sin\frac{\theta}{2}\cos\frac{\theta}{2}$$
+
+            <p><strong>Divide numerator and denominator of $\cos\theta$ by $\cos^2(\theta/2)$:</strong></p>
+            $$\cos\theta = \frac{\cos^2(\theta/2) - \sin^2(\theta/2)}{\cos^2(\theta/2) + \sin^2(\theta/2)} = \frac{1 - \tan^2(\theta/2)}{1 + \tan^2(\theta/2)} = \frac{1 - u^2}{1 + u^2}$$
+
+            <p>(We multiplied top and bottom by $\frac{1}{\cos^2(\theta/2)}$ and used $\cos^2 + \sin^2 = 1$ in the denominator.)</p>
+
+            <p><strong>Similarly for $\sin\theta$:</strong></p>
+            $$\sin\theta = \frac{2\sin(\theta/2)\cos(\theta/2)}{\cos^2(\theta/2) + \sin^2(\theta/2)} = \frac{2\tan(\theta/2)}{1 + \tan^2(\theta/2)} = \frac{2u}{1 + u^2}$$
+
+            <p><strong>Why this is powerful for robotics:</strong></p>
+            <p>Any equation of the form $a\cos\theta + b\sin\theta = c$ becomes:</p>
+            $$a\cdot\frac{1-u^2}{1+u^2} + b\cdot\frac{2u}{1+u^2} = c$$
+            <p>Multiplying through by $(1 + u^2)$ gives a <strong>polynomial</strong> in $u$:</p>
+            $$(c+a)u^2 - 2bu + (c-a) = 0$$
+            <p>This is a quadratic, solvable by the quadratic formula. The two roots correspond to the (up to) two solutions for $\theta$ -- matching the physical reality that there are typically two robot configurations (e.g., elbow-up and elbow-down).</p>
+
+            <p><strong>Geometric interpretation:</strong> The substitution $u = \tan(\theta/2)$ is the stereographic projection of the unit circle onto the real line. Each point on the circle (except $\theta = \pi$, where $u \to \infty$) maps to exactly one real number, and vice versa.</p>
+
+            <div class="callout callout-warning" style="margin-top: 1rem;">
+              <div class="callout-label">Caveat</div>
+              <p>The substitution misses $\theta = \pi$ (since $\tan(\pi/2)$ is undefined). In robotics, this corresponds to the arm being fully folded back on itself -- a boundary case that usually needs separate treatment.</p>
+            </div>
+
+            <p><strong>Reference</strong>: <a href="https://en.wikipedia.org/wiki/Tangent_half-angle_substitution" target="_blank">Tangent half-angle substitution (Wikipedia)</a> and <a href="https://proofwiki.org/wiki/Weierstrass_Substitution" target="_blank">ProofWiki -- Weierstrass Substitution</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example: Half-Angle Substitution -->
+    <div class="callout callout-example">
+      <div class="callout-label">Example — Half-Angle Substitution
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=19" target="_blank">PDF p.19</a>
+      </div>
+
+      <p><strong>Problem:</strong> Convert the transcendental equation $a\cos\theta + b\sin\theta = c$ into a polynomial in the tangent of the half angle and solve for $\theta$.</p>
+
+      <button class="solution-toggle" data-target="sol-ch4-1">Show Solution</button>
+      <div class="solution-content" id="sol-ch4-1">
+        <p><strong>Solution:</strong></p>
+        <p>Substituting the half-angle identities:</p>
+        $$a\left(\frac{1 - u^2}{1 + u^2}\right) + b\left(\frac{2u}{1 + u^2}\right) = c$$
+        <p>Multiplying through by $(1 + u^2)$:</p>
+        $$a(1 - u^2) + 2bu = c(1 + u^2)$$
+        <p>Rearranging:</p>
+        $$(a + c)u^2 - 2bu + (c - a) = 0$$
+        <p>Solving the quadratic:</p>
+        $$u = \frac{b \pm \sqrt{b^2 + a^2 - c^2}}{a + c}$$
+        <p>Therefore:</p>
+        $$\theta = 2\tan^{-1}\left(\frac{b \pm \sqrt{b^2 + a^2 - c^2}}{a + c}\right)$$
+        <p><strong>Note:</strong> The condition for real solutions is $a^2 + b^2 \geq c^2$.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.7 PIEPER'S SOLUTION -->
+    <!-- ============================================================ -->
+    <h2 id="s4-7">4.7 Pieper's Solution when Three Axes Intersect
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=20" target="_blank">PDF p.20</a>
+    </h2>
+
+    <h3>Setup and Definitions</h3>
+
+    <p>Consider a PUMA serial robot. The last three axes intersect; the origins of link frames $\{4\}$, $\{5\}$, and $\{6\}$, i.e. Wrist Bend, Swivel, and Roll, are all located at this point of intersection. Knowing $x$, $y$, and $z$ and three orientations, i.e. $\alpha$, $\theta$, and $\gamma$ of frame $\{6\}$ with respect to frame $\{0\}$, the transformation matrix between the two frames from <a href="MSE429_Chapter_2.html">Chapter 2</a> is:</p>
+
+    $${}^{0}T_6 = \begin{bmatrix} {}^{0}R_6 & {}^{0}P_{6ORG} \\ 0 \quad 0 \quad 0 & 1 \end{bmatrix}$$
+
+    <p>Where:</p>
+    $${}^{0}R_6 = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}$$
+    <p>is the rotation matrix, and:</p>
+    $${}^{0}P_{6ORG} = \begin{bmatrix} x \\ y \\ z \end{bmatrix}$$
+
+    <div class="figure">
+      <img src="assets/images/ch4_p20.png" alt="Figure: PUMA robot diagram showing joint labels and their ranges. Joint 1 (Waist) at 320 degrees range, Joint 2 (Shoulder) at 220 degrees range, Joint 3 (Elbow) at 270 degrees range, Joint 4 (Wrist Be" loading="lazy">
+    </div>
+    <div class="figure-desc">
+      <strong>Figure:</strong> PUMA robot diagram showing joint labels and their ranges. Joint 1 (Waist) at 320 degrees range, Joint 2 (Shoulder) at 220 degrees range, Joint 3 (Elbow) at 270 degrees range, Joint 4 (Wrist Bend) at approximately 200 degrees range, Joint 5 (Wrist Swivel) at 600 degrees range, and Joint 6 (Wrist Roll) at 532 degrees range. Links are numbered 1, 2, 3. The point $P_{4,5,6ORG}$ is marked at the intersection of the last three wrist axes, and frame $0_6$ is marked at the wrist.
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=20" target="_blank">PDF p.20</a>
+    </div>
+
+    <p>We know ${}^{0}P_{6ORG}$ and ${}^{0}P_{4ORG}$ are the same points in space (since frames $\{4\}$, $\{5\}$, $\{6\}$ all have their origins at the wrist intersection point).</p>
+
+    <!-- Enrichment: Key insight behind Pieper's method -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — The Key Insight Behind Pieper's Method (Wrist Center Decoupling)</div>
+
+      <p>Pieper's method is arguably the most important practical technique in this chapter. The core idea deserves emphasis because the derivation that follows is lengthy and can obscure the simple underlying principle.</p>
+
+      <p><strong>The fundamental insight:</strong></p>
+      <p>A 6-DOF robot with a spherical wrist (last 3 axes intersecting) can be split into two independent subproblems:</p>
+      <ol>
+        <li><strong>Position problem (joints 1, 2, 3):</strong> Where is the wrist center point?</li>
+        <li><strong>Orientation problem (joints 4, 5, 6):</strong> What is the orientation at that wrist center?</li>
+      </ol>
+
+      <p>This works because the last three joints ($\theta_4$, $\theta_5$, $\theta_6$) rotate about the wrist center but <strong>do not move it</strong>. The wrist center position depends <strong>only</strong> on $\theta_1$, $\theta_2$, $\theta_3$.</p>
+
+      <div class="collapsible">
+        <div class="collapsible-header">Show step-by-step intuition</div>
+        <div class="collapsible-body">
+          <div class="collapsible-body-inner">
+            <ol>
+              <li><strong>Compute the wrist center from the desired end-effector pose.</strong> Since frames $\{4\}$, $\{5\}$, $\{6\}$ share the same origin (the wrist center), we know: ${}^{0}P_{4ORG} = {}^{0}P_{6ORG}$. The wrist center position in the base frame is simply the position part of ${}^{0}T_6$.</li>
+              <li><strong>Solve for $\theta_1$, $\theta_2$, $\theta_3$</strong> using only the wrist center position $(x, y, z)$. This is a 3-variable, 3-equation problem. The clever algebraic manipulations (squaring to eliminate $\theta_1$, defining $f$ and $g$ functions, using half-angle substitution) are all techniques for solving this reduced subproblem.</li>
+              <li><strong>With $\theta_1$, $\theta_2$, $\theta_3$ known</strong>, compute ${}^{0}_{3}R$ (the rotation from base to frame 3). Then solve: ${}^{3}_{6}R = ({}^{0}_{3}R)^{-1} \cdot {}^{0}_{6}R$. This gives a known numerical rotation matrix on the left. The right side is a product of three rotation matrices involving $\theta_4$, $\theta_5$, $\theta_6$. This is the Z-Y-Z Euler angle decomposition from <a href="MSE429_Chapter_2.html">Chapter 2</a>.</li>
+            </ol>
+            <p><strong>Why "almost every 6-DOF robot" is designed this way:</strong></p>
+            <p>Pieper proved that the IK has a closed-form solution whenever three consecutive axes intersect. Robot designers deliberately create spherical wrists to satisfy this condition, because closed-form IK is essential for real-time control. The engineering trade-off is clear: a spherical wrist slightly limits the workspace and dexterity, but guarantees fast, reliable, deterministic inverse kinematics.</p>
+            <p><strong>Reference</strong>: Craig, J.J., <em>Introduction to Robotics: Mechanics and Control</em>, 4th ed., Chapter 4. Also: <a href="https://opentextbooks.clemson.edu/wangrobotics/chapter/inverse-kinematics/" target="_blank">Clemson Open Textbook -- Inverse Kinematics</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pieper's derivation: step-by-step controls -->
+    <h3>Pieper's Method -- Full Derivation</h3>
+
+    <div class="derivation-steps" id="deriv-pieper">
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous</button>
+        <span class="step-counter">Step 1 of 8</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Forward Kinematics Decomposition
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=21" target="_blank">PDF p.21</a>
+        </div>
+        <p>From <a href="MSE492_Chapter_3.html">Chapter 3</a> we have:</p>
+        $${}^{0}T_6 = {}^{0}T_1 \; {}^{1}T_2 \; {}^{2}T_3 \; {}^{3}T_4 \; {}^{4}T_5 \; {}^{5}T_6 = \begin{bmatrix} {}^{0}R_6 & {}^{0}P_{6ORG} \\ 0 \quad 0 \quad 0 & 1 \end{bmatrix}$$
+        <p>Also:</p>
+        $${}^{0}T_6 = {}^{0}T_4 \; {}^{4}T_5 \; {}^{5}T_6 = \begin{bmatrix} {}^{0}R_4 & {}^{0}P_{4ORG} \\ 0 \quad 0 \quad 0 & 1 \end{bmatrix} {}^{4}T_5 \; {}^{5}T_6 = \begin{bmatrix} {}^{0}R_6 & {}^{0}P_{6ORG} \\ 0 \quad 0 \quad 0 & 1 \end{bmatrix}$$
+        <p>We know:</p>
+        $${}^{0}P_{4ORG} = {}^{0}P_{6ORG}$$
+        <p>Therefore, for only matching the positions, we do not need to calculate the whole ${}^{0}T_6$.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Expanding ${}^{0}P_{4ORG}$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=22" target="_blank">PDF p.22</a>
+        </div>
+        $${}^{0}P_{4ORG} = {}^{0}T_1 \; {}^{1}T_2 \; {}^{2}T_3 \; {}^{3}P_{4ORG}$$
+        <p>From Chapter 3, for any two adjacent joints we have the general DH transform:</p>
+        $${}^{i-1}T_i = \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i c\alpha_{i-1} & c\theta_i c\alpha_{i-1} & -s\alpha_{i-1} & -d_i s\alpha_{i-1} \\ s\theta_i s\alpha_{i-1} & c\theta_i s\alpha_{i-1} & c\alpha_{i-1} & d_i c\alpha_{i-1} \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        <p>Therefore:</p>
+        $${}^{3}T_4 = \begin{bmatrix} c\theta_4 & -s\theta_4 & 0 & a_3 \\ s\theta_4 c\alpha_3 & c\theta_4 c\alpha_3 & -s\alpha_3 & -d_4 s\alpha_3 \\ s\theta_4 s\alpha_3 & c\theta_4 s\alpha_3 & c\alpha_3 & d_4 c\alpha_3 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+        <p>and:</p>
+        $${}^{3}P_{4ORG} = \begin{bmatrix} a_3 \\ -d_4 s\alpha_3 \\ d_4 c\alpha_3 \\ 1 \end{bmatrix}$$
+      </div>
+
+      <!-- Step 3 -->
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Defining $f_1$, $f_2$, $f_3$ (Functions of $\theta_3$ Only)
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=23" target="_blank">PDF p.23</a>
+        </div>
+        <p>The following relationship will give us 3 nonlinear equations which can be used to find $\theta_1$, $\theta_2$, and $\theta_3$:</p>
+        $${}^{0}P_{4ORG} = {}^{0}T_1 \; {}^{1}T_2 \; {}^{2}T_3 \begin{bmatrix} a_3 \\ -d_4 s\alpha_3 \\ d_4 c\alpha_3 \\ 1 \end{bmatrix} = \begin{bmatrix} x \\ y \\ z \\ 1 \end{bmatrix}$$
+        <p>Define $f_1$, $f_2$, and $f_3$ as follows:</p>
+        $$\begin{bmatrix} f_1 \\ f_2 \\ f_3 \\ 1 \end{bmatrix} = {}^{2}T_3 \begin{bmatrix} a_3 \\ -d_4 s\alpha_3 \\ d_4 c\alpha_3 \\ 1 \end{bmatrix}$$
+        <p>Expanding:</p>
+        $$f_1 = a_3 c_3 + d_4 s\alpha_3 s_3 + a_2$$
+        $$f_2 = a_3 c\alpha_2 s_3 - d_4 s\alpha_3 c\alpha_2 c_3 - d_4 s\alpha_2 c\alpha_3 - d_3 s\alpha_2$$
+        $$f_3 = a_3 s\alpha_2 s_3 - d_4 s\alpha_3 s\alpha_2 c_3 + d_4 c\alpha_2 c\alpha_3 + d_3 c\alpha_2$$
+        <p>$f_1$, $f_2$, and $f_3$ are only functions of $\theta_3$.</p>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Defining $g_1$, $g_2$, $g_3$ (Functions of $\theta_2$ and $\theta_3$)
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=24" target="_blank">PDF p.24</a>
+        </div>
+        <p>Using ${}^{1}_{2}T$ and ${}^{0}_{1}T$:</p>
+        $${}^{0}P_{4ORG} = \begin{bmatrix} c_1 g_1 - s_1 g_2 \\ s_1 g_1 + c_1 g_2 \\ g_3 \\ 1 \end{bmatrix} = \begin{bmatrix} x \\ y \\ z \\ 1 \end{bmatrix}$$
+        <p>where:</p>
+        $$g_1 = c_2 f_1 - s_2 f_2 + a_1$$
+        $$g_2 = s_2 c\alpha_1 f_1 + c_2 c\alpha_1 f_2 - s\alpha_1 f_3 - d_2 s\alpha_1$$
+        $$g_3 = s_2 s\alpha_1 f_1 + c_2 s\alpha_1 f_2 + c\alpha_1 f_3 + d_2 c\alpha_1$$
+        <p>$g_1$, $g_2$, and $g_3$ are only functions of $\theta_2$ and $\theta_3$.</p>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="derivation-step">
+        <div class="step-label">Step 5: Squared Distance Expression
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=24" target="_blank">PDF p.24</a>
+        </div>
+        <p>Now, writing an expression for the squared magnitude of ${}^{0}P_{4ORG}$:</p>
+        $$r = x^2 + y^2 + z^2$$
+        $$= (c_1 g_1 - s_1 g_2)^2 + (s_1 g_1 + c_1 g_2)^2 + g_3^2$$
+        $$= g_1^2 + g_2^2 + g_3^2$$
+        $$= f_1^2 + f_2^2 + f_3^2 + a_1^2 + d_2^2 + 2d_2 f_3 + 2a_1(c_2 f_1 - s_2 f_2)$$
+      </div>
+
+      <!-- Step 6 -->
+      <div class="derivation-step">
+        <div class="step-label">Step 6: Simplified Equations for $r$ and $z$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=25" target="_blank">PDF p.25</a>
+        </div>
+        <p>Let:</p>
+        $$k_1 = f_1$$
+        $$k_2 = -f_2$$
+        $$k_3 = f_1^2 + f_2^2 + f_3^2 + a_1^2 + d_2^2 + 2d_2 f_3$$
+        $$k_4 = f_3 c\alpha_1 + d_2 c\alpha_1$$
+        <p>We can rewrite the equations for $r$ and $z$ as:</p>
+        $$r = (k_1 c_2 + k_2 s_2) 2a_1 + k_3$$
+        $$z = (k_1 s_2 - k_2 c_2) s\alpha_1 + k_4$$
+        <div class="callout callout-warning" style="margin-top: 0.75rem;">
+          <div class="callout-label">Slide Correction</div>
+          <p>The original slide (page 25) has a sign error: it writes $k_1 s_2 + k_2 c_2$, but direct expansion of $g_3$ with $k_2 = -f_2$ gives $k_1 s_2 - k_2 c_2$. The corrected sign is confirmed by the fact that squaring and adding the $r$ and $z$ equations must yield $k_1^2 + k_2^2$ (cross terms cancel only with opposite signs on the $k_2$ terms).</p>
+        </div>
+        <p>These two equations are useful as they eliminate the dependence on $\theta_1$. Dependence on $\theta_2$ has taken a simple form.</p>
+      </div>
+
+      <!-- Step 7 -->
+      <div class="derivation-step">
+        <div class="step-label">Step 7: Three Cases for Solving $\theta_3$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=25" target="_blank">PDF p.25</a>
+        </div>
+        <p>Consider three distinguished cases for the solution of $\theta_3$:</p>
+
+        <p><strong>Case 1:</strong> If $a_1 = 0$, then $r = k_3$ where $r$ is known. The right side ($k_3$) is a function of $\theta_3$ only. Using transcendental equations (half-angle substitution), the quadratic equation in $\tan\frac{\theta_3}{2}$ can be solved for $\theta_3$.</p>
+
+        <p><strong>Case 2:</strong> If $s\alpha_1 = 0$, then $z = k_4$, where $z$ is known. Using transcendental equations, the quadratic equation can be solved for $\theta_3$.</p>
+
+        <p><strong>Case 3:</strong>
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=26" target="_blank">PDF p.26</a>
+          Otherwise,
+        </p>
+        $$\frac{r - k_3}{2a_1} = k_1 c_2 + k_2 s_2$$
+        $$\frac{z - k_4}{s\alpha_1} = k_1 s_2 - k_2 c_2$$
+        <p>Squaring and adding:</p>
+        $$\left(\frac{r - k_3}{2a_1}\right)^2 + \left(\frac{z - k_4}{s\alpha_1}\right)^2 = k_1^2 + k_2^2$$
+        <p>This removes the dependency on $\theta_2$.</p>
+        <p>Using transcendental equations (half-angle substitution), the above equation becomes of degree 4, that can be solved for $\theta_3$.</p>
+      </div>
+
+      <!-- Step 8 -->
+      <div class="derivation-step">
+        <div class="step-label">Step 8: Solving for $\theta_4$, $\theta_5$, and $\theta_6$
+          <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=27" target="_blank">PDF p.27</a>
+        </div>
+        <p>Next is to solve for $\theta_4$, $\theta_5$, and $\theta_6$.</p>
+        <p>The rotation portion of ${}^{0}_{6}R$ can be used.</p>
+        $${}^{3}_{6}R = {}^{0}_{3}R^{-1} \; {}^{0}_{6}R = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}$$
+        <p>Expanding the individual rotation matrices:</p>
+        $${}^{3}_{6}R = {}^{3}_{4}R \; {}^{4}_{5}R \; {}^{5}_{6}R = \begin{bmatrix} c_4 & -s_4 & 0 \\ s_4 & c_4 & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} c_5 & -s_5 & 0 \\ 0 & 0 & -1 \\ s_5 & c_5 & 0 \end{bmatrix} \begin{bmatrix} c_6 & -s_6 & 0 \\ 0 & 0 & 1 \\ -s_6 & -c_6 & 0 \end{bmatrix}$$
+        $${}^{3}_{6}R = \begin{bmatrix} c_4 c_5 c_6 - s_4 s_6 & -c_4 c_5 s_6 - s_4 c_6 & -c_4 s_5 \\ s_4 c_5 c_6 + c_4 s_6 & -s_4 c_5 s_6 + c_4 c_6 & -s_4 s_5 \\ s_5 c_6 & -s_5 s_6 & c_5 \end{bmatrix}$$
+        <p>For many manipulators, these last three angles can be solved for by using the $Z - Y - Z$ Euler angle solution (from <a href="MSE429_Chapter_2.html">Chapter 2</a>), applied to ${}^{3}_{6}R$.</p>
+      </div>
+    </div>
+
+    <!-- Z-Y-Z Euler Angle Solution -->
+    <h3>Z-Y-Z Euler Angle Solution (Reminder from Section 2.8)
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=28" target="_blank">PDF p.28</a>
+    </h3>
+
+    <p><strong>Forward problem:</strong> With the Euler angle representation, the rotation matrices are post-multiplied.</p>
+
+    $${}^{A}_{B}R_{ZY'Z''}(\alpha, \beta, \gamma) = \begin{bmatrix} c\alpha c\beta c\gamma - s\alpha s\gamma & -c\alpha c\beta s\gamma - s\alpha c\gamma & c\alpha s\beta \\ s\alpha c\beta c\gamma + c\alpha s\gamma & -s\alpha c\beta s\gamma + c\alpha c\gamma & s\alpha s\beta \\ -s\beta c\gamma & s\beta s\gamma & c\beta \end{bmatrix} = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}$$
+
+    <p>You consider $\alpha$, $\beta$, and $\gamma$ as $\theta_4$, $\theta_5$, and $\theta_6$.</p>
+
+    <p><strong>Inverse problem:</strong></p>
+
+    $$\theta_5 = \text{Atan2}\left(\sqrt{r_{31}^2 + r_{32}^2}, \; r_{33}\right)$$
+    $$\theta_4 = \text{Atan2}(r_{23}/s\beta, \; r_{13}/s\beta)$$
+    $$\theta_6 = \text{Atan2}(r_{32}/s\beta, \; -r_{31}/s\beta)$$
+
+    <p>where $s\beta = \sin\theta_5$. Note: when $\theta_5 = 0$ (or $\pi$), $s\beta = 0$ and the formulas for $\theta_4$ and $\theta_6$ involve division by zero -- this is a <span class="tooltip-term" tabindex="0">wrist singularity<span class="tooltip-content">A configuration where the wrist's first and third axes ($Z_4$ and $Z_6$) become collinear (i.e., $\theta_5 = 0$ or $\pi$). In this pose, joints 4 and 6 produce the same rotation, so only their sum or difference is determined -- the robot loses one degree of orientational freedom. The Jacobian drops rank, and the Z-Y-Z Euler angle extraction becomes degenerate (division by $\sin\theta_5 = 0$).<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, 4th ed., &sect;5.5 &middot; <a href="https://en.wikipedia.org/wiki/Gimbal_lock" target="_blank">Wikipedia: Gimbal lock</a></span></span></span>.</p>
+
+    <!-- Enrichment: Pieper's Method video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Video: Pieper's Method and Kinematic Decoupling in Practice</div>
+      <p>The following video resources demonstrate the kinematic decoupling approach used in Pieper's method:</p>
+
+      <p><strong>1. Modern Robotics -- Numerical Inverse Kinematics (Part 1)</strong><br>
+      <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/6-2-numerical-inverse-kinematics-part-1-of-2/" target="_blank">modernrobotics.northwestern.edu (Part 1)</a></p>
+      <p>While this video covers the <strong>numerical</strong> approach (Newton-Raphson), it provides excellent context for understanding <strong>why</strong> the analytical approach (Pieper's method) is preferred when available.</p>
+
+      <p><strong>2. Modern Robotics -- Numerical Inverse Kinematics (Part 2)</strong><br>
+      <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/6-2-numerical-inverse-kinematics-part-2-of-2/" target="_blank">modernrobotics.northwestern.edu (Part 2)</a></p>
+      <p>Part 2 shows an animation of a 4-joint RRRP arm converging to a solution over Newton-Raphson iterations.</p>
+
+      <p><strong>3. RoboGrok -- Inverse Kinematics of a SCARA Manipulator (Angela Sodemann)</strong><br>
+      <a href="https://www.robogrok.com/1-1-6_Inverse_Kinematics_of_a_SCARA_Manipulator.php" target="_blank">robogrok.com</a></p>
+      <p>This video walks through the graphical/geometric approach to inverse kinematics for a SCARA robot, which is a simpler case of kinematic decoupling.</p>
+
+      <p><strong>Summary of the complete Pieper algorithm:</strong></p>
+      <ol>
+        <li>Extract $(x, y, z)$ from the desired ${}^{0}T_6$ -- this is the wrist center</li>
+        <li>Solve for $\theta_3$ using half-angle substitution on the squared-distance equation (eliminates both $\theta_1$ and $\theta_2$)</li>
+        <li>Solve for $\theta_2$ using the simplified $r$ and $z$ equations (now that $\theta_3$ is known)</li>
+        <li>Solve for $\theta_1$ from $x = c_1 g_1 - s_1 g_2$ and $y = s_1 g_1 + c_1 g_2$</li>
+        <li>Compute ${}^{3}_{6}R = ({}^{0}_{3}R)^T \cdot {}^{0}_{6}R$ (all quantities now known)</li>
+        <li>Solve for $\theta_4$, $\theta_5$, $\theta_6$ using Z-Y-Z Euler angle extraction</li>
+      </ol>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>Pieper's method for closed-form IK requires that:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">All joints are prismatic</button>
+        <button class="quiz-option" data-correct="true">Three consecutive joint axes intersect at a common point</button>
+        <button class="quiz-option" data-correct="false">The manipulator has exactly 3 DOF</button>
+        <button class="quiz-option" data-correct="false">The Jacobian is always full rank</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! Pieper's method applies to 6-DOF manipulators where 3 consecutive axes intersect at a point (like a spherical wrist), allowing position and orientation to be decoupled." data-incorrect="Pieper's method requires 3 consecutive axes to intersect at a point. This is commonly satisfied by robots with spherical wrists, where the last 3 axes intersect."></div>
+    </div>
+
+    <div class="concept-check" data-concept="piepers-method">
+      <span class="concept-check-label">How well do you understand Pieper's method?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.8 COMPUTATIONAL CONSIDERATIONS -->
+    <!-- ============================================================ -->
+    <h2 id="s4-8">4.8 Computational Considerations
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=29" target="_blank">PDF p.29</a>
+    </h2>
+
+    <p>In many path-controlled schemes (Chapter 7), it is necessary to calculate the inverse kinematics of a manipulator at 30 Hz or faster. For computational efficiency, one may consider the following:</p>
+    <ul>
+      <li>Using a lookup-table for <code>atan2</code> routine.</li>
+      <li>Structure the computation of multiple solutions in parallel (rather than pursuing them one after another serially).</li>
+      <li>Using fixed- over floating-point representation of the quantities involved in calculation (it is possible since the variables do not have large dynamic range, and the ranges are fairly well-known).</li>
+      <li>Factorization of equations to reduce the number of multiplications and additions -- this comes at the cost of creating local variables (good trade-off).</li>
+      <li>Avoid the computation of redundant kinematics, e.g., calculate only two columns of rotation, then compute the third column using cross product.</li>
+      <li>For transcendental functions, they can be computed from a series expansion.</li>
+    </ul>
+
+    <!-- Enrichment: Numerical IK video -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment — Video: Numerical IK Methods -- What the Slides Skip</div>
+      <p>The slides dismiss numerical methods as "slow" and "not interested," but understanding them provides important context for appreciating the closed-form solutions in this chapter.</p>
+      <p><strong>Modern Robotics Chapter 6 -- Inverse Kinematics of Open Chains</strong><br>
+      <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/inverse-kinematics-of-open-chains/" target="_blank">modernrobotics.northwestern.edu</a></p>
+
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Speed</th><th>Guarantees</th><th>Use case</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Closed-form (Pieper)</td><td>~10-50 us</td><td>All solutions found, deterministic</td><td>6-DOF with spherical wrist</td></tr>
+          <tr><td>Newton-Raphson</td><td>~0.1-1 ms</td><td>May not converge; finds one solution</td><td>General 6-DOF without Pieper condition</td></tr>
+          <tr><td>Jacobian pseudoinverse</td><td>~0.1-5 ms</td><td>Handles redundancy; may oscillate</td><td>7+ DOF redundant robots</td></tr>
+          <tr><td>CCD (Cyclic Coordinate Descent)</td><td>~1-10 ms</td><td>Simple; may get stuck</td><td>Animation, games</td></tr>
+          <tr><td>FABRIK</td><td>~0.5-5 ms</td><td>Fast convergence; no orientation</td><td>Animation, humanoid posing</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Key takeaway for this course:</strong> The computational considerations in Section 4.8 (lookup tables, fixed-point, factorization) are optimization techniques applied to <strong>closed-form</strong> solutions to squeeze them into the tightest possible real-time deadlines. Numerical methods would need all these optimizations <strong>plus</strong> would still be iterative and non-deterministic.</p>
+      <p><strong>Additional reference</strong>: Hauser, K., <em>Robotic Systems</em> (online textbook), Chapter on Inverse Kinematics: <a href="https://motion.cs.illinois.edu/RoboticSystems/InverseKinematics.html" target="_blank">motion.cs.illinois.edu</a></p>
+    </div>
+
+    <p style="text-align: center; color: var(--text-secondary); margin-top: 2rem; font-style: italic;">
+      <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=30" target="_blank">PDF p.30</a>
+      <em>Let The Learning Continue</em>
+    </p>
+
+    <!-- ============================================================ -->
+    <!-- KEY EQUATIONS SUMMARY -->
+    <!-- ============================================================ -->
+    <div class="quiz-score"></div>
+
+    <h2 id="key-equations">Key Equations Summary</h2>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.1 — Forward Kinematics Chain
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=3" target="_blank">PDF p.3</a>
+      </div>
+      $${}^{0}_{e.e}T = {}^{0}_{1}T(q_1) \; {}^{1}_{2}T(q_2) \; \cdots \; {}^{n-1}_{n}T(q_n) \; {}^{n}_{e.e}T$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.2 — FK for Three-Link Planar Manipulator
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=14" target="_blank">PDF p.14</a>
+      </div>
+      $${}^{0}_{3}T = \begin{bmatrix} c_{123} & -s_{123} & 0 & l_1 c_1 + l_2 c_{12} \\ s_{123} & c_{123} & 0 & l_1 s_1 + l_2 s_{12} \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.3 — Cosine of $\theta_2$ (Algebraic and Geometric)
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=15" target="_blank">PDF p.15</a>
+      </div>
+      $$c_2 = \frac{x^2 + y^2 - l_1^2 - l_2^2}{2 l_1 l_2}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.4 — Sine of $\theta_2$
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=16" target="_blank">PDF p.16</a>
+      </div>
+      $$s_2 = \pm\sqrt{1 - c_2^2}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.5 — $\theta_2$
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=16" target="_blank">PDF p.16</a>
+      </div>
+      $$\theta_2 = \text{Atan2}(s_2, c_2)$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.6 — $\theta_1$
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=17" target="_blank">PDF p.17</a>
+      </div>
+      $$\theta_1 = \text{Atan2}(y, x) - \text{Atan2}(k_2, k_1)$$
+      <p>where $k_1 = l_1 + l_2 c_2$ and $k_2 = l_2 s_2$.</p>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.7 — $\theta_3$ from Orientation Constraint
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=17" target="_blank">PDF p.17</a>
+      </div>
+      $$\theta_1 + \theta_2 + \theta_3 = \phi$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.8 — Geometric Solution: $\theta_1$ (Two Cases)
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=18" target="_blank">PDF p.18</a>
+      </div>
+      $$\theta_1 = \begin{cases} \beta + \psi & , \; \theta_2 < 0 \\ \beta - \psi & , \; \theta_2 > 0 \end{cases}$$
+      <p>where $\beta = \text{Atan2}(y, x)$ and $\cos\psi = \frac{x^2 + y^2 + l_1^2 - l_2^2}{2 l_1 \sqrt{x^2 + y^2}}$.</p>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.9 — Half-Angle Substitutions
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=19" target="_blank">PDF p.19</a>
+      </div>
+      $$u = \tan\frac{\theta}{2}, \quad \cos\theta = \frac{1 - u^2}{1 + u^2}, \quad \sin\theta = \frac{2u}{1 + u^2}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.10 — Solution of $a\cos\theta + b\sin\theta = c$
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=19" target="_blank">PDF p.19</a>
+      </div>
+      $$\theta = 2\tan^{-1}\left(\frac{b \pm \sqrt{b^2 + a^2 - c^2}}{a + c}\right)$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.11 — General DH Transformation Matrix
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=22" target="_blank">PDF p.22</a>
+      </div>
+      $${}^{i-1}T_i = \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i c\alpha_{i-1} & c\theta_i c\alpha_{i-1} & -s\alpha_{i-1} & -d_i s\alpha_{i-1} \\ s\theta_i s\alpha_{i-1} & c\theta_i s\alpha_{i-1} & c\alpha_{i-1} & d_i c\alpha_{i-1} \\ 0 & 0 & 0 & 1 \end{bmatrix}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.12 — Wrist Origin Position in Frame $\{3\}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=22" target="_blank">PDF p.22</a>
+      </div>
+      $${}^{3}P_{4ORG} = \begin{bmatrix} a_3 \\ -d_4 s\alpha_3 \\ d_4 c\alpha_3 \\ 1 \end{bmatrix}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.13 — Pieper's $f$ Functions (Functions of $\theta_3$ Only)
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=23" target="_blank">PDF p.23</a>
+      </div>
+      $$f_1 = a_3 c_3 + d_4 s\alpha_3 s_3 + a_2$$
+      $$f_2 = a_3 c\alpha_2 s_3 - d_4 s\alpha_3 c\alpha_2 c_3 - d_4 s\alpha_2 c\alpha_3 - d_3 s\alpha_2$$
+      $$f_3 = a_3 s\alpha_2 s_3 - d_4 s\alpha_3 s\alpha_2 c_3 + d_4 c\alpha_2 c\alpha_3 + d_3 c\alpha_2$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.14 — Pieper's $g$ Functions (Functions of $\theta_2$ and $\theta_3$)
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=24" target="_blank">PDF p.24</a>
+      </div>
+      $$g_1 = c_2 f_1 - s_2 f_2 + a_1$$
+      $$g_2 = s_2 c\alpha_1 f_1 + c_2 c\alpha_1 f_2 - s\alpha_1 f_3 - d_2 s\alpha_1$$
+      $$g_3 = s_2 s\alpha_1 f_1 + c_2 s\alpha_1 f_2 + c\alpha_1 f_3 + d_2 c\alpha_1$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.15 — Squared Distance (Eliminates $\theta_1$)
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=24" target="_blank">PDF p.24</a>
+      </div>
+      $$r = x^2 + y^2 + z^2 = f_1^2 + f_2^2 + f_3^2 + a_1^2 + d_2^2 + 2d_2 f_3 + 2a_1(c_2 f_1 - s_2 f_2)$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.16 — Simplified $r$ and $z$ Equations (with $k$ Substitutions)
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=25" target="_blank">PDF p.25</a>
+      </div>
+      $$r = (k_1 c_2 + k_2 s_2) 2a_1 + k_3$$
+      $$z = (k_1 s_2 - k_2 c_2) s\alpha_1 + k_4$$
+      <p>where $k_1 = f_1$, $k_2 = -f_2$, $k_3 = f_1^2 + f_2^2 + f_3^2 + a_1^2 + d_2^2 + 2d_2 f_3$, $k_4 = f_3 c\alpha_1 + d_2 c\alpha_1$.</p>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.17 — Case 3: Eliminate $\theta_2$ to Solve for $\theta_3$
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=26" target="_blank">PDF p.26</a>
+      </div>
+      $$\left(\frac{r - k_3}{2a_1}\right)^2 + \left(\frac{z - k_4}{s\alpha_1}\right)^2 = k_1^2 + k_2^2$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.18 — Wrist Rotation Matrix Product ${}^{3}_{6}R$
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=27" target="_blank">PDF p.27</a>
+      </div>
+      $${}^{3}_{6}R = \begin{bmatrix} c_4 c_5 c_6 - s_4 s_6 & -c_4 c_5 s_6 - s_4 c_6 & -c_4 s_5 \\ s_4 c_5 c_6 + c_4 s_6 & -s_4 c_5 s_6 + c_4 c_6 & -s_4 s_5 \\ s_5 c_6 & -s_5 s_6 & c_5 \end{bmatrix}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.19 — Z-Y-Z Euler Angle Forward Solution
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=28" target="_blank">PDF p.28</a>
+      </div>
+      $${}^{A}_{B}R_{ZY'Z''}(\alpha, \beta, \gamma) = \begin{bmatrix} c\alpha c\beta c\gamma - s\alpha s\gamma & -c\alpha c\beta s\gamma - s\alpha c\gamma & c\alpha s\beta \\ s\alpha c\beta c\gamma + c\alpha s\gamma & -s\alpha c\beta s\gamma + c\alpha c\gamma & s\alpha s\beta \\ -s\beta c\gamma & s\beta s\gamma & c\beta \end{bmatrix}$$
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">E4.20 — Z-Y-Z Euler Angle Inverse Solution (for $\theta_4$, $\theta_5$, $\theta_6$)
+        <a class="source-link" href="../Slides/MSE492 - Chapter4 - rev2.pdf#page=28" target="_blank">PDF p.28</a>
+      </div>
+      $$\theta_5 = \text{Atan2}\left(\sqrt{r_{31}^2 + r_{32}^2}, \; r_{33}\right)$$
+      $$\theta_4 = \text{Atan2}(r_{23}/s\beta, \; r_{13}/s\beta)$$
+      $$\theta_6 = \text{Atan2}(r_{32}/s\beta, \; -r_{31}/s\beta)$$
+      <p>where $\alpha, \beta, \gamma$ correspond to $\theta_4, \theta_5, \theta_6$ and $s\beta = \sin\theta_5$.</p>
+    </div>
+
+    <div class="flashcard-deck">
+      <div class="flashcard-deck-header">Key Concept Flashcards</div>
+      <div class="flashcard-container">
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Definition</div>
+            <div class="flashcard-text">Reachable vs. dexterous workspace?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">Reachable: points reachable with at least one orientation.<br>Dexterous: points reachable with ALL orientations.<br>Dexterous $\subseteq$ Reachable.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Method</div>
+            <div class="flashcard-text">When does Pieper's method apply?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">6-DOF manipulator where 3 consecutive axes intersect at a point (e.g., spherical wrist).<br><br>Allows decoupling position (first 3 joints) from orientation (last 3 joints).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Technique</div>
+            <div class="flashcard-text">Half-angle substitution: $u = \tan(\theta/2)$</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\cos\theta = \frac{1-u^2}{1+u^2}$, $\sin\theta = \frac{2u}{1+u^2}$<br><br>Converts trig equations into polynomial equations that can be solved algebraically.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Concept</div>
+            <div class="flashcard-text">How many IK solutions can a 6R robot have?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">Up to 16 solutions for a general 6R manipulator.<br><br>Multiple solutions arise from elbow-up/down, shoulder-left/right, wrist-flip configurations.</div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="flashcard-btn flashcard-prev">Prev</button>
+        <span class="flashcard-counter">1 / 4</span>
+        <button class="flashcard-btn flashcard-next">Next</button>
+        <button class="flashcard-shuffle">Shuffle</button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED PRACTICE -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Practice</h3>
+      <ul>
+        <li><a href="MSE429_Tutorial_3.html">Tutorial 3</a> -- Inverse kinematics problems for planar and spatial manipulators</li>
+        <li><a href="MSE429_Assignment_2.html">Assignment 2</a> -- Inverse kinematics and workspace analysis</li>
+        <li><a href="MSE429_Midterm_1.html">Midterm 1</a> -- Includes inverse kinematics problems</li>
+      </ul>
+    </div>
+
+    <button class="quick-ref-toggle" title="Quick Reference">&Sigma;</button>
+    <div class="quick-ref-panel">
+      <h3>Ch 4 Quick Reference</h3>
+      <div class="ref-item">
+        <div class="ref-name">IK Problem</div>
+        <div class="ref-eq">Given ${}^0_n T$, find $\theta_1, \ldots, \theta_n$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Half-angle sub</div>
+        <div class="ref-eq">$u = \tan(\theta/2)$: $c\theta = \frac{1-u^2}{1+u^2}$, $s\theta = \frac{2u}{1+u^2}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Pieper's condition</div>
+        <div class="ref-eq">3 consecutive $Z$ axes intersect at a point</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Max solutions (6R)</div>
+        <div class="ref-eq">Up to 16 solutions</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Atan2</div>
+        <div class="ref-eq">$\theta = \text{Atan2}(y, x)$ — 4-quadrant arctangent</div>
+      </div>
+    </div>
+
+    <!-- Prev / Next navigation -->
+    <nav class="page-nav"></nav>
+
+  </main>
+</body>
+</html>

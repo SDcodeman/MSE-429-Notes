@@ -1,0 +1,259 @@
+1-
+
+                                                                       xee
+                         x1             x3
+                                                  z3                           zee
+                                              z1 , x2
+                              z2
+
+
+
+
+                                   x0          z0
+
+
+
+0.5 for each frame origin and 0.75 for each frame axes
+
+
+
+ i-1       α i −1    ai −1         θi    di         i
+ 0        0          0             θ1   L1          1
+ 1        90         0             θ2   0           2
+ 2        90         L2            0    d3          3
+ 3        0          L3            0    0           ee
+
+
+0.5 for zero elements and 0.75 for all nonzero and joint parameter elements.
+
+           cos θi               − sin θi                   0              ai −1       
+          sin θ cos α        cos θi cos α i −1         − sin α i −1   −di sin α i −1 
+i −1
+     Ti =       i       i −1
+
+           sin θi sin α i −1 cos θi sin α i −1         cos α i −1     di cos α i −1 
+                                                                                      
+                  0                 0                      0               1          
+
+       cos θ1      − sin θ1 0 0 
+        sin θ      cos θ1 0 0 
+0
+  T1 =       1
+
+        0             0     1 L1 
+                                 
+        0             0     0 1
+       cos θ 2   − sin θ 2      0
+                                 0
+        0           0        −1 0 
+1
+  T2 = 
+        sin θ1   cos θ 2     0 0
+                                   
+        0           0        0 1
+
+       1    0 0 L2 
+       0    0 −1 −d3 
+2
+  T3 = 
+       0    1 0   0 
+                      
+       0    0 0   1 
+
+        1   0    0 L3 
+        0   1    0 0 
+3
+  Tee = 
+        0   0    1 0
+                      
+        0   0    0 1
+
+
+
+                         c1c2        s1 c1s2   c1 (( L2 + L3 )c2 + d3 s2 ) 
+                         s c        −c1 s1s2   s1 (( L2 + L3 )c2 + d3 s2 ) 
+0
+  Tee = 0T11T2 2T33Tee =  1 2
+                          s2         0 −c2        ( L2 + L3 ) s2 − d3c2 
+                                                                            
+                          0          0   0                  1              
+
+2 for each individual transformation matrix and 2 for the final answer
+       2-
+       α
+       = 1 90,=
+              a1 0, d
+                  =  1 L1 , α
+                          =   2 90, a
+                                  =  2 L2 , d
+                                          =   2 0, θ
+                                                 =   3 0, α
+                                                        =   3 0, a
+                                                               =  3 L3 , d
+                                                                      =    4 0
+
+       Using Pieper’s method, for a1 = 0                             2
+
+        r = k3              2
+
+       and
+
+        k3 = f12 + f 2 2 + f32 + a12 + d 2 2 + 2d 2 f 3
+
+           a3c3 + d 4 sα 3 s3 + a2
+        f1 =
+        f 2 =a3cα 2 s3 − d 4 sα 3cα 2 c3 − d 4 sα 2 cα 3 − d3 sα 2
+        f3 =a3 sα 2 s3 − d 4 sα 3 sα 2 c3 + d 4 cα 2 cα 3 + d3cα 2
+
+       Sub α
+          =  1 90, d
+                 =  1 L1 , α
+                         =   2 90, a
+                                 =  2 L2 , d
+                                         =   2 0, θ
+                                                =   3 0, α
+                                                       =   3 0, a
+                                                              =  3 L3 , d
+                                                                     =    4 0
+
+        f1
+        = L2 + L3
+        f 2 = −d3
+                                                2 for each f and 2 for k3
+        f3 = 0
+        k3 =( L2 + L3 ) 2 + d32
+
+       We know
+
+        r = x2 + y 2 + z 2
+                                                          2 for d3
+        → d3 =        x 2 + y 2 + z 2 − ( L2 + L3 ) 2
+
+       We also have
+
+        z = (k1s2 − k2 c2 ) sα1 + k4
+
+       and
+
+        k1= f1= L2 + L3
+        k2 =− f2 =d3
+                                                2 for each k and 2 for z
+        k4 = f3cα1 + d 2 cα1 = 0
+        →z=( L2 + L3 ) s2 − d3c2
+
+                 θ2
+                 1− u2             2u
+=u tan ,
+     =   cos θ 2  =   2
+                        , sin θ 2                                    4 for using the transcendental approach
+      2          1+ u             1+ u2
+                        2u         1− u2
+  → z = ( L2 + L3 )           − d3
+                      1+ u2        1+ u2
+  ( z − d3 )u 2 − 2( L2 + L3 )u + z + d3 =0
+                                                        2 for forming the quadratic equation for u
+     L2 + L3 ± ( L2 + L3 ) 2 − ( z − d3 )( z + d3 )
+  u=
+                    ( z − d3 )
+  or
+
+        L2 + L3 ± ( L2 + L3 ) 2 + d32 − z 2
+  u=
+                      ( z − d3 )                        2 for u
+  and
+
+  θ 2 = 2 tan −1 u             2 for θ2
+
+
+
+  Now for θ1
+
+  c1 g1 − s1 g 2 x
+                =
+                               1 for each θ1 equation
+  s1 g1 + c1 g 2 y
+                =
+
+  and
+
+  g1 = c2 f1 − s2 f 2 + a1 = c2 ( L2 + L3 ) + s2 d3
+                                                        2 for each g
+  g 2 = s2 cα1 f1 + c2 cα1 f 2 − sα1 f3 − d 2 sα1 = 0
+
+  →
+  x = c1 (c2 ( L2 + L3 ) + s2 d3 )
+=y s1 (c2 ( L2 + L3 ) + s2 d3 ) →
+                                = θ1 a tan 2( y, x)
+
+  2 for θ1
+   3-
+   a)
+
+            c4 − s4                0  c5        − s5    0   c6       − s6   0
+   3
+     R6  s4 c4                    0   0       0      −1  0       0     1 
+             0    0               1   s5     c5      0   − s6   −c6    0 
+       c4 c5c6 − s4 s6             −c4 c5 s6 − s4 c6        −c4 s5 
+   =  s4 c5c6 + c4 s6             − s4 c5 s6 + c4 c6       − s4 s5 
+            s5c6                        − s5 s6              c5 
+
+   5 for multiplying the three matrices
+   b)
+
+                   0 − Cos 60 Cos 30                        0 −0.5 0.866 
+   0                          sin 30                       0 0.866 0.5 
+       R6         0=   sin 60                                                        2.5
+                   −1   0      0                          −1 0    0 
+
+   c)
+
+      c1c2                      s1 c1s2 
+ =R3  s1c2
+   0
+                                −c1 s1s2 
+       s2                      0 −c2 
+
+                     c1c2                  s1c2       s2   0.5     0.5   0.707 
+    0        −1      0                                   
+                                                       0 =                  0             1.5
+                                                              0.707 −0.707
+                            T
+        R3        =R = s1 3                −c1
+                      c1s2                s1s2      −c2   0.5   0.5   −0.707 
+
+                 0.5    0.5       0.707   0 −0.5 0.866 
+=R63
+        R
+        =        0       −10
+           R6 0.707 −0.707          0   0 0.866 0.5 
+         3
+
+                 0.5   0.5      −0.707   −1 0   0 
+   −0.707 0.183 0.683       r11 r12 r13 
+   0                    
+            −0.966 0.259    r            r23 
+=                         == 21 r   22
+
+   0.707   0.183 0.683    r31 r32 r33 
+
+   1 for finding the elements of 3 R6
+
+   sin θ5 ±
+         =r132 + r232                                     1 for finding sin θ5
+      a tan 2( r 2 + r 2 , r ) 47
+                   13    23    33 =
+θ5 =                                     4 for each θ5
+                      2     2
+      a tan 2(− r13 + r23 , r33 ) −
+                                   = 47
+
+    a tan 2(−r32 , r31 ) −
+                          = 14.53
+θ6 =                                     4 for each θ 6
+     a tan 2(r32 , −r31 ) =
+                           165.5
+
+    a tan 2(−r23 , −r13 ) = 200.8
+θ4 =                                     4 for each θ 4
+     a tan 2(r23 , r31 ) = 20.8
+

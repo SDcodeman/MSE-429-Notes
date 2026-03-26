@@ -1,0 +1,46 @@
+Problem 1: Determine the Jacobian matrix, 𝐉 . ., of the Stanford manipulator using the joint direction and
+derivative‐based method.
+
+
+
+
+                                            Page 1
+Page 2
+Problem 2: Determine the Jacobian matrix, 𝐉 . ., of the Stanford manipulator using the joint direction and
+cross‐product method.
+
+
+
+
+                                            Page 3
+Page 4
+Problem 3: Consider for the Stanford manipulator a Jacobian based on a point o the end‐effector that is
+coincident with the wrist centre. What is 𝐉 ?
+
+
+
+
+                                            Page 5
+Problem 4: Find 𝐉 for the Standford manipulator and determine the velocity transformation 𝑻𝒗   →   .
+
+
+
+
+                                         Page 6
+Page 7
+Problem 5: Solve the inverse velocity problem of the Stanford manipulator.
+
+
+
+
+                                           Page 8
+Problem 6: Solve the inverse force problem of the Stanford manipulator, i.e., find 𝝉 for known
+           𝒇
+ 𝐅.             .
+         𝒎 .
+
+
+
+
+                                            Page 9
+
