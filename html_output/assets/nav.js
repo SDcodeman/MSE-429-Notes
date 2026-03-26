@@ -7,16 +7,21 @@ const NAV_DATA = {
     { href: "MSE492_Chapter_3.html", title: "Ch 3: Manipulator Kinematics (DH)", course: "MSE492" },
     { href: "MSE492_Chapter_4.html", title: "Ch 4: Inverse Kinematics", course: "MSE492" },
     { href: "MSE492_Chapter_5.html", title: "Ch 5: Jacobians & Velocities", course: "MSE492" },
+    { href: "MSE492_Chapter_6.html", title: "Ch 6: Manipulator Dynamics", course: "MSE492" },
+    { href: "MSE492_Chapter_7.html", title: "Ch 7: Trajectory Generation", course: "MSE492" },
+    { href: "MSE492_Chapter_8.html", title: "Ch 8: Manipulator Design", course: "MSE492" },
   ],
   tutorials: [
     { href: "MSE429_Tutorial_1.html", title: "Tutorial 1", course: "MSE429" },
     { href: "MSE429_Tutorial_3.html", title: "Tutorial 3", course: "MSE429" },
     { href: "MSE429_Tutorial_4.html", title: "Tutorial 4", course: "MSE429" },
     { href: "MSE429_Tutorial_5.html", title: "Tutorial 5", course: "MSE429" },
+    { href: "MSE429_Tutorial_6.html", title: "Tutorial 6", course: "MSE429" },
   ],
   assessments: [
     { href: "MSE429_Assignment_1.html", title: "Assignment 1", course: "MSE429" },
     { href: "MSE429_Assignment_2.html", title: "Assignment 2", course: "MSE429" },
+    { href: "MSE429_Assignment_3.html", title: "Assignment 3", course: "MSE429" },
     { href: "MSE429_Midterm_1.html", title: "Midterm 1", course: "MSE429" },
   ]
 };

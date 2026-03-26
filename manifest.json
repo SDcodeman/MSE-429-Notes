@@ -282,52 +282,135 @@
       "category": "chapter",
       "course": "MSE492",
       "chapter": 6,
-      "title": "Chapter 6 (revision 2)",
+      "title": "Manipulator Dynamics",
       "md5": "a5d189c5ffdbf0fafe598646e996dcb7",
       "pages": 33,
       "status": "canonical",
+      "extracted_to": "extracted/MSE492_Chapter_6.md",
       "stages": {
-        "extracted": false,
-        "extraction_audited": false,
-        "enriched": false,
-        "content_verified": false,
-        "html_generated": false,
-        "html_audited": false
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": true,
+        "content_verified": true,
+        "html_generated": true,
+        "html_audited": true
       }
     },
     "MSE492 - Chapter7.pdf": {
       "category": "chapter",
       "course": "MSE492",
       "chapter": 7,
-      "title": "Chapter 7",
+      "title": "Trajectory Generation",
       "md5": "dda5489805afc3a163664b0f9cde1fea",
       "pages": 39,
       "status": "canonical",
+      "extracted_to": "extracted/MSE492_Chapter_7.md",
       "stages": {
-        "extracted": false,
-        "extraction_audited": false,
-        "enriched": false,
-        "content_verified": false,
-        "html_generated": false,
-        "html_audited": false
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": true,
+        "content_verified": true,
+        "html_generated": true,
+        "html_audited": true
       }
     },
     "MSE492 - Chapter8.pdf": {
       "category": "chapter",
       "course": "MSE492",
       "chapter": 8,
-      "title": "Chapter 8",
+      "title": "Manipulator Design",
       "md5": "78a4f63a6056e9c7d5219dd2597589ea",
       "pages": 22,
       "status": "canonical",
+      "extracted_to": "extracted/MSE492_Chapter_8.md",
       "stages": {
-        "extracted": false,
-        "extraction_audited": false,
-        "enriched": false,
-        "content_verified": false,
-        "html_generated": false,
-        "html_audited": false
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": true,
+        "content_verified": true,
+        "html_generated": true,
+        "html_audited": true
       }
+    },
+    "MSE429 - Tutorials 4 (Solutions).pdf (dup2)": {
+      "md5": "c1d47eae62018128375a75681b6954d6",
+      "status": "skip",
+      "skip_reason": "Exact duplicate of already-processed MSE429 - Tutorials 4 (Solutions).pdf"
+    },
+    "MSE429 - Tutorials 5 (Solutions).pdf (dup2)": {
+      "md5": "ae4af6f4d28b4be2549f4a7658de3af5",
+      "status": "skip",
+      "skip_reason": "Exact duplicate of already-processed MSE429 - Tutorials 5 (Solutions).pdf"
+    },
+    "MSE 429 - Assignment 3 (Solutions).pdf": {
+      "category": "assignment",
+      "course": "MSE429",
+      "assignment": 3,
+      "title": "Assignment 3 Solutions",
+      "md5": "705c403ea375373e4874aca69ae7cbce",
+      "pages": 5,
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Assignment_3.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE429 - Tutorials 6 (Solutions).pdf": {
+      "category": "tutorial",
+      "course": "MSE429",
+      "tutorial": 6,
+      "title": "Tutorial 6 Solutions",
+      "md5": "e32b25621a577d81fb41908d53d9956b",
+      "pages": 10,
+      "status": "canonical",
+      "extracted_to": "extracted/MSE429_Tutorial_6.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": true,
+        "html_audited": true
+      },
+      "stages_notes": "Enrichment and verification skipped \u2014 only applies to chapter files"
+    },
+    "MSE429 - Tutorial 5.pdf": {
+      "category": "tutorial",
+      "course": "MSE429",
+      "tutorial": "5-questions",
+      "title": "Tutorial 5 Questions Only",
+      "md5": "f6a718ae25efd3a4132b6a6667892259",
+      "pages": 1,
+      "status": "canonical",
+      "notes": "Questions only, no solutions. 1 page.",
+      "extracted_to": "extracted/MSE429_Tutorial_5_Questions.md",
+      "stages": {
+        "extracted": true,
+        "extraction_audited": true,
+        "enriched": "skipped",
+        "content_verified": "skipped",
+        "html_generated": "skipped",
+        "html_audited": "skipped"
+      },
+      "stages_notes": "Questions-only file, no separate HTML page (covered by Tutorial 5 Solutions page)"
+    },
+    "MSE429 - Project Outline.pdf": {
+      "status": "skip",
+      "skip_reason": "Project document, moved back to MSE429-Project repo"
+    },
+    "MSE429 - Project_Phase2_Report_Group.pdf": {
+      "status": "skip",
+      "skip_reason": "Project document, moved back to MSE429-Project repo"
+    },
+    "annotated-MSE429 - Projects_Phase1_Report_Group5.pdf": {
+      "status": "skip",
+      "skip_reason": "Project document, moved back to MSE429-Project repo"
     }
   }
 }

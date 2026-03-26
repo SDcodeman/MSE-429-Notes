@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 8: Manipulator Design &mdash; MSE 492</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});"></script>
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+
+  <main class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&rsaquo;</span>
+      MSE492<span class="sep">&rsaquo;</span>
+      Chapter 8
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Ch 8: Manipulator Design
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=1" target="_blank">PDF p.1</a>
+    </h1>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <h2 id="overview">Overview
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=2" target="_blank">PDF p.2</a>
+    </h2>
+
+    <p>Topics covered in this chapter:</p>
+    <ol>
+      <li><strong>Task-Based Design Requirements</strong> &mdash; Matching degrees of freedom to task needs; impact of symmetric tools and workspace considerations.</li>
+      <li><strong>Kinematic Configuration</strong> &mdash; Joint configurations: Cartesian, articulated, SCARA, spherical, cylindrical; design of wrist mechanisms with orthogonal and nonorthogonal axes.</li>
+      <li><strong>Quantitative Measures of Workspace Attributes</strong> &mdash; Efficiency of workspace design using structural length index $Q_L$; well-conditioned workspaces and manipulability measure $\mathcal{w}$.</li>
+      <li><strong>Redundant and Closed-Chain Structures</strong> &mdash; Applications and advantages of redundant manipulators; closed-loop structures like the Stewart mechanism.</li>
+    </ol>
+
+    <!-- ============================================================ -->
+    <!-- INTRODUCTION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-intro">Introduction
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=3" target="_blank">PDF p.3</a>
+    </h2>
+
+    <h3 id="sec-8-intro-defs">Definitions</h3>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <ul>
+        <li><strong><span class="tooltip-term" tabindex="0">Manipulator<span class="tooltip-content">The robotic arm mechanism including internal (proprioceptive) sensors such as encoders and resolvers. It is the core mechanical structure of a robot system.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: The robotic arm mechanism including internal (proprioceptive) sensors.</li>
+        <li><strong><span class="tooltip-term" tabindex="0">End-Effector<span class="tooltip-content">The end-of-arm tooling attached to the manipulator. Also called EOAT (End-Of-Arm Tooling). Examples include grippers, welding torches, and spray guns.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: The end-of-arm tooling attached to the manipulator.</li>
+        <li><strong>External Sensors and Effectors</strong>: Devices such as vision systems and part feeders that supplement the robot system.</li>
+        <li><strong>Controller</strong>: The computational unit that governs manipulator operation.</li>
+      </ul>
+    </div>
+
+    <h3 id="sec-8-intro-props">Theorems &amp; Properties</h3>
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li><strong>Influence on Kinematic and Dynamic Analysis</strong>: The structure of a manipulator affects both kinematic and dynamic analysis. Some configurations are easy to solve, while others lack closed-form solutions.</li>
+        <li><strong>Performance Limitations</strong>: Factors such as load capacity, speed, size of workspace, and repeatability limit a manipulator's performance.</li>
+        <li><strong>Rigid-Body Dynamics</strong>: Control of manipulators also depends on friction and flexibility of drive systems.</li>
+      </ul>
+    </div>
+
+    <h3 id="sec-8-intro-concepts">Key Concepts</h3>
+    <p><strong>Elements of a Robot System</strong>
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=3" target="_blank">PDF p.3</a>
+    </p>
+    <ol>
+      <li>The manipulator, including internal or proprioceptive sensors.</li>
+      <li>The end-effector, or end-of-arm tooling.</li>
+      <li>External sensors and effectors, such as vision systems and part feeders.</li>
+      <li>The controller.</li>
+    </ol>
+    <p><strong>Iterative Process</strong>: Designing a manipulator involves rethinking higher-level design decisions as new problems arise.</p>
+
+    <!-- ============================================================ -->
+    <!-- BASING THE DESIGN ON TASK REQUIREMENTS -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-task">Basing the Design on Task Requirements
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=4" target="_blank">PDF p.4</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <ul>
+        <li><strong>Universally Programmable</strong>: Robots are designed to perform a variety of tasks but are often specialized for specific applications.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=4" target="_blank">PDF p.4</a>
+        </li>
+        <li><strong><span class="tooltip-term" tabindex="0">Degrees of Freedom (DOF)<span class="tooltip-content">The number of independent parameters needed to specify a robot's configuration. Each actuated joint contributes one DOF. A general spatial task requires 6 DOF (3 translation + 3 rotation).<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: The number of DOF should match the number required by the task. Not all tasks require a full six DOF.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=4" target="_blank">PDF p.4</a>
+        </li>
+        <li><strong>Redundant (for a task)</strong>: A robot is considered redundant for a task when the tool has an axis of symmetry, allowing an infinite number of equivalent orientations.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=4" target="_blank">PDF p.4</a>
+        </li>
+        <li><strong>Symmetric-Tool Handling</strong>: Imagining an extra "fictitious" joint along the tool's axis of symmetry can simplify positioning. Normally requires six degrees of freedom, but with the fictitious joint, only five real joints are needed.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=5" target="_blank">PDF p.5</a>
+        </li>
+        <li><strong>Active Positioning Devices</strong>: Devices like tilt/roll platforms that reduce the robot's required degrees of freedom.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=6" target="_blank">PDF p.6</a>
+        </li>
+        <li><strong><span class="tooltip-term" tabindex="0">Positioning Structure<span class="tooltip-content">The first three joints of a manipulator, which position the wrist point in space. These joints determine the reachable workspace volume and the kinematic configuration class (Cartesian, SCARA, articulated, etc.).<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: The first three joints of a manipulator, which position the wrist point in space.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=9" target="_blank">PDF p.9</a>
+        </li>
+        <li><strong>Orienting Structure (Wrist)</strong>: The last $n - 3$ joints that orient the end-effector and have axes intersecting at the wrist point.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=9" target="_blank">PDF p.9</a>
+        </li>
+        <li><strong><span class="tooltip-term" tabindex="0">Wrist Point<span class="tooltip-content">The point where the axes of the last n - 3 joints intersect. When the wrist is spherical (3 intersecting revolute axes), the inverse kinematics can be decoupled into a positioning sub-problem and an orientation sub-problem.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: The point where the axes of the last $n - 3$ joints intersect.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=9" target="_blank">PDF p.9</a>
+        </li>
+      </ul>
+    </div>
+
+    <h3 id="sec-8-task-examples">Worked Examples</h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Example &mdash; Grinding Tool Redundancy</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=4" target="_blank">PDF p.4</a>
+      <p><strong>Problem</strong>: A manipulator positions a grinding tool in two different configurations.</p>
+      <p><strong>Key Insight</strong>: The orientation of the tool relative to its axis $\hat{Z}_T$ is irrelevant because the grinding wheel rotates at several hundred RPM. Since the tool can be positioned in an infinite number of ways by rotating around $\hat{Z}_T$, the robot is considered <strong>redundant</strong> for this task.</p>
+      <p><strong>Conclusion</strong>: Symmetric tools may reduce required DOF. Arc welding, spot welding, deburring, glueing, and polishing often employ end-effectors with at least one axis of symmetry.</p>
+    </div>
+
+    <div class="figure-desc">Grinding Tool with Manipulator (Ch8-4): Two side-by-side illustrations of a robotic arm holding a grinding wheel positioned against a surface in two different configurations. Both poses achieve equivalent grinding despite different arm configurations, demonstrating the redundancy from tool symmetry about $\hat{Z}_T$.</div>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Example &mdash; Circuit Board Assembly</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=5" target="_blank">PDF p.5</a>
+      <p><strong>Problem</strong>: Placing components on circuit boards.</p>
+      <p><strong>Solution</strong>: Requires three degrees of freedom for planar movement ($x$, $y$, rotation) and a fourth for lifting/inserting parts ($z$). Total: 4 DOF.</p>
+    </div>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Example &mdash; Pipe Welding with Tilt/Roll Platform</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=6" target="_blank">PDF p.6</a>
+      <p><strong>Problem</strong>: Welding pipes using an active positioning device.</p>
+      <p><strong>Solution</strong>: A tilt/roll platform accounts for two degrees of freedom, theoretically allowing a 3-DOF robot for symmetric-tool tasks.</p>
+    </div>
+
+    <div class="figure-desc">Tilt/Roll Platform (Ch8-6): A robotic arm mounted above a tilt/roll platform holding a workpiece. The platform provides two additional degrees of freedom (tilt and roll) to the overall manipulator system.</div>
+
+    <h3 id="sec-8-task-props">Theorems &amp; Properties</h3>
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li>Many industrial robots have five degrees of freedom (5-DOF) due to the prevalence of symmetric tools.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=5" target="_blank">PDF p.5</a>
+        </li>
+        <li>Tasks with fewer than six degrees of freedom are common in industry.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=5" target="_blank">PDF p.5</a>
+        </li>
+        <li>Most manipulators are designed so that the last $n - 3$ joints orient the end-effector and have axes that intersect at the wrist point, and the first three joints position this wrist point.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=9" target="_blank">PDF p.9</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why don't all tasks need six degrees of freedom?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>A full 6 DOF is needed to place an end-effector at an arbitrary position <em>and</em> orientation in 3D space. However, many real tasks have inherent symmetries or constraints that reduce this requirement:</p>
+        <ul>
+          <li><strong>Symmetric tools</strong> (grinders, drills): rotation about the tool axis is irrelevant, removing 1 DOF.</li>
+          <li><strong>Planar tasks</strong> (circuit board assembly): motion is restricted to a plane, needing only 3&ndash;4 DOF.</li>
+          <li><strong>Active workholding</strong> (tilt/roll platforms): the workpiece provides some of the required DOF externally.</li>
+        </ul>
+        <p>Matching DOF to the task keeps the robot simpler, cheaper, faster, and more reliable.</p>
+      </div></div>
+    </div>
+
+    <!-- Self-Test Quiz 1 -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>A robot equipped with a cylindrical grinding wheel needs to position the tool at a specific point and angle against a surface. How many <strong>real</strong> DOF are minimally required?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">6 &mdash; full spatial positioning is always needed</button>
+        <button class="quiz-option" data-correct="true">5 &mdash; the tool's rotational symmetry about its axis acts as a "fictitious" 6th joint</button>
+        <button class="quiz-option" data-correct="false">4 &mdash; the grinding plane constrains the problem to 4 DOF</button>
+        <button class="quiz-option" data-correct="false">3 &mdash; only position matters, not orientation</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The grinding wheel's axis of symmetry makes one orientation DOF redundant, so only 5 real joints are needed." data-incorrect="Because the grinding tool is symmetric about its spin axis, rotation about that axis is irrelevant. This acts as a fictitious 6th joint, so only 5 real joints are required."></div>
+    </div>
+
+    <div class="concept-check" data-concept="task-requirements">
+      <span class="concept-check-label">How well do you understand task-based design requirements?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- KINEMATIC CONFIGURATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-kinematic">Kinematic Configuration
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=7" target="_blank">PDF p.7</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <ul>
+        <li><strong>Load Capacity</strong>: Depends upon the sizing of structural members, power-transmission system, and actuators. The load placed on actuators and drive system is a function of the configuration of the robot, the percentage of time supporting a load, and dynamic loading due to inertial- and velocity-related forces.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=7" target="_blank">PDF p.7</a>
+        </li>
+        <li><strong>Speed</strong>: High speed offers advantages when a proposed robotic solution must compete on economic terms with hard automation or human workers. For some applications (e.g., welding, spray-painting), the process itself limits the speed rather than the manipulator.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=7" target="_blank">PDF p.7</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Property</div>
+      <p>The acceleration and deceleration phases take up most of the cycle time (e.g., in a pick-and-place scenario). Hence, <strong>acceleration capability</strong>, not just peak speed, is very important.
+        <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=7" target="_blank">PDF p.7</a>
+      </p>
+    </div>
+
+    <!-- Enrichment: Comparison Table -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Comparison of Kinematic Configurations</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Configuration Comparison</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Configuration</th>
+                <th>Work Envelope Shape</th>
+                <th>Typical DOF (positioning)</th>
+                <th>Key Advantage</th>
+                <th>Key Limitation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Cartesian</strong></td>
+                <td>Rectangular box</td>
+                <td>3P</td>
+                <td>Very stiff structure; trivial IK; decoupled joints</td>
+                <td>Large footprint relative to workspace</td>
+              </tr>
+              <tr>
+                <td><strong>Cylindrical</strong></td>
+                <td>Hollow cylinder</td>
+                <td>R + 2P</td>
+                <td>Good radial reach; moderate stiffness</td>
+                <td>Cannot reach directly above/below base</td>
+              </tr>
+              <tr>
+                <td><strong>Spherical</strong></td>
+                <td>Partial sphere / thick shell</td>
+                <td>2R + P</td>
+                <td>Compact base; large angular sweep</td>
+                <td>Resolution degrades with radial extension</td>
+              </tr>
+              <tr>
+                <td><strong>SCARA</strong></td>
+                <td>Partial cylinder</td>
+                <td>2R + P</td>
+                <td>Extremely fast (actuators in base); gravity-decoupled joints</td>
+                <td>Motion limited to horizontal plane + Z</td>
+              </tr>
+              <tr>
+                <td><strong>Articulated</strong></td>
+                <td>Roughly spherical</td>
+                <td>3R</td>
+                <td>Minimal structural intrusion; reaches confined spaces; smallest $Q_L$</td>
+                <td>More complex IK; coupled dynamics</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p><strong>Why SCARA robots are so fast</strong>: Because the first three joints do not support the weight of the links or payload (all motion is in the horizontal plane), the actuators can be housed in the stationary base and made very large. This is why some SCARA robots achieve speeds up to 30 ft/s &mdash; roughly 10x faster than comparable articulated robots.</p>
+
+          <p><strong>Why articulated robots have the best $Q_L$</strong>: The articulated configuration sweeps out a roughly spherical workspace with minimal total link length ($Q_L \approx 0.62$), compared to $Q_L = 3$ for a Cartesian robot. This means articulated robots use their structural material most efficiently to create workspace volume.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CARTESIAN MANIPULATOR -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-cartesian">Cartesian Manipulator
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=10" target="_blank">PDF p.10</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <ul>
+        <li><strong><span class="tooltip-term" tabindex="0">Cartesian Manipulator<span class="tooltip-content">A manipulator whose first three joints are prismatic and mutually orthogonal, corresponding to the X, Y, and Z Cartesian directions. Also known as a gantry robot when built at large scale.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: A manipulator where joints 1 through 3 are prismatic, mutually orthogonal, and correspond to the $X$, $Y$, and $Z$ Cartesian directions.</li>
+        <li><strong>Gantry Robots</strong>: Very large Cartesian robots that sometimes manipulate entire automobiles or inspect entire aircraft.</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li>The inverse kinematic solution for this configuration is <strong>trivial</strong>.</li>
+        <li>This configuration produces robots with <strong>very stiff structures</strong>. As a consequence, very large robots can be built.</li>
+        <li>The first three joints are <strong>decoupled</strong>. This makes them simpler to design and prevents kinematic singularities due to the first three joints.</li>
+      </ul>
+    </div>
+
+    <div class="figure-desc">Cartesian Manipulator (Ch8-10): Two views showing three mutually orthogonal prismatic axes ($d_1$, $d_2$, $d_3$) corresponding to Cartesian $X$, $Y$, $Z$. Side view shows vertical and horizontal prismatic joints; top view shows the horizontal workspace.</div>
+
+    <!-- ============================================================ -->
+    <!-- ARTICULATED MANIPULATOR -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-articulated">Articulated Manipulator
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=11" target="_blank">PDF p.11</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Articulated Manipulator<span class="tooltip-content">Also called a jointed, elbow, or anthropomorphic manipulator. It uses revolute joints throughout the positioning structure, producing a roughly spherical workspace and the best structural length index ($Q_L \approx 0.62$).<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: Sometimes also called a <strong>jointed</strong>, <strong>elbow</strong>, or <strong>anthropomorphic</strong> manipulator. Typically consists of two "shoulder" joints (one for rotation about a vertical axis and one for elevation out of the horizontal plane), an "elbow" joint (whose axis is usually parallel to the shoulder elevation joint), and two or three wrist joints at the end.</p>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li>Articulated robots <strong>minimize the intrusion</strong> of the manipulator structure into the workspace, making them capable of reaching into confined spaces.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=11" target="_blank">PDF p.11</a>
+        </li>
+        <li>They require <strong>much less overall structure</strong> than Cartesian robots, making them less expensive for applications needing smaller workspaces.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=11" target="_blank">PDF p.11</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="figure-desc">Articulated Manipulator (Ch8-11): Side view with base revolute joint, shoulder joint ($\theta_2$), and elbow joint ($\theta_3$). Top view shows the circular swept workspace (annular region) around the base with $\theta_1$ at the center.</div>
+
+    <!-- ============================================================ -->
+    <!-- SCARA MANIPULATOR -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-scara">SCARA Manipulator
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=12" target="_blank">PDF p.12</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong><span class="tooltip-term" tabindex="0">SCARA Manipulator<span class="tooltip-content">Selective Compliance Assembly Robot Arm. Has three parallel revolute joints for planar motion plus a prismatic joint for vertical motion. Extremely fast because actuators are housed in the stationary base and joints do not fight gravity.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: Has three parallel revolute joints (allowing it to move and orient in a plane), with a fourth prismatic joint for moving the end-effector normal to the plane.</p>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li>The first three joints do <strong>not</strong> have to support any of the weight of the manipulator or the load.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=12" target="_blank">PDF p.12</a>
+        </li>
+        <li>Link 0 can easily house the actuators for the first two joints. The actuators can be made very large, so the robot can move very fast.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=12" target="_blank">PDF p.12</a>
+        </li>
+        <li>One SCARA manipulator can move at up to <strong>30 feet per second</strong>, about 10 times faster than most articulated industrial robots.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=12" target="_blank">PDF p.12</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="figure-desc">SCARA Manipulator (Ch8-12): Side view with two horizontal links connected by revolute joints and a vertical prismatic joint ($d_3$) at the end. Top view shows the annular workspace swept by the two-link planar arm with joints $\theta_1$ and $\theta_2$.</div>
+
+    <div class="concept-check" data-concept="kinematic-configurations">
+      <span class="concept-check-label">How well do you understand the five kinematic configurations?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SPHERICAL MANIPULATOR -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-spherical">Spherical Manipulator
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=13" target="_blank">PDF p.13</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong>Spherical Manipulator</strong>: Has many similarities to the articulated manipulator, but with the elbow joint replaced by a prismatic joint. The link that moves prismatically might telescope or even "stick out the back" when retracted.</p>
+    </div>
+
+    <div class="figure-desc">Spherical Manipulator (Ch8-13): Side view with a base revolute joint, elevation revolute joint ($\theta_2$), and telescoping prismatic joint ($d_3$). Top view shows the annular/circular workspace.</div>
+
+    <!-- ============================================================ -->
+    <!-- CYLINDRICAL MANIPULATOR -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-cylindrical">Cylindrical Manipulator
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=13" target="_blank">PDF p.13</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong>Cylindrical Manipulator</strong>: Consists of a prismatic joint for translating the arm vertically ($d_2$), a revolute joint with a vertical axis ($\theta_1$), another prismatic joint ($d_3$) orthogonal to the revolute joint axis, and finally a wrist of some sort.</p>
+    </div>
+
+    <div class="figure-desc">Cylindrical Manipulator (Ch8-13): Side view with vertical prismatic joint ($d_2$) and horizontal prismatic joint ($d_3$). Top view shows the annular workspace swept by $\theta_1$ at center and radial prismatic joint ($d_3$).</div>
+
+    <!-- Self-Test Quiz 2 -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>Which kinematic configuration can achieve speeds up to 30 ft/s because its actuators are housed in the stationary base and joints do not fight gravity?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Cartesian</button>
+        <button class="quiz-option" data-correct="false">Articulated</button>
+        <button class="quiz-option" data-correct="true">SCARA</button>
+        <button class="quiz-option" data-correct="false">Spherical</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! SCARA robots move in the horizontal plane so joints do not fight gravity, and actuators are housed in the stationary base, enabling very high speeds." data-incorrect="The SCARA configuration is the fastest because its horizontal-plane motion means joints don't fight gravity, and the actuators can be housed in the large stationary base."></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- QUANTITATIVE MEASURES OF WORKSPACE ATTRIBUTES -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-workspace">Quantitative Measures of Workspace Attributes
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=14" target="_blank">PDF p.14</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Length Sum ($L$)<span class="tooltip-content">A rough measure of the "length" of the complete linkage. For prismatic joints, $d_i$ is interpreted as the length of travel between joint-travel limits. Lower total length for a given workspace volume indicates a more efficient design.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: A rough measure of the "length" of the complete linkage, defined as:</p>
+      $$L = \sum_{i=1}^{N} (a_{i-1} + d_i)$$
+      <p>where $a_{i-1}$ and $d_i$ are the link length and joint offset as defined in Chapter 3. For prismatic joints, $d_i$ must be interpreted as a constant equal to the length of travel between the joint-travel limits.
+        <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=14" target="_blank">PDF p.14</a>
+      </p>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Structural Length Index ($Q_L$)<span class="tooltip-content">The ratio of the manipulator's length sum to the cube root of the workspace volume. A dimensionless measure of how efficiently the robot's physical size translates into usable workspace. Good designs have low $Q_L$.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: Defined as the ratio of the manipulator's length sum to the cube root of the workspace volume:</p>
+      $$Q_L = \frac{L}{\sqrt[3]{w}}$$
+      <p>where $w$ is the volume of the manipulator's workspace. <strong>Good designs have low $Q_L$</strong>.
+        <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=14" target="_blank">PDF p.14</a>
+      </p>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why is $Q_L$ a useful design metric?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>$Q_L$ captures a fundamental design trade-off: <strong>how efficiently does a manipulator's physical size translate into usable workspace?</strong></p>
+        <p>Consider two robots with the same total link length $L$. The one that sweeps out a larger workspace volume $w$ will have a lower $Q_L$ and is the better design from a workspace-efficiency standpoint. The articulated configuration achieves the theoretical best ($Q_L \approx 0.62$) because revolute joints sweep out spherical volumes, which enclose the most volume for a given radius. In contrast, Cartesian configurations waste structural length on linear rails that only produce rectangular volumes ($Q_L = 3$).</p>
+      </div></div>
+    </div>
+
+    <h3 id="sec-8-workspace-props">Theorems &amp; Properties</h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Optimal $Q_L$ Values</div>
+      <p><strong>Cartesian Manipulator</strong>: The value of $Q_L$ is minimized when all three joints have the same length of travel. This minimal value is $Q_L = 3$.
+        <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=15" target="_blank">PDF p.15</a>
+      </p>
+      <p><strong>Articulated Manipulator</strong>:</p>
+      $$Q_L = \frac{1}{\sqrt[3]{4\pi/3}} \cong 0.62$$
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=15" target="_blank">PDF p.15</a>
+    </div>
+
+    <h3 id="sec-8-scara-ql">Worked Example &mdash; SCARA Manipulator $Q_L$</h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Example &mdash; SCARA $Q_L$ Optimization</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=15" target="_blank">PDF p.15</a>
+      <p><strong>Problem</strong>: A SCARA manipulator has links 1 and 2 of equal length $l/2$, and the range of motion of prismatic joint 3 is given by $d_3$. Assume joint limits are absent. Find $Q_L$. What value of $d_3$ minimizes $Q_L$ and what is this minimal value?</p>
+    </div>
+
+    <!-- Step-by-step derivation for SCARA Q_L -->
+    <div class="derivation-steps">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Compute the length sum</div>
+        $$L = \frac{l}{2} + \frac{l}{2} + d_3 = l + d_3$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Compute the workspace volume</div>
+        <p>The workspace is a right cylinder of radius $l$ and height $d_3$. Therefore:</p>
+        $$w = \pi l^2 d_3$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Write $Q_L$</div>
+        $$Q_L = \frac{l + d_3}{\sqrt[3]{\pi l^2 d_3}}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Minimize $Q_L$ as a function of $d_3 / l$</div>
+        <p>Optimization gives $d_3 = \dfrac{l}{2}$ as the optimal value.</p>
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 5: Compute the minimal $Q_L$</div>
+        <p>The corresponding minimal value of $Q_L$ is <strong>1.29</strong>.</p>
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Prev</button>
+        <span class="step-counter">Step 1 of 5</span>
+        <button class="step-btn step-next">Next</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <!-- Enrichment: Q_L derivations -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Derivation of Optimal $Q_L$ for Cartesian and Articulated Configurations</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Derivation</div>
+
+          <p><strong>Cartesian manipulator</strong>: For a Cartesian robot with three prismatic joints of travel $d_1$, $d_2$, $d_3$:</p>
+          <ul>
+            <li>$L = d_1 + d_2 + d_3$</li>
+            <li>$w = d_1 \cdot d_2 \cdot d_3$</li>
+            <li>By the AM-GM inequality, for a fixed $L$, the product $d_1 d_2 d_3$ is maximized when $d_1 = d_2 = d_3 = L/3$.</li>
+            <li>Then $w = (L/3)^3 = L^3/27$, so $Q_L = L / \sqrt[3]{L^3/27} = L / (L/3) = 3$.</li>
+          </ul>
+
+          <p><strong>Articulated manipulator</strong>: An idealized articulated arm of total length $L$ (single link, full joint range) sweeps out a sphere of radius $L$:</p>
+          <ul>
+            <li>$w = \frac{4}{3}\pi L^3$</li>
+            <li>$Q_L = \frac{L}{\sqrt[3]{\frac{4}{3}\pi L^3}} = \frac{1}{\sqrt[3]{\frac{4\pi}{3}}} \approx 0.62$</li>
+          </ul>
+          <p>This shows that articulated configurations are roughly <strong>5x more workspace-efficient</strong> than Cartesian configurations.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <h3 id="sec-8-ql-summary">Summary of Optimal $Q_L$ Values</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Configuration</th>
+          <th>Optimal $Q_L$</th>
+          <th>Condition</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cartesian</td>
+          <td>$3$</td>
+          <td>All three joints have equal travel</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=15" target="_blank">PDF p.15</a></td>
+        </tr>
+        <tr>
+          <td>Articulated</td>
+          <td>$\approx 0.62$</td>
+          <td>$\frac{1}{\sqrt[3]{4\pi/3}}$</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=15" target="_blank">PDF p.15</a></td>
+        </tr>
+        <tr>
+          <td>SCARA</td>
+          <td>$1.29$</td>
+          <td>$d_3 = l/2$ (links of length $l/2$ each)</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=15" target="_blank">PDF p.15</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-check" data-concept="workspace-measures">
+      <span class="concept-check-label">How well do you understand $Q_L$ and workspace efficiency?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- Self-Test Quiz 3 -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>Which kinematic configuration achieves the lowest (best) structural length index $Q_L$?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Cartesian ($Q_L = 3$)</button>
+        <button class="quiz-option" data-correct="false">SCARA ($Q_L = 1.29$)</button>
+        <button class="quiz-option" data-correct="true">Articulated ($Q_L \approx 0.62$)</button>
+        <button class="quiz-option" data-correct="false">Cylindrical ($Q_L \approx 2.0$)</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The articulated configuration sweeps a roughly spherical workspace, enclosing maximum volume per unit link length, giving the best $Q_L \approx 0.62$." data-incorrect="The articulated configuration has the best $Q_L \approx 0.62$ because revolute joints sweep spherical volumes, which maximize volume for a given radius."></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- DESIGNING WELL-CONDITIONED WORKSPACES -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-conditioning">Designing Well-Conditioned Workspaces
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=16" target="_blank">PDF p.16</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <ul>
+        <li><strong><span class="tooltip-term" tabindex="0">Singular Points<span class="tooltip-content">Configurations where the manipulator's Jacobian loses rank and the robot loses one or more degrees of freedom in task space. At singularities, certain end-effector velocities require infinite joint velocities.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 5 &amp; 8</span></span></span></strong>: Points where a manipulator loses one or more degrees of freedom. Certain tasks may not be performed effectively at these points.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=16" target="_blank">PDF p.16</a>
+        </li>
+        <li><strong><span class="tooltip-term" tabindex="0">Manipulability Ellipsoids<span class="tooltip-content">Graphical representations of how well a manipulator can move in various directions at a given configuration. The ellipsoid is the image of a unit sphere of joint velocities mapped through the Jacobian. A spherical ellipsoid indicates isotropic (equally good) motion capability.<span class="tooltip-source">Yoshikawa, 1985</span></span></span></strong>: Graphical measures that help evaluate workspace conditioning; related to how uniformly a manipulator can move and apply forces.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=17" target="_blank">PDF p.17</a>
+        </li>
+        <li><strong>Inertia Ellipsoids</strong>: Graphical measures that evaluate how well a manipulator can accelerate in various Cartesian directions.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=17" target="_blank">PDF p.17</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li>A manipulator loses one or more degrees of freedom at singular points.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=16" target="_blank">PDF p.16</a>
+        </li>
+        <li>Actions of the manipulator <strong>near</strong> singular points may be poorly conditioned. The manipulator's ability to move and apply forces uniformly is compromised.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=16" target="_blank">PDF p.16</a>
+        </li>
+        <li>The <strong>farther</strong> the manipulator is from singular points, the better it can move uniformly and apply forces in all directions.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=16" target="_blank">PDF p.16</a>
+        </li>
+        <li>Various measures have been suggested to quantify the effects of singularities. These measures can help design a manipulator with a maximally large, well-conditioned subspace of the workspace.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=17" target="_blank">PDF p.17</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Enrichment: Condition Number -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Condition Number and Isotropy</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Condition Number</div>
+          <p>Beyond the manipulability measure $\mathcal{w}$, the <strong>condition number</strong> of the Jacobian provides a complementary measure of workspace quality.</p>
+
+          <p><strong>Condition number</strong>: Defined as the ratio of the largest to smallest singular value of the Jacobian:</p>
+          $$\kappa(\mathbf{J}) = \frac{\sigma_{\max}}{\sigma_{\min}}$$
+
+          <ul>
+            <li>$\kappa = 1$: The manipulability ellipsoid is a <strong>sphere</strong> (isotropic configuration). The robot can move equally well in all directions.</li>
+            <li>$\kappa \to \infty$: The robot is at or near a <strong>singularity</strong>. The ellipsoid collapses toward a line or plane.</li>
+          </ul>
+
+          <p>The <strong>isotropy index</strong> is the reciprocal:</p>
+          $$\mu = \frac{1}{\kappa(\mathbf{J})} = \frac{\sigma_{\min}}{\sigma_{\max}} \in [0, 1]$$
+
+          <p>A value of $\mu = 1$ represents perfect isotropy. Designing a manipulator so that a large portion of its workspace has $\mu$ close to 1 ensures well-conditioned operation throughout.</p>
+
+          <p><strong>Key distinction</strong>: The manipulability measure $\mathcal{w}$ tells you the <em>overall magnitude</em> of velocity capability (volume of the ellipsoid), while the condition number tells you the <em>uniformity</em> of that capability (shape of the ellipsoid). A robot can have high $\mathcal{w}$ but poor conditioning if it can move very fast in one direction but barely at all in another.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MANIPULABILITY MEASURE -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-manipulability">Manipulability Measure
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <p><strong>Singular Configurations</strong>: Found by solving $\det(\mathbf{J}(\Theta)) = 0$.</p>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Manipulability Measure ($\mathcal{w}$)<span class="tooltip-content">A scalar measure of manipulator dexterity defined by Yoshikawa (1985). It equals the product of all singular values of the Jacobian, which is proportional to the volume of the velocity ellipsoid. At singularities, $\mathcal{w} = 0$. Good designs maximize $\mathcal{w}$ over large regions of the workspace.<span class="tooltip-source">Yoshikawa, T. "Manipulability of Robotic Mechanisms." <em>IJRR</em>, 4(2), 1985</span></span></span></strong>: A measure of manipulator dexterity defined as:</p>
+      $$\mathcal{w} = \sqrt{\det(\mathbf{J}(\Theta)\,\mathbf{J}^\top(\Theta))}$$
+
+      <p>which, for <strong>nonredundant</strong> manipulators, reduces to:</p>
+      $$\mathcal{w} = |\det(\mathbf{J}(\Theta))|$$
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li>A good manipulator design has <strong>large areas</strong> of its workspace characterized by <strong>high values</strong> of $\mathcal{w}$.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a>
+        </li>
+        <li>At singular configurations, $\mathcal{w} = 0$.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does $\mathcal{w} = 0$ at a singularity?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>At a singularity, $\det(\mathbf{J}) = 0$, which means $\mathbf{J}$ has at least one zero singular value. Since $\mathcal{w} = \prod \sigma_i$, any zero singular value makes the entire product zero. Geometrically, the velocity ellipsoid collapses from a full-dimensional ellipsoid to a lower-dimensional object (e.g., a disc or a line), meaning the robot cannot move in at least one direction.</p>
+      </div></div>
+    </div>
+
+    <h3 id="sec-8-manipulability-eqs">Key Equations</h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Key Equations</div>
+
+      <p><strong>Singularity condition</strong>:</p>
+      $$\det(\mathbf{J}(\Theta)) = 0$$
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a>
+
+      <p><strong>Manipulability measure (general)</strong>:</p>
+      $$\mathcal{w} = \sqrt{\det(\mathbf{J}(\Theta)\,\mathbf{J}^\top(\Theta))}$$
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a>
+
+      <p><strong>Manipulability measure (nonredundant)</strong>:</p>
+      $$\mathcal{w} = |\det(\mathbf{J}(\Theta))|$$
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a>
+    </div>
+
+    <!-- Enrichment: Yoshikawa's Proof -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Yoshikawa's Manipulability Measure &mdash; Geometric Derivation</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+
+          <p>Yoshikawa's manipulability measure (1985) has a clean geometric interpretation as the <strong>volume of the velocity ellipsoid</strong>. Here is the derivation.</p>
+
+          <!-- Step-by-step derivation for Yoshikawa's measure -->
+          <div class="derivation-steps">
+            <div class="derivation-step visible">
+              <div class="step-label">Setup</div>
+              <p>The relationship between joint velocities and end-effector velocities is:</p>
+              $$\dot{\mathbf{x}} = \mathbf{J}(\Theta)\,\dot{\Theta}$$
+              <p>Consider all joint velocities $\dot{\Theta}$ satisfying the unit-norm constraint $\|\dot{\Theta}\| \leq 1$. This defines a unit hypersphere in joint-velocity space.</p>
+            </div>
+
+            <div class="derivation-step">
+              <div class="step-label">Step 1: Mapping through the Jacobian</div>
+              <p>The image of this unit sphere under the linear map $\mathbf{J}$ is an <strong>ellipsoid</strong> in task space, defined by:</p>
+              $$\mathcal{E} = \left\{ \dot{\mathbf{x}} \in \mathbb{R}^m \;\middle|\; \dot{\mathbf{x}}^\top \left(\mathbf{J}\mathbf{J}^\top\right)^{-1} \dot{\mathbf{x}} \leq 1 \right\}$$
+              <p>This is the <strong>manipulability ellipsoid</strong> (or velocity ellipsoid).</p>
+            </div>
+
+            <div class="derivation-step">
+              <div class="step-label">Step 2: Singular Value Decomposition</div>
+              <p>Let $\mathbf{J} = \mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^\top$ be the SVD, where $\boldsymbol{\Sigma} = \text{diag}(\sigma_1, \sigma_2, \ldots, \sigma_m)$ contains the singular values. Then:</p>
+              $$\mathbf{J}\mathbf{J}^\top = \mathbf{U}\boldsymbol{\Sigma}^2\mathbf{U}^\top$$
+              <p>The eigenvalues of $\mathbf{J}\mathbf{J}^\top$ are $\sigma_1^2, \sigma_2^2, \ldots, \sigma_m^2$, and the eigenvectors (columns of $\mathbf{U}$) give the <strong>principal axes</strong> of the ellipsoid. The <strong>semi-axis lengths</strong> are $\sigma_1, \sigma_2, \ldots, \sigma_m$.</p>
+            </div>
+
+            <div class="derivation-step">
+              <div class="step-label">Step 3: Volume of the ellipsoid</div>
+              <p>The volume of an $m$-dimensional ellipsoid with semi-axes $\sigma_1, \ldots, \sigma_m$ is:</p>
+              $$V_{\mathcal{E}} = C_m \prod_{i=1}^{m} \sigma_i$$
+              <p>where $C_m$ is the volume of the unit $m$-ball ($C_2 = \pi$, $C_3 = \frac{4\pi}{3}$, etc.).</p>
+            </div>
+
+            <div class="derivation-step">
+              <div class="step-label">Step 4: Connecting to the determinant</div>
+              <p>Since:</p>
+              $$\prod_{i=1}^{m} \sigma_i = \sqrt{\prod_{i=1}^{m} \sigma_i^2} = \sqrt{\det(\mathbf{J}\mathbf{J}^\top)}$$
+              <p>The manipulability measure is:</p>
+              $$\mathcal{w} = \sqrt{\det(\mathbf{J}\mathbf{J}^\top)} = \prod_{i=1}^{m} \sigma_i$$
+              <p>Thus, <strong>$\mathcal{w}$ is proportional to the volume of the velocity ellipsoid</strong>. When $\mathcal{w} = 0$, at least one singular value is zero, the ellipsoid collapses to a lower-dimensional object, and the robot has lost the ability to move in at least one direction.</p>
+            </div>
+
+            <div class="derivation-step">
+              <div class="step-label">Step 5: Nonredundant case</div>
+              <p>For <strong>nonredundant manipulators</strong> ($n = m$, so $\mathbf{J}$ is square):</p>
+              $$\det(\mathbf{J}\mathbf{J}^\top) = \det(\mathbf{J})^2 \implies \mathcal{w} = |\det(\mathbf{J})|$$
+            </div>
+
+            <div class="step-controls">
+              <button class="step-btn step-prev" disabled>Prev</button>
+              <span class="step-counter">Step 1 of 6</span>
+              <button class="step-btn step-next">Next</button>
+              <button class="step-btn step-show-all">Show All</button>
+            </div>
+          </div>
+
+          <p><strong>Original Reference</strong>: Yoshikawa, T. "Manipulability of Robotic Mechanisms." <em>The International Journal of Robotics Research</em>, 4(2), pp. 3&ndash;9, 1985. <a href="https://journals.sagepub.com/doi/10.1177/027836498500400201" target="_blank">SAGE Journals</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Video links -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Video Resources on Manipulability Ellipsoids</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video: Manipulability Ellipsoids (Modern Robotics)</div>
+          <p>Professor Kevin Lynch's lecture on manipulability from the <em>Modern Robotics</em> course at Northwestern University provides an excellent visual explanation of how the velocity ellipsoid forms from the Jacobian.</p>
+          <p><strong>Key points covered</strong>:</p>
+          <ul>
+            <li>A unit circle in joint-velocity space maps through $\mathbf{J}$ to an ellipse in task space</li>
+            <li>The semi-axis lengths equal the singular values $\sigma_1, \sigma_2, \ldots$ of $\mathbf{J}$</li>
+            <li>The principal axes align with the left singular vectors (columns of $\mathbf{U}$)</li>
+            <li>The <strong>force ellipsoid</strong> is the inverse of the velocity ellipsoid</li>
+            <li>Two scalar measures: (1) $\sigma_{\max}/\sigma_{\min}$ (condition number), and (2) $\prod \sigma_i$ (manipulability)</li>
+          </ul>
+          <p><strong>URL</strong>: <a href="https://youtu.be/8VSrYDi_cs0" target="_blank">https://youtu.be/8VSrYDi_cs0</a></p>
+          <p>See also: <a href="https://youtu.be/vjJgTvnQpBs" target="_blank">Singularities (Ch. 5.3)</a></p>
+        </div>
+
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video: Velocity Ellipsoid in 3D (Robot Academy, QUT)</div>
+          <p>Professor Peter Corke's lesson extends the velocity ellipse concept to 3D and introduces the manipulability scalar measure, with interactive visualizations of ellipsoids changing shape across the workspace.</p>
+          <p><strong>URL</strong>: <a href="https://robotacademy.net.au/lesson/velocity-ellipsoid-in-3d-and-manipulability/" target="_blank">https://robotacademy.net.au/lesson/velocity-ellipsoid-in-3d-and-manipulability/</a></p>
+          <p>See also: <a href="https://robotacademy.net.au/lesson/velocity-ellipse-in-2d/" target="_blank">Velocity Ellipse in 2D &mdash; Robot Academy</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="manipulability">
+      <span class="concept-check-label">How well do you understand the manipulability measure and velocity ellipsoids?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ASADA'S APPROACH -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-asada">Manipulability via Acceleration Analysis &mdash; Asada's Approach
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Cartesian Mass Matrix<span class="tooltip-content">The effective inertia matrix experienced at the end-effector in Cartesian space. It is obtained by transforming the joint-space mass matrix through the inverse Jacobian. Its eigenvalues and eigenvectors define the inertia ellipsoid.<span class="tooltip-source">Asada, H. 1983, 1984</span></span></span></strong>: Defined as:</p>
+      $$\mathbf{M}_x(\Theta) = \mathbf{J}^{-\top}(\Theta)\,\mathbf{M}(\Theta)\,\mathbf{J}^{-1}(\Theta)$$
+      <p>This serves as a measure of how well the manipulator can accelerate in various Cartesian directions.
+        <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a>
+      </p>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Inertia Ellipsoid<span class="tooltip-content">A graphical representation of the Cartesian mass matrix. Short axes indicate directions of high effective inertia (poor acceleration), while long axes indicate directions of low effective inertia (easy acceleration). This is the opposite sense from the velocity ellipsoid.<span class="tooltip-source">Asada, H. 1983, 1984</span></span></span></strong>: A graphic representation of the Cartesian mass matrix, given by:</p>
+      $$\mathbf{X}^\top \mathbf{M}_x(\Theta)\,\mathbf{X} = 1$$
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Properties</div>
+      <ul>
+        <li>The inertia ellipsoid equation represents an $n$-dimensional ellipse, where $n$ is the dimension of $\mathbf{X}$.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a>
+        </li>
+        <li>The <strong>axes</strong> of the ellipsoid lie in the directions of the <strong>eigenvectors</strong> of $\mathbf{M}_x(\Theta)$.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a>
+        </li>
+        <li>The <strong>reciprocals of the square roots</strong> of the corresponding eigenvalues provide the <strong>lengths</strong> of the axes of the ellipsoids.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a>
+        </li>
+        <li><strong>Well-conditioned points</strong> in the manipulator workspace are characterized by inertia ellipsoids that are <strong>spherical</strong> (or nearly so).
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why is the inertia ellipsoid the "opposite" of the velocity ellipsoid?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>For the <strong>velocity ellipsoid</strong>, long axes mean the robot can achieve <em>high velocities</em> in that direction. For the <strong>inertia ellipsoid</strong>, long axes (small eigenvalues of $\mathbf{M}_x$) mean <em>low effective inertia</em>, so the robot <em>accelerates easily</em> in that direction.</p>
+        <p>The inversion arises because the inertia ellipsoid is defined by $\mathbf{X}^\top \mathbf{M}_x \mathbf{X} = 1$, where large $\mathbf{M}_x$ eigenvalues <em>shrink</em> the ellipsoid axis. The force ellipsoid $\mathbf{F}^\top (\mathbf{J}\mathbf{J}^\top) \mathbf{F} = 1$ is similarly inversely related to the velocity ellipsoid: directions where the robot moves fast are directions where it can only exert small forces, and vice versa.</p>
+      </div></div>
+    </div>
+
+    <h3 id="sec-8-asada-example">Worked Example &mdash; Planar 2-Link Inertia Ellipsoids</h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Example &mdash; Planar Two-Link RR Manipulator Inertia Ellipsoids</div>
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=20" target="_blank">PDF p.20</a>
+      <p><strong>Problem</strong>: Consider a planar two-link RR manipulator. Find the inertia ellipsoids across the workspace.</p>
+      <p><strong>Solution</strong>: The inertia ellipsoids are computed at various points in the workspace using the Cartesian mass matrix $\mathbf{M}_x(\Theta) = \mathbf{J}^{-\top}(\Theta)\,\mathbf{M}(\Theta)\,\mathbf{J}^{-1}(\Theta)$. The resulting ellipsoids vary across the workspace, becoming more elongated (less spherical) near singular configurations and more circular (well-conditioned) in the central regions.</p>
+      <p><strong>Reference</strong>: Asada, Haruhiko. "Dynamic analysis and design of robot manipulators using inertia ellipsoids." Proceedings. 1984 IEEE International Conference on Robotics and Automation. Vol. 1. IEEE, 1984.</p>
+    </div>
+
+    <div class="figure-desc">Workspace of a 2-DOF Planar Arm with Inertia Ellipsoids (Ch8-20): A kidney/crescent-shaped workspace of a planar 2-link RR arm. Near the center/base, the ellipses are nearly circular (well-conditioned, isotropic acceleration capability). Toward the boundaries (near singularities), the ellipses become highly elongated (poor conditioning). The base is located at the inner cusp of the crescent shape.</div>
+
+    <!-- Enrichment: Asada's GIE Derivation -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Asada's Generalized Inertia Ellipsoid &mdash; Full Derivation</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Derivation</div>
+
+          <p>Asada's approach (1983, 1984) extends the classical concept of a single rigid body's inertia ellipsoid to an entire articulated chain.</p>
+
+          <p><strong>Starting point &mdash; Joint-space dynamics</strong> (ignoring gravity and velocity terms):</p>
+          $$\boldsymbol{\tau} = \mathbf{M}(\Theta)\,\ddot{\Theta}$$
+
+          <p><strong>Step 1 &mdash; Transform to Cartesian space</strong>: Using $\dot{\mathbf{x}} = \mathbf{J}\dot{\Theta}$, differentiate to get:</p>
+          $$\ddot{\mathbf{x}} = \mathbf{J}\ddot{\Theta} + \dot{\mathbf{J}}\dot{\Theta}$$
+          <p>At a snapshot (ignoring the $\dot{\mathbf{J}}\dot{\Theta}$ term for the quasi-static analysis), we have $\ddot{\Theta} = \mathbf{J}^{-1}\ddot{\mathbf{x}}$.</p>
+
+          <p><strong>Step 2 &mdash; Substitute into dynamics</strong>:</p>
+          $$\boldsymbol{\tau} = \mathbf{M}\mathbf{J}^{-1}\ddot{\mathbf{x}}$$
+          <p>Using the virtual work principle ($\mathbf{F} = \mathbf{J}^{-\top}\boldsymbol{\tau}$), the Cartesian force is:</p>
+          $$\mathbf{F} = \underbrace{\mathbf{J}^{-\top}\mathbf{M}\mathbf{J}^{-1}}_{\mathbf{M}_x}\;\ddot{\mathbf{x}}$$
+
+          <p><strong>Step 3 &mdash; Interpret the ellipsoid</strong>: The set of all Cartesian accelerations achievable with unit joint torque ($\|\boldsymbol{\tau}\| \leq 1$) forms an ellipsoid whose shape is governed by $\mathbf{M}_x^{-1}$. Equivalently, the equation $\mathbf{X}^\top \mathbf{M}_x \mathbf{X} = 1$ defines the <strong>inertia ellipsoid</strong>.</p>
+
+          <p><strong>Physical meaning of the ellipsoid axes</strong>:</p>
+          <ul>
+            <li><strong>Short axis</strong> (large eigenvalue of $\mathbf{M}_x$): The direction in which the robot has high effective inertia and therefore <strong>accelerates poorly</strong>.</li>
+            <li><strong>Long axis</strong> (small eigenvalue of $\mathbf{M}_x$): The direction in which the robot has low effective inertia and <strong>accelerates easily</strong>.</li>
+          </ul>
+
+          <p><strong>Design implication</strong>: By plotting inertia ellipsoids across the workspace at the design stage, engineers can optimize link masses, lengths, and mass distributions so that the ellipsoids remain as spherical as possible throughout the intended working region.</p>
+
+          <p><strong>References</strong>:</p>
+          <ul>
+            <li>Asada, H. "A Geometrical Representation of Manipulator Dynamics and Its Application to Arm Design." <em>ASME J. Dyn. Sys., Meas., Control</em>, 105(3), pp. 131&ndash;135, 1983. <a href="https://asmedigitalcollection.asme.org/dynamicsystems/article-abstract/105/3/131/399164/A-Geometrical-Representation-of-Manipulator" target="_blank">ASME Digital Collection</a></li>
+            <li>Asada, H. "Dynamic analysis and design of robot manipulators using inertia ellipsoids." <em>Proceedings, 1984 IEEE ICRA</em>, Vol. 1. <a href="https://ieeexplore.ieee.org/document/1087211/" target="_blank">IEEE Xplore</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="asada-inertia">
+      <span class="concept-check-label">How well do you understand Asada's inertia ellipsoids?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- REDUNDANT AND CLOSED-CHAIN STRUCTURES -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-redundant">Redundant and Closed-Chain Structures
+      <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=21" target="_blank">PDF p.21</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <ul>
+        <li><strong><span class="tooltip-term" tabindex="0">Redundant Manipulators<span class="tooltip-content">Manipulators with more than six degrees of freedom. The extra DOF provide a null-space of joint velocities that do not affect the end-effector, enabling singularity avoidance, obstacle avoidance, and other secondary objectives.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8</span></span></span></strong>: Manipulators with more than six degrees of freedom. They offer benefits like micromanipulation and avoiding singular configurations.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=21" target="_blank">PDF p.21</a>
+        </li>
+        <li><strong>Closed-Loop Structures</strong>: Kinematic chains where at least one loop is formed, as opposed to serial (open-chain) linkages.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=21" target="_blank">PDF p.21</a>
+        </li>
+        <li><strong><span class="tooltip-term" tabindex="0">Stewart Mechanism (Stewart Platform)<span class="tooltip-content">A closed-loop parallel manipulator that controls position and orientation of a platform using six linear actuators. Very stiff and accurate, but with limited range of motion. Inverse kinematics is trivial but forward kinematics can have up to 40 solutions.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 8; Stewart, 1965</span></span></span></strong>: A closed-loop alternative to the serial 6-DOF manipulator that controls the position and orientation of the end-effector using six linear actuators.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=21" target="_blank">PDF p.21</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Stewart Mechanism Properties</div>
+      <ul>
+        <li><strong>Actuator Connections</strong>: Actuators are connected to the base with two-degree-of-freedom universal joints and to the end-effector with three-degree-of-freedom ball-and-socket joints.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=21" target="_blank">PDF p.21</a>
+        </li>
+        <li><strong>Characteristics</strong>: The mechanism is very <strong>stiff</strong> due to its closed-loop structure but has a more <strong>limited range of motion</strong> compared to serial linkages.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=21" target="_blank">PDF p.21</a>
+        </li>
+        <li><strong>Kinematic Solutions</strong>: The <strong>inverse</strong> kinematic solution is <strong>simple</strong>, whereas the <strong>forward</strong> kinematic solution is <strong>complex</strong> and often lacks a closed-form formulation.
+          <a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=21" target="_blank">PDF p.21</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="figure-desc">Stewart Mechanism (Ch8-21): A 3D illustration of a Stewart platform (hexapod). The top platform (end-effector) is connected to the base by six linear actuators ($d_1$ through $d_6$) arranged symmetrically. Universal joints (2-DOF) at the base, ball-and-socket joints (3-DOF) at the end-effector.</div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why is inverse kinematics simple but forward kinematics complex for Stewart platforms?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>In a serial chain, forward kinematics is a simple chain of matrix multiplications, while inverse kinematics requires solving a nonlinear system. In a <strong>parallel chain</strong>, the structure is reversed:</p>
+        <ul>
+          <li><strong>Inverse kinematics (simple)</strong>: Given the desired pose, each actuator length $d_i$ is simply the Euclidean distance between its base and platform attachment points after applying the rigid-body transformation:
+          $$d_i = \| \mathbf{p}_{\text{base},i} - (\mathbf{R}\,\mathbf{p}_{\text{platform},i} + \mathbf{t}) \|$$
+          This is a closed-form solution requiring only basic vector arithmetic.</li>
+          <li><strong>Forward kinematics (complex)</strong>: Given six actuator lengths, finding the resulting platform pose requires solving a system of six nonlinear equations simultaneously. The general Stewart platform has been shown to have <strong>up to 40 solutions</strong>.</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <!-- Self-Test Quiz 4 -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>What is the general inverse velocity solution for a redundant manipulator ($n > 6$)?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">$\dot{\Theta} = \mathbf{J}^{-1}\dot{\mathbf{x}}$ (standard inverse)</button>
+        <button class="quiz-option" data-correct="true">$\dot{\Theta} = \mathbf{J}^{\dagger}\dot{\mathbf{x}} + (\mathbf{I} - \mathbf{J}^{\dagger}\mathbf{J})\mathbf{z}$ (pseudoinverse + null-space term)</button>
+        <button class="quiz-option" data-correct="false">$\dot{\Theta} = \mathbf{J}^{\top}\dot{\mathbf{x}}$ (transpose method)</button>
+        <button class="quiz-option" data-correct="false">$\dot{\Theta} = (\mathbf{J}^{\top}\mathbf{J})^{-1}\mathbf{J}^{\top}\dot{\mathbf{x}}$ (least squares)</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The pseudoinverse gives the minimum-norm solution, and the null-space term $(\mathbf{I} - \mathbf{J}^{\dagger}\mathbf{J})\mathbf{z}$ allows exploiting the extra DOF for secondary objectives like singularity avoidance." data-incorrect="For redundant manipulators, the pseudoinverse $\mathbf{J}^{\dagger}$ replaces $\mathbf{J}^{-1}$, and an arbitrary null-space component is added to exploit the extra DOF."></div>
+    </div>
+
+    <!-- Enrichment: Redundant Manipulators -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Redundant Manipulators &mdash; Self-Motion and Practical Benefits</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Redundancy</div>
+
+          <p><strong>Why more than 6 DOF?</strong> A 6-DOF serial manipulator generally has a finite number of inverse kinematic solutions for a given end-effector pose. A <strong>redundant</strong> manipulator ($n > 6$) has infinitely many solutions, forming a <strong>self-motion manifold</strong>.</p>
+
+          <p><strong>Self-motion</strong>: Holding the end-effector pose constant while continuously moving through joint configurations. For a 7-DOF arm, this commonly appears as the elbow tracing a circle around the line from shoulder to wrist, analogous to how a human can move their elbow up or down while keeping their hand fixed.</p>
+
+          <p><strong>Practical advantages of redundancy</strong>:</p>
+          <ol>
+            <li><strong>Singularity avoidance</strong>: The extra DOF allows the robot to "steer around" singular configurations.</li>
+            <li><strong>Obstacle avoidance</strong>: The robot can reconfigure its intermediate links to avoid collisions.</li>
+            <li><strong>Joint limit avoidance</strong>: Self-motion keeps all joints away from their mechanical limits.</li>
+            <li><strong>Torque/force optimization</strong>: Null-space motion can minimize joint torques.</li>
+            <li><strong>Fault tolerance</strong>: If one joint fails, the robot may still complete the task.</li>
+          </ol>
+
+          <p><strong>Mathematical formulation</strong>:</p>
+          $$\dot{\Theta} = \mathbf{J}^{\dagger}\dot{\mathbf{x}} + (\mathbf{I} - \mathbf{J}^{\dagger}\mathbf{J})\mathbf{z}$$
+          <p>where $\mathbf{J}^{\dagger}$ is the Moore-Penrose pseudoinverse and $\mathbf{z}$ is an arbitrary vector. The term $(\mathbf{I} - \mathbf{J}^{\dagger}\mathbf{J})\mathbf{z}$ projects $\mathbf{z}$ into the <strong>null space</strong> of $\mathbf{J}$, producing joint velocities that do not affect the end-effector.</p>
+
+          <p><strong>Industrial example</strong>: The KUKA LBR iiwa is a well-known 7-DOF collaborative robot. Its extra DOF enables human-safe operation in cluttered environments.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Stewart Platform -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Stewart Platform &mdash; Inverse vs. Forward Kinematics</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Stewart Platform Comparison</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Stewart Platform</th>
+                <th>Serial 6-DOF</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Stiffness</td>
+                <td>Very high (loads shared by 6 actuators)</td>
+                <td>Lower (loads stacked serially)</td>
+              </tr>
+              <tr>
+                <td>Range of motion</td>
+                <td>Limited</td>
+                <td>Large</td>
+              </tr>
+              <tr>
+                <td>Accuracy</td>
+                <td>High (errors average, not accumulate)</td>
+                <td>Lower (errors accumulate)</td>
+              </tr>
+              <tr>
+                <td>Payload-to-weight ratio</td>
+                <td>High</td>
+                <td>Low</td>
+              </tr>
+              <tr>
+                <td>Inverse kinematics</td>
+                <td>Simple (closed-form)</td>
+                <td>Often complex</td>
+              </tr>
+              <tr>
+                <td>Forward kinematics</td>
+                <td>Complex (up to 40 solutions)</td>
+                <td>Simple (direct computation)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p><strong>Historical note</strong>: The design is often called the "Gough-Stewart platform" in recognition of V.E. Gough, who built the first operational version in 1954 for tire testing at Dunlop. D. Stewart independently proposed a similar mechanism for flight simulators in a 1965 paper.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="redundant-closed">
+      <span class="concept-check-label">How well do you understand redundant and closed-chain structures?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SUMMARY OF KEY EQUATIONS -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-summary">Summary of Key Equations</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Equation</th>
+          <th>Description</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>$L = \sum_{i=1}^{N} (a_{i-1} + d_i)$</td>
+          <td>Length sum of manipulator</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=14" target="_blank">PDF p.14</a></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>$Q_L = \dfrac{L}{\sqrt[3]{w}}$</td>
+          <td>Structural length index</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=14" target="_blank">PDF p.14</a></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>$\det(\mathbf{J}(\Theta)) = 0$</td>
+          <td>Singularity condition</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>$\mathcal{w} = \sqrt{\det(\mathbf{J}(\Theta)\,\mathbf{J}^\top(\Theta))}$</td>
+          <td>Manipulability measure (general)</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>$\mathcal{w} = \lvert\det(\mathbf{J}(\Theta))\rvert$</td>
+          <td>Manipulability measure (nonredundant)</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=18" target="_blank">PDF p.18</a></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>$\mathbf{M}_x(\Theta) = \mathbf{J}^{-\top}(\Theta)\,\mathbf{M}(\Theta)\,\mathbf{J}^{-1}(\Theta)$</td>
+          <td>Cartesian mass matrix</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>$\mathbf{X}^\top \mathbf{M}_x(\Theta)\,\mathbf{X} = 1$</td>
+          <td>Inertia ellipsoid</td>
+          <td><a class="source-link" href="../Slides/MSE492 - Chapter8.pdf#page=19" target="_blank">PDF p.19</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============================================================ -->
+    <!-- ADDITIONAL REFERENCES -->
+    <!-- ============================================================ -->
+    <div class="collapsible">
+      <div class="collapsible-header">Additional References and Further Reading</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; References</div>
+
+          <h4>Textbook</h4>
+          <ul>
+            <li>Craig, J.J. <em>Introduction to Robotics: Mechanics and Control</em>, 3rd Edition. Pearson, 2005. Chapter 8: Manipulator-Mechanism Design.</li>
+          </ul>
+
+          <h4>Foundational Papers</h4>
+          <ul>
+            <li>Yoshikawa, T. "Manipulability of Robotic Mechanisms." <em>The International Journal of Robotics Research</em>, 4(2), 1985. <a href="https://journals.sagepub.com/doi/10.1177/027836498500400201" target="_blank">SAGE Journals</a></li>
+            <li>Asada, H. "Dynamic analysis and design of robot manipulators using inertia ellipsoids." <em>Proceedings, 1984 IEEE ICRA</em>. <a href="https://ieeexplore.ieee.org/document/1087211/" target="_blank">IEEE Xplore</a></li>
+            <li>Asada, H. "A Geometrical Representation of Manipulator Dynamics and Its Application to Arm Design." <em>ASME J. Dyn. Sys., Meas., Control</em>, 105(3), 1983. <a href="https://asmedigitalcollection.asme.org/dynamicsystems/article-abstract/105/3/131/399164/A-Geometrical-Representation-of-Manipulator" target="_blank">ASME</a></li>
+          </ul>
+
+          <h4>Video Lectures</h4>
+          <ul>
+            <li><strong>Modern Robotics Ch. 5.4 &mdash; Manipulability</strong> (Kevin Lynch, Northwestern): <a href="https://youtu.be/8VSrYDi_cs0" target="_blank">https://youtu.be/8VSrYDi_cs0</a></li>
+            <li><strong>Modern Robotics Ch. 5.3 &mdash; Singularities</strong> (Kevin Lynch, Northwestern): <a href="https://youtu.be/vjJgTvnQpBs" target="_blank">https://youtu.be/vjJgTvnQpBs</a></li>
+            <li><strong>Velocity Ellipsoid in 3D and Manipulability</strong> (Peter Corke, Robot Academy): <a href="https://robotacademy.net.au/lesson/velocity-ellipsoid-in-3d-and-manipulability/" target="_blank">Robot Academy</a></li>
+          </ul>
+
+          <h4>Supplementary Online Resources</h4>
+          <ul>
+            <li><a href="https://en.wikipedia.org/wiki/Manipulability_ellipsoid" target="_blank">Manipulability Ellipsoid &mdash; Wikipedia</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Stewart_platform" target="_blank">Stewart Platform &mdash; Wikipedia</a></li>
+            <li><a href="https://modernrobotics.northwestern.edu/" target="_blank">Modern Robotics (free textbook and videos) &mdash; Northwestern University</a></li>
+            <li><a href="https://www.mathworks.com/help/robotics/ref/manipulabilityindex.html" target="_blank">MATLAB manipulabilityIndex Documentation</a></li>
+            <li><a href="https://h2t.iar.kit.edu/pdf/Vahrenkamp2012c.pdf" target="_blank">Manipulability Analysis (KIT survey paper)</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- QUIZ SCORE -->
+    <!-- ============================================================ -->
+    <div class="quiz-score"></div>
+
+    <!-- ============================================================ -->
+    <!-- FLASHCARD DECK -->
+    <!-- ============================================================ -->
+    <h2 id="sec-8-flashcards">Review Flashcards</h2>
+
+    <div class="flashcard-deck">
+      <div class="flashcard-deck-header">Key Concepts &mdash; Chapter 8</div>
+      <div class="flashcard-container">
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Structural Length Index</div>
+            <div class="flashcard-text">What is $Q_L$ and what does a low value indicate?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$Q_L = \dfrac{L}{\sqrt[3]{w}}$, the ratio of the manipulator's length sum to the cube root of workspace volume. A <strong>low $Q_L$</strong> indicates efficient use of structural material to create workspace volume. The articulated configuration achieves the best value ($Q_L \approx 0.62$).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Manipulability Measure</div>
+            <div class="flashcard-text">How is Yoshikawa's manipulability measure $\mathcal{w}$ defined, and what does it represent geometrically?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\mathcal{w} = \sqrt{\det(\mathbf{J}\mathbf{J}^\top)} = \prod \sigma_i$<br><br>It is proportional to the <strong>volume of the velocity ellipsoid</strong>. When $\mathcal{w} = 0$, the robot is at a singularity. For nonredundant robots: $\mathcal{w} = |\det(\mathbf{J})|$.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Cartesian Mass Matrix</div>
+            <div class="flashcard-text">What is the Cartesian mass matrix and how does the inertia ellipsoid differ from the velocity ellipsoid?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\mathbf{M}_x = \mathbf{J}^{-\top}\mathbf{M}\mathbf{J}^{-1}$<br><br>The inertia ellipsoid ($\mathbf{X}^\top \mathbf{M}_x \mathbf{X} = 1$) has the <strong>opposite</strong> sense from the velocity ellipsoid: long axes mean <em>easy</em> acceleration (low inertia), while short axes mean <em>poor</em> acceleration (high inertia).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">SCARA Configuration</div>
+            <div class="flashcard-text">Why are SCARA robots so much faster than articulated robots?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">SCARA robots move in the <strong>horizontal plane</strong>, so joints do not fight gravity. The actuators for the first two joints are housed in the <strong>stationary base</strong> and can be made very large. Some SCARA robots achieve speeds up to <strong>30 ft/s</strong> &mdash; roughly 10x faster than articulated robots.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Redundant Manipulators</div>
+            <div class="flashcard-text">What is the general inverse velocity solution for a redundant manipulator, and what does the null-space term do?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\dot{\Theta} = \mathbf{J}^{\dagger}\dot{\mathbf{x}} + (\mathbf{I} - \mathbf{J}^{\dagger}\mathbf{J})\mathbf{z}$<br><br>The first term gives the minimum-norm solution. The null-space term $(\mathbf{I} - \mathbf{J}^{\dagger}\mathbf{J})\mathbf{z}$ projects $\mathbf{z}$ into the null space of $\mathbf{J}$, producing joint velocities that <strong>do not affect the end-effector</strong> but can be used for singularity avoidance, obstacle avoidance, etc.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Stewart Platform</div>
+            <div class="flashcard-text">Why is inverse kinematics simple but forward kinematics complex for a Stewart platform?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text"><strong>IK (simple)</strong>: Each actuator length is just the distance between its base and platform attachment points: $d_i = \|\mathbf{p}_{\text{base},i} - (\mathbf{R}\mathbf{p}_{\text{platform},i} + \mathbf{t})\|$.<br><br><strong>FK (complex)</strong>: Given 6 lengths, finding the platform pose requires solving 6 simultaneous nonlinear equations with <strong>up to 40 solutions</strong>.</div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="flashcard-btn flashcard-prev">Prev</button>
+        <span class="flashcard-counter">1 / 6</span>
+        <button class="flashcard-btn flashcard-next">Next</button>
+        <button class="flashcard-shuffle">Shuffle</button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- QUICK REFERENCE PANEL -->
+    <!-- ============================================================ -->
+    <button class="quick-ref-toggle" title="Quick Reference">&Sigma;</button>
+    <div class="quick-ref-panel">
+      <h3>Ch 8 Quick Reference</h3>
+      <div class="ref-item">
+        <div class="ref-name">Length Sum</div>
+        <div class="ref-eq">$L = \sum_{i=1}^{N} (a_{i-1} + d_i)$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Structural Length Index</div>
+        <div class="ref-eq">$Q_L = \dfrac{L}{\sqrt[3]{w}}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Singularity Condition</div>
+        <div class="ref-eq">$\det(\mathbf{J}(\Theta)) = 0$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Manipulability (general)</div>
+        <div class="ref-eq">$\mathcal{w} = \sqrt{\det(\mathbf{J}\mathbf{J}^\top)}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Manipulability (nonredundant)</div>
+        <div class="ref-eq">$\mathcal{w} = |\det(\mathbf{J})|$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Cartesian Mass Matrix</div>
+        <div class="ref-eq">$\mathbf{M}_x = \mathbf{J}^{-\top}\mathbf{M}\mathbf{J}^{-1}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Inertia Ellipsoid</div>
+        <div class="ref-eq">$\mathbf{X}^\top \mathbf{M}_x \mathbf{X} = 1$</div>
+      </div>
+    </div>
+
+    <!-- Page navigation -->
+    <nav class="page-nav"></nav>
+
+  </main>
+
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

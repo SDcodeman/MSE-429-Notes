@@ -1,0 +1,25 @@
+                                      MSE429 – Tutorial 5
+Problem 1: Determine the Jacobian matrix, 0𝐉𝐉𝑒𝑒.𝑒𝑒. , of the Stanford manipulator using the joint direction
+and derivative‐based method.
+
+Problem 2: Determine the Jacobian matrix, 0𝐉𝐉𝑒𝑒.𝑒𝑒. , of the Stanford manipulator using the joint direction
+and cross-product method.
+
+Problem 3: Consider for the Stanford manipulator a Jacobian based on a point to the end-effector that is
+coincident with the wrist centre. What is 0𝐉𝐉𝑤𝑤 ?
+
+Problem 4: 3𝐉𝐉𝑤𝑤 for the Stanford manipulator and determine the velocity transformation 03𝑻𝑻𝑻𝑻𝑒𝑒𝑒𝑒→𝑤𝑤 .
+
+Problem 5: Solve the inverse velocity problem of the Stanford manipulator.
+
+Problem 6: Solve the inverse force problem of the Stanford manipulator, i.e., find 𝝉𝝉 for known
+            0
+ 0             𝒇𝒇
+   𝑭𝑭𝑒𝑒𝑒𝑒 = �        �
+              𝒎𝒎𝑒𝑒𝑒𝑒
+
+
+
+
+                                                Page 1 of 1
+

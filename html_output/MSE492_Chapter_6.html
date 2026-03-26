@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 6: Manipulator Dynamics &mdash; MSE 492</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});"></script>
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+
+  <main class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&rsaquo;</span>
+      MSE492<span class="sep">&rsaquo;</span>
+      Chapter 6
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Ch 6: Manipulator Dynamics
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=1" target="_blank">PDF p.1</a>
+    </h1>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <h2 id="overview">Overview
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=2" target="_blank">PDF p.2</a>
+    </h2>
+
+    <p>In this chapter the dynamics of serial manipulators will be introduced following two formulations:</p>
+    <ul>
+      <li>Introduction to Inverse and Forward Dynamic Problems</li>
+      <li>Mass Distribution and Inertia Properties</li>
+      <li>Acceleration of a Rigid Body</li>
+      <li>Dynamic Formulations
+        <ul>
+          <li>Newton-Euler Formulation</li>
+          <li>Lagrange Formulation</li>
+        </ul>
+      </li>
+    </ul>
+
+    <!-- Enrichment: Modern Robotics Video Series -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment &mdash; Video: Modern Robotics Chapter 8 &mdash; Dynamics of Open Chains</div>
+      <p>Professor Kevin Lynch (Northwestern University) has an excellent free video series covering the dynamics topics in this chapter. The videos use the screw-theory perspective from the <em>Modern Robotics</em> textbook, which complements the Craig-style approach used in our course.</p>
+      <p><strong>Recommended videos (in order of relevance to this chapter):</strong></p>
+      <table>
+        <thead>
+          <tr><th>Topic</th><th>YouTube Link</th><th>Duration</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Lagrangian Formulation of Dynamics (Part 1)</td><td><a href="https://youtu.be/1U6y_68CjeY" target="_blank">youtu.be/1U6y_68CjeY</a></td><td>~6 min</td></tr>
+          <tr><td>Lagrangian Formulation of Dynamics (Part 2)</td><td><a href="https://youtu.be/BjD-pL819LA" target="_blank">youtu.be/BjD-pL819LA</a></td><td>~6 min</td></tr>
+          <tr><td>Understanding the Mass Matrix</td><td><a href="https://youtu.be/7PFQou5l9do" target="_blank">youtu.be/7PFQou5l9do</a></td><td>~5 min</td></tr>
+          <tr><td>Dynamics of a Single Rigid Body (Part 1)</td><td><a href="https://youtu.be/9pdqePt1Nbg" target="_blank">youtu.be/9pdqePt1Nbg</a></td><td>~6 min</td></tr>
+          <tr><td>Dynamics of a Single Rigid Body (Part 2)</td><td><a href="https://youtu.be/2rUWVdslaI4" target="_blank">youtu.be/2rUWVdslaI4</a></td><td>~4 min</td></tr>
+          <tr><td>Newton-Euler Inverse Dynamics</td><td><a href="https://youtu.be/ZASVKAlegfQ" target="_blank">youtu.be/ZASVKAlegfQ</a></td><td>~6 min</td></tr>
+          <tr><td>Forward Dynamics of Open Chains</td><td><a href="https://youtu.be/L8zpJOxDbh4" target="_blank">youtu.be/L8zpJOxDbh4</a></td><td>~4 min</td></tr>
+          <tr><td>Dynamics in the Task Space</td><td><a href="https://youtu.be/iQa01aFgf8U" target="_blank">youtu.be/iQa01aFgf8U</a></td><td>~2 min</td></tr>
+          <tr><td>Constrained Dynamics</td><td><a href="https://youtu.be/E6Yp6DwJh24" target="_blank">youtu.be/E6Yp6DwJh24</a></td><td>~5 min</td></tr>
+          <tr><td>Actuation, Gearing, and Friction</td><td><a href="https://youtu.be/w1kYLT3pETc" target="_blank">youtu.be/w1kYLT3pETc</a></td><td>~6 min</td></tr>
+        </tbody>
+      </table>
+      <p>Full chapter page: <a href="https://modernrobotics.northwestern.edu/chapters/chapter8/" target="_blank">Modern Robotics Chapter 8</a></p>
+    </div>
+
+    <!-- Enrichment: Robot Academy -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Robot Academy &mdash; Rigid Body Dynamics Masterclass (Peter Corke, QUT)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video Series</div>
+          <p>Professor Peter Corke's Robot Academy provides a 10-lesson masterclass on rigid body dynamics with short, focused videos (each under 10 minutes). These are excellent for building intuition before tackling the math.</p>
+          <table>
+            <thead><tr><th>Lesson</th><th>URL</th></tr></thead>
+            <tbody>
+              <tr><td>Introduction to Rigid-Body Dynamics</td><td><a href="https://robotacademy.net.au/lesson/introduction-to-rigid-body-dynamics/" target="_blank">robotacademy.net.au</a></td></tr>
+              <tr><td>Forces Acting On Robot Links</td><td><a href="https://robotacademy.net.au/lesson/forces-acting-on-robot-links/" target="_blank">robotacademy.net.au</a></td></tr>
+              <tr><td>Gravity and Payload</td><td><a href="https://robotacademy.net.au/lesson/gravity-and-payload/" target="_blank">robotacademy.net.au</a></td></tr>
+              <tr><td>Inertia and Acceleration Coupling</td><td><a href="https://robotacademy.net.au/lesson/inertia-and-acceleration-coupling/" target="_blank">robotacademy.net.au</a></td></tr>
+              <tr><td>Velocity Coupling</td><td><a href="https://robotacademy.net.au/lesson/velocity-coupling/" target="_blank">robotacademy.net.au</a></td></tr>
+              <tr><td>Forward Dynamics</td><td><a href="https://robotacademy.net.au/lesson/forward-dynamics/" target="_blank">robotacademy.net.au</a></td></tr>
+              <tr><td>Summary of Rigid-Body Dynamics</td><td><a href="https://robotacademy.net.au/lesson/summary-of-rigid-body-dynamics/" target="_blank">robotacademy.net.au</a></td></tr>
+            </tbody>
+          </table>
+          <p>Full masterclass page: <a href="https://robotacademy.net.au/masterclass/rigid-body-dynamics/" target="_blank">Rigid Body Dynamics Masterclass</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Textbook reference -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Textbook Reference &mdash; Craig, "Introduction to Robotics"</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Reference</div>
+          <p>The material in this chapter corresponds to <strong>Chapter 6: Manipulator Dynamics</strong> in Craig's textbook (3rd edition, Pearson, 2005). Craig covers:</p>
+          <ul>
+            <li>Sections 6.1&ndash;6.3: Mass distribution, inertia tensors, and acceleration of rigid bodies</li>
+            <li>Sections 6.4&ndash;6.5: Newton-Euler recursive formulation (outward/inward iterations)</li>
+            <li>Sections 6.6&ndash;6.7: Lagrangian formulation and the mass matrix</li>
+            <li>Section 6.8: Properties of the dynamic equation</li>
+          </ul>
+          <p>The full textbook is available online: <a href="https://marsuniversity.github.io/ece387/Introduction-to-Robotics-Craig.pdf" target="_blank">Craig, Introduction to Robotics (PDF)</a></p>
+          <p><strong>Additional dynamics references:</strong></p>
+          <ul>
+            <li><a href="https://ocw.mit.edu/courses/2-12-introduction-to-robotics-fall-2005/c7caaa2376b8ec01e270328a3b80b029_chapter7.pdf" target="_blank">MIT OCW Chapter 7: Dynamics (H. Harry Asada)</a></li>
+            <li><a href="https://ethz.ch/content/dam/ethz/special-interest/mavt/robotics-n-intelligent-systems/rsl-dam/documents/RobotDynamics2016/script-dynamics.pdf" target="_blank">ETH Zurich Robot Dynamics Lecture Script</a></li>
+            <li><a href="http://www.diag.uniroma1.it/deluca/rob2_en/06_NewtonEulerDynamics.pdf" target="_blank">De Luca, Newton-Euler Dynamics (Sapienza)</a></li>
+            <li><a href="https://www.diag.uniroma1.it/deluca/rob2_en/03_LagrangianDynamics_1.pdf" target="_blank">De Luca, Lagrangian Dynamics (Sapienza)</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.1 INVERSE AND FORWARD DYNAMIC PROBLEMS -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-1">6.1 Inverse and Forward Dynamic Problems
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=3" target="_blank">PDF p.3</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+
+      <p><strong>General Dynamic Equation</strong>: The general dynamic equation of articulated bodies relates forces/torques to motion:</p>
+      $$\boldsymbol{Q} = \boldsymbol{M}(\boldsymbol{\Theta})\ddot{\boldsymbol{\Theta}} + \boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}) + \boldsymbol{G}(\boldsymbol{\Theta})$$
+
+      <p>where:</p>
+      <ul>
+        <li>$\boldsymbol{M}(\boldsymbol{\Theta})$ is the <strong><span class="tooltip-term" tabindex="0">mass matrix<span class="tooltip-content">A symmetric, positive-definite matrix that captures the effective inertia of the manipulator in joint space. It depends on the robot's configuration and relates joint accelerations to the inertial forces/torques required to produce them.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;6.7</span></span></span></strong>, a function of joint displacement $\boldsymbol{\Theta}$</li>
+        <li>$\ddot{\boldsymbol{\Theta}}$ is the vector of <strong>joint accelerations</strong></li>
+        <li>$\boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}})$ is the <strong>velocity coupling vector</strong> (centrifugal and Coriolis terms), a function of $\boldsymbol{\Theta}$ and $\dot{\boldsymbol{\Theta}}$</li>
+        <li>$\boldsymbol{G}(\boldsymbol{\Theta})$ is the <strong>gravitational vector</strong>, a function of $\boldsymbol{\Theta}$</li>
+        <li>$\boldsymbol{Q} = \boldsymbol{\tau} - \boldsymbol{J}^\top \boldsymbol{F} - \boldsymbol{f}_r$ is the <strong>generalized force vector</strong>, which includes actuator torque/force, external forces, and friction</li>
+      </ul>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does the dynamic equation have three separate terms ($M\ddot\Theta$, $V$, $G$)?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>Each term captures a fundamentally different physical effect on the manipulator:</p>
+        <p><strong>$\boldsymbol{M}(\boldsymbol{\Theta})\ddot{\boldsymbol{\Theta}}$</strong> is the <em>inertial</em> term &mdash; the torque needed to accelerate the links. This is Newton's second law ($F = ma$) generalized to a multi-body system.</p>
+        <p><strong>$\boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}})$</strong> captures velocity-dependent forces: <em>centrifugal</em> forces (from a single joint spinning) and <em>Coriolis</em> forces (from the interaction of two joints' velocities). These vanish when the robot is stationary or moving slowly.</p>
+        <p><strong>$\boldsymbol{G}(\boldsymbol{\Theta})$</strong> is the gravity loading &mdash; the torques needed just to hold the robot still against gravity. For many industrial tasks at moderate speeds, this is the dominant term.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;6.4&ndash;6.7</div>
+      </div></div>
+    </div>
+
+    <h3 id="sec-6-1-1">6.1.1 The State-Space Equation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=4" target="_blank">PDF p.4</a>
+    </h3>
+
+    <p>Assuming no external forces or friction, the equation simplifies to:</p>
+    $$\boldsymbol{\tau} = \boldsymbol{M}(\boldsymbol{\Theta})\ddot{\boldsymbol{\Theta}} + \boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}) + \boldsymbol{G}(\boldsymbol{\Theta}) \tag{1}$$
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Inverse Dynamics<span class="tooltip-content">Given a desired trajectory (joint displacements, velocities, and accelerations), compute the required joint torques/forces. Used for real-time robot control. The equation is "linear" in the sense that torques are found by direct substitution &mdash; no differential equation needs to be solved.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;6.5</span></span></span></strong>: Given a set of joint displacements ($\boldsymbol{\Theta}$), joint rates ($\dot{\boldsymbol{\Theta}}$), and joint accelerations ($\ddot{\boldsymbol{\Theta}}$), determine the required joint torques/forces ($\boldsymbol{\tau}$) that are required through the actuators to produce such motion. Eq. (1) is a <strong>linear equation</strong>.</p>
+      <p><strong><span class="tooltip-term" tabindex="0">Forward Dynamics<span class="tooltip-content">Given applied joint torques/forces, compute the resulting motion of the manipulator. Used for simulation. Requires solving a second-order differential equation by inverting the mass matrix and numerically integrating.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;6.5</span></span></span></strong>: Given a set of joint torques/forces ($\boldsymbol{\tau}$), determine the motion of the manipulator ($\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}, \ddot{\boldsymbol{\Theta}}$). Eq. (1) is a <strong>differential equation</strong>.</p>
+    </div>
+
+    <!-- Diagrams -->
+    <h3>Diagrams
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=5" target="_blank">PDF p.5</a>
+    </h3>
+
+    <div class="figure-desc">Manipulator High-Level Block Diagram (Ch6-5): The "Trajectory Generator" block outputs desired joint displacements $\boldsymbol{\Theta}_d(t)$, joint rates $\dot{\boldsymbol{\Theta}}_d(t)$, and joint accelerations $\ddot{\boldsymbol{\Theta}}_d(t)$. These feed into the "Control System" block, which outputs torque $\boldsymbol{\tau}$. The torque feeds into the "Robot" block, which outputs the actual joint displacements $\boldsymbol{\Theta}$ and joint rates $\dot{\boldsymbol{\Theta}}$. A feedback loop sends $\boldsymbol{\Theta}$ and $\dot{\boldsymbol{\Theta}}$ back to the Control System.</div>
+
+    <p><strong>Inverse Dynamics</strong> is used for controlling the manipulator, i.e., the torque is controlled to provide a desired motion:</p>
+    $$\boldsymbol{\tau} = \boldsymbol{M}(\boldsymbol{\Theta}_d)\ddot{\boldsymbol{\Theta}}_d + \boldsymbol{V}(\boldsymbol{\Theta}_d, \dot{\boldsymbol{\Theta}}_d) + \boldsymbol{G}(\boldsymbol{\Theta}_d)$$
+
+    <p><strong>Forward Dynamics</strong> is used for simulating the motion of the manipulator. Simulation replaces the Robot block.</p>
+
+    <!-- Enrichment: Inverse vs Forward -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Inverse vs. Forward Dynamics &mdash; Detailed Comparison</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>Inverse Dynamics</strong> answers the question: <em>"What torques do the motors need to produce so the robot follows this desired trajectory?"</em> This is the problem you solve for <strong>control</strong>. You know the motion you want ($\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}, \ddot{\boldsymbol{\Theta}}$) and you compute the required torques $\boldsymbol{\tau}$. The equation is "linear" in the sense that given the motion, the torques are found by direct substitution &mdash; no differential equation needs to be solved.</p>
+          <p><strong>Forward Dynamics</strong> answers the question: <em>"If I apply these torques, what motion will the robot produce?"</em> This is the problem you solve for <strong>simulation</strong>. You know the torques $\boldsymbol{\tau}$ and you solve a second-order differential equation to find the resulting motion. This requires numerical integration (e.g., Runge-Kutta methods) because you must invert the mass matrix and integrate accelerations over time:</p>
+          $$\ddot{\boldsymbol{\Theta}} = \boldsymbol{M}^{-1}(\boldsymbol{\Theta})\left[\boldsymbol{\tau} - \boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}) - \boldsymbol{G}(\boldsymbol{\Theta})\right]$$
+          <p>Forward dynamics is computationally more expensive because it requires the inversion of the mass matrix at every time step.</p>
+          <p><strong>Reference</strong>: <a href="http://www.scholarpedia.org/article/Robot_dynamics" target="_blank">Robot Dynamics &mdash; Scholarpedia</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Video -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Video &mdash; Inverse and Forward Dynamics Lessons (Robot Academy)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video</div>
+          <ul>
+            <li><strong>Forward Dynamics</strong>: Explains how torques map to robot motion for simulation purposes. <a href="https://robotacademy.net.au/lesson/forward-dynamics/" target="_blank">robotacademy.net.au</a></li>
+            <li><strong>Introduction to Rigid-Body Dynamics</strong>: Provides a high-level overview of the forces and torques that influence joint motion. <a href="https://robotacademy.net.au/lesson/introduction-to-rigid-body-dynamics/" target="_blank">robotacademy.net.au</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz 1: Inverse vs Forward Dynamics -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>You want to simulate a robot arm dropping under gravity with no motor torques applied. Which dynamics problem are you solving?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Inverse dynamics &mdash; because you know the trajectory and need the torques</button>
+        <button class="quiz-option" data-correct="true">Forward dynamics &mdash; because you know the torques ($\tau = 0$) and need to find the resulting motion</button>
+        <button class="quiz-option" data-correct="false">Neither &mdash; gravity is handled separately from the dynamic equation</button>
+        <button class="quiz-option" data-correct="false">Inverse dynamics &mdash; because the torques are zero</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! Forward dynamics takes known torques (here $\tau = 0$) and computes the resulting motion by solving a differential equation. This is exactly what a simulator does." data-incorrect="When you know the applied torques and want to find the motion, that is forward dynamics. Inverse dynamics goes the other way: known motion to required torques."></div>
+    </div>
+
+    <div class="concept-check" data-concept="inverse-forward-dynamics">
+      <span class="concept-check-label">How well do you understand inverse vs. forward dynamics?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.2 MASS DISTRIBUTION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-2">6.2 Mass Distribution
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=6" target="_blank">PDF p.6</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+
+      <p><strong>Mass</strong>: The mass is a measure of the resistance of a body to linear acceleration. If a force acts on a body, the body will accelerate. The ratio between the force and the resulting acceleration is the inertia (or mass) of the body.</p>
+      $$\boldsymbol{F} = m\boldsymbol{a}$$
+
+      <p><strong>Rotational Inertia</strong>: Rotational inertia is a measure of the resistance of a body to angular acceleration. If a torque acts on a body, the body will undergo an angular acceleration. The ratio between the torque and the angular acceleration is the rotational inertia of the body, which depends on its mass and its distribution about the axis of rotation.</p>
+      $$\boldsymbol{M} = \boldsymbol{I}\boldsymbol{\alpha} + \boldsymbol{\omega} \times \boldsymbol{I}\boldsymbol{\omega}$$
+    </div>
+
+    <h3 id="sec-6-2-1">6.2.1 Centroidal Inertia Properties of Common Shapes
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=7" target="_blank">PDF p.7</a>
+    </h3>
+
+    <div class="figure-desc">Centroidal Inertia Properties Reference Table (Ch6-7): A reference figure showing the centroidal inertia properties for six common shapes. All products of inertia not listed are zero. The coordinate axes are placed at the center of mass $G$ for each shape.</div>
+
+    <div class="collapsible">
+      <div class="collapsible-header">Centroidal Inertia Properties for Common Shapes (click to expand)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+
+        <p><strong>Slender Bar</strong>: A thin bar of length $L$ and cross-sectional area $A$ along the $y$-axis. $m = \rho A L$. $I_{xx} \approx 0$, $I_{yy} = I_{zz} = \frac{1}{12}mL^2$.</p>
+
+        <p><strong>Semicylinder</strong>: A half-cylinder of radius $R$ and length $L$ with centroid at $4R/(3\pi)$ from the flat face. $m = \frac{1}{2}\pi\rho R^2 L$. $I_{xx} = \left(\frac{1}{4} - \frac{16}{9\pi^2}\right)mR^2 + \frac{1}{12}mL^2$. $I_{yy} = \frac{m}{12}(3R^2 + L^2)$. $I_{zz} = \left(\frac{1}{2} - \frac{16}{9\pi^2}\right)mR^2$.</p>
+
+        <p><strong>Thin Disk</strong> ($h \ll R$): A disk of radius $R$ and thickness $h$. $m = \pi\rho R^2 h$. $I_{xx} = I_{yy} = \frac{1}{4}mR^2$. $I_{zz} = \frac{1}{2}mR^2$.</p>
+
+        <p><strong>Cylinder</strong>: A solid cylinder of radius $R$ and length $L$. $m = \pi\rho R^2 L$. $I_{xx} = I_{yy} = \frac{1}{12}m(3R^2 + L^2)$. $I_{zz} = \frac{1}{2}mR^2$.</p>
+
+        <p><strong>Rectangular Parallelepiped</strong>: A box with dimensions $a \times b \times c$ centered at $G$. $m = \rho abc$. $I_{xx} = \frac{1}{12}m(b^2 + c^2)$. $I_{yy} = \frac{1}{12}m(a^2 + c^2)$. $I_{zz} = \frac{1}{12}m(a^2 + b^2)$.</p>
+
+        <p><strong>Sphere</strong>: A solid sphere of radius $R$. $m = \frac{4}{3}\pi\rho R^3$. $I_{xx} = I_{yy} = I_{zz} = \frac{2}{5}mR^2$.</p>
+
+      </div></div>
+    </div>
+
+    <h3 id="sec-6-2-2">6.2.2 The Inertia Tensor
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=8" target="_blank">PDF p.8</a>
+    </h3>
+
+    <p>Bodies described with respect to axes that form planes of symmetry (principal axes) have zero products of inertia ($I_{xy}$, $I_{xz}$, $I_{yz}$). Thus, only moments of inertia ($I_{xx}$, $I_{yy}$, $I_{zz}$) are non-zero.</p>
+
+    <p>All the inertia properties (moments and products of inertia) can be written in a matrix known as the <strong><span class="tooltip-term" tabindex="0">inertia tensor<span class="tooltip-content">A 3x3 symmetric, positive-definite matrix that encodes a rigid body's resistance to angular acceleration about any axis. Diagonal entries are moments of inertia; off-diagonal entries are (negated) products of inertia. It depends on the choice of reference frame.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;6.2</span></span></span></strong>:</p>
+
+    $${}^{A}\boldsymbol{I} = \begin{bmatrix} I_{xx} & -I_{xy} & -I_{xz} \\ -I_{xy} & I_{yy} & -I_{yz} \\ -I_{xz} & -I_{yz} & I_{zz} \end{bmatrix}$$
+
+    <p>where $A$ is the reference frame in which the inertia tensor is being described.</p>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+
+      <p><strong>Moments of Inertia</strong> (diagonal terms):</p>
+      $$I_{xx} = \iiint_V (y^2 + z^2)\,\rho\,dv$$
+      $$I_{yy} = \iiint_V (x^2 + z^2)\,\rho\,dv$$
+      $$I_{zz} = \iiint_V (x^2 + y^2)\,\rho\,dv$$
+
+      <p><strong>Products of Inertia</strong> (off-diagonal terms):</p>
+      $$I_{xy} = \iiint_V xy\,\rho\,dv$$
+      $$I_{xz} = \iiint_V xz\,\rho\,dv$$
+      $$I_{yz} = \iiint_V yz\,\rho\,dv$$
+    </div>
+
+    <div class="figure-desc">Inertia Tensor Reference Frame (Ch6-8): An arbitrary 3D body with frame $\{A\}$ at the origin. Axes $\hat{X}$, $\hat{Y}$, $\hat{Z}$ are shown. A small volume element $dv$ is highlighted inside the body with position vector ${}^{A}\boldsymbol{P}$ from the origin to the element.</div>
+
+    <!-- Enrichment: What the Inertia Tensor Really Means -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: What the Inertia Tensor Really Means</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>Why a tensor (matrix) instead of a scalar?</strong> In 2D, a single moment of inertia $I$ suffices because there is only one possible axis of rotation (perpendicular to the plane). In 3D, the body can rotate about any axis, and the resistance to rotation depends on <em>which</em> axis you choose. The inertia tensor encodes this directional dependence.</p>
+          <p><strong>Diagonal terms (moments of inertia):</strong> $I_{xx}$ measures the body's resistance to rotation about the $x$-axis. It depends on how far the mass is distributed from the $x$-axis, which is why the integral involves $y^2 + z^2$ (the squared distance from the $x$-axis).</p>
+          <p><strong>Off-diagonal terms (products of inertia):</strong> $I_{xy}$ captures the asymmetry of mass distribution relative to the $xy$ plane. When products of inertia are non-zero, applying a torque about one axis causes angular acceleration about other axes as well. This is why the angular momentum $\boldsymbol{L} = \boldsymbol{I}\boldsymbol{\omega}$ is not always parallel to $\boldsymbol{\omega}$.</p>
+          <p><strong>Principal axes:</strong> There always exists an orientation of the coordinate axes (found via eigenvalue decomposition) where all products of inertia vanish. These are the <strong>principal axes</strong>, and the corresponding eigenvalues are the <strong>principal moments of inertia</strong>. When robot links are modeled as simple geometric shapes with symmetry, the DH frame axes often align with the principal axes, making the products of inertia zero.</p>
+          <p><strong>The inertia tensor is always symmetric and positive definite</strong>, guaranteeing real, positive principal moments of inertia.</p>
+          <p><strong>References</strong>:</p>
+          <ul>
+            <li><a href="https://ocw.mit.edu/courses/16-07-dynamics-fall-2009/dd277ec654440f4c2b5b07d6c286c3fd_MIT16_07F09_Lec26.pdf" target="_blank">MIT Lecture L26: 3D Rigid Body Dynamics &mdash; The Inertia Tensor (PDF)</a></li>
+            <li><a href="https://phys.libretexts.org/Bookshelves/Classical_Mechanics/Variational_Principles_in_Classical_Mechanics_(Cline)/13:_Rigid-body_Rotation/13.04:_Inertia_Tensor" target="_blank">Physics LibreTexts: Inertia Tensor</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Worked Example: Rectangular Body -->
+    <h3>Worked Example: Inertia Tensor of a Rectangular Body
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=9" target="_blank">PDF p.9</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example</div>
+      <p><strong>Problem</strong>: Find the inertia tensor for a rectangular body of uniform density $\rho$ with respect to the coordinate system shown, where the frame $\{A\}$ is at one corner of the box with dimensions $l$ (along $\hat{Y}$), $w$ (along $\hat{X}$), and $h$ (along $\hat{Z}$).</p>
+    </div>
+
+    <div class="figure-desc">Rectangular Body with Corner Frame (Ch6-9, Ch6-10, Ch6-11): A 3D rectangular box with frame $\{A\}$ located at one corner. The $\hat{X}$ axis runs along the width $w$, the $\hat{Y}$ axis runs along the length $l$, and the $\hat{Z}$ axis runs along the height $h$.</div>
+
+    <button class="solution-toggle" data-target="sol-ch6-rect">Show Solution</button>
+    <div id="sol-ch6-rect" class="solution-content">
+      <p><strong>Moments of Inertia</strong>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=9" target="_blank">PDF p.9</a>
+      </p>
+
+      <p>Computing $I_{xx}$:</p>
+      $$I_{xx} = \int_0^{h}\int_0^{l}\int_0^{w} (y^2 + z^2)\rho\,dx\,dy\,dz$$
+      $$= \int_0^{h}\int_0^{l} (y^2 + z^2)\rho\,w\,dy\,dz$$
+      $$= \int_0^{h}\left(\frac{l^3}{3} + z^2 l\right)\rho\,w\,dz$$
+      $$= \left(\frac{hl^3w}{3} + \frac{h^3 lw}{3}\right)\rho = \frac{m}{3}(l^2 + h^2)$$
+
+      <p>Similarly:</p>
+      $$I_{yy} = \frac{m}{3}(w^2 + h^2)$$
+      $$I_{zz} = \frac{m}{3}(l^2 + w^2)$$
+
+      <p><strong>Products of Inertia</strong>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=10" target="_blank">PDF p.10</a>
+      </p>
+
+      <p>Computing $I_{xy}$:</p>
+      $$I_{xy} = \int_0^{h}\int_0^{l}\int_0^{w} xy\,\rho\,dx\,dy\,dz$$
+      $$= \int_0^{h}\int_0^{l} \frac{w^2}{2}y\,\rho\,dy\,dz$$
+      $$= \int_0^{h} \frac{w^2 l^2}{4}\,\rho\,dz$$
+      $$= \frac{m}{4}wl$$
+
+      <p>Similarly:</p>
+      $$I_{xz} = \frac{m}{4}wh$$
+      $$I_{yz} = \frac{m}{4}hl$$
+
+      <p><strong>Final Result</strong>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=11" target="_blank">PDF p.11</a>
+      </p>
+
+      $${}^{A}\boldsymbol{I} = \begin{bmatrix} \frac{m}{3}(l^2 + h^2) & -\frac{m}{4}wl & -\frac{m}{4}wh \\ -\frac{m}{4}wl & \frac{m}{3}(w^2 + h^2) & -\frac{m}{4}hl \\ -\frac{m}{4}wh & -\frac{m}{4}hl & \frac{m}{3}(l^2 + w^2) \end{bmatrix}$$
+    </div>
+
+    <!-- Enrichment: Corner vs Centroid -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Corner-Frame vs. Centroid-Frame Inertia Tensors</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>Notice the difference between the corner-frame result above and the centroidal values from Section 6.2.1:</p>
+          <table>
+            <thead><tr><th>Term</th><th>Centroid frame ($\frac{1}{12}$ factors)</th><th>Corner frame ($\frac{1}{3}$ factors)</th></tr></thead>
+            <tbody>
+              <tr><td>$I_{xx}$</td><td>$\frac{m}{12}(l^2 + h^2)$</td><td>$\frac{m}{3}(l^2 + h^2)$</td></tr>
+              <tr><td>Products of inertia</td><td>All zero (symmetry)</td><td>Non-zero ($\frac{m}{4}wl$, etc.)</td></tr>
+            </tbody>
+          </table>
+          <p>The corner-frame values are exactly what you get by applying the Parallel Axis Theorem (Section 6.3) to the centroidal values. For example, the displacement from centroid to corner is $(x_C, y_C, z_C) = (w/2, l/2, h/2)$:</p>
+          $${}^{C}I_{xx} = \frac{m}{12}(l^2 + h^2) + m\left(\frac{l^2}{4} + \frac{h^2}{4}\right) = \frac{m}{12}(l^2 + h^2) + \frac{m}{4}(l^2 + h^2) = \frac{m}{3}(l^2 + h^2)$$
+          <p>This consistency check is a useful way to verify your inertia calculations.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="mass-distribution">
+      <span class="concept-check-label">How well do you understand mass distribution and inertia tensors?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.3 PARALLEL AXIS THEOREM -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-3">6.3 Mass Distribution &mdash; Parallel Axis Theorem
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=12" target="_blank">PDF p.12</a>
+    </h2>
+
+    <p><strong><span class="tooltip-term" tabindex="0">Parallel Axis Theorem<span class="tooltip-content">A theorem that allows you to compute the inertia tensor about any point, given the inertia tensor about the center of mass and the displacement between the two points. It always increases the moment of inertia (moving the reference away from the center of mass increases inertia).<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;6.3</span></span></span></strong>: In general, inertial tensors are described with respect to a frame attached to the centroid of the body; however, sometimes it is necessary to describe the inertia tensor with respect to another reference frame. The translation of the moments and products of inertia to another reference frame is accomplished with the Parallel Axis Theorem.</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; Parallel Axis Theorem</div>
+      <p>Given frame $\{A\}$ at the centroid and frame $\{C\}$ displaced from $\{A\}$ by $(x_C, y_C, z_C)$, with both frames having the same orientation:</p>
+
+      <p><strong>Moments of Inertia:</strong></p>
+      $${}^{C}I_{xx} = {}^{A}I_{xx} + m(z_C^2 + y_C^2)$$
+      $${}^{C}I_{yy} = {}^{A}I_{yy} + m(x_C^2 + z_C^2)$$
+      $${}^{C}I_{zz} = {}^{A}I_{zz} + m(x_C^2 + y_C^2)$$
+
+      <p><strong>Products of Inertia:</strong></p>
+      $${}^{C}I_{xy} = {}^{A}I_{xy} + m\,x_C\,y_C$$
+      $${}^{C}I_{yz} = {}^{A}I_{yz} + m\,y_C\,z_C$$
+      $${}^{C}I_{xz} = {}^{A}I_{xz} + m\,x_C\,z_C$$
+    </div>
+
+    <div class="figure-desc">Parallel Axis Theorem Diagram (Ch6-12): An irregular 2D body with two coordinate frames shown. Frame $\{A\}$ is at the centroid of the body. Frame $\{C\}$ is displaced from $\{A\}$ by vector with components $(x_C, y_C, z_C)$. Both frames have identically oriented axes.</div>
+
+    <!-- Proof: Parallel Axis Theorem -->
+    <div class="collapsible">
+      <div class="collapsible-header">Proof: Parallel Axis Theorem for the Full Inertia Tensor</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+
+          <p><strong>Proof (scalar form, for $I_{xx}$):</strong></p>
+          <p>Starting from the definition:</p>
+          $${}^{C}I_{xx} = \iiint_V \left[(y + y_C)^2 + (z + z_C)^2\right]\rho\,dv$$
+          <p>Expanding:</p>
+          $$= \iiint_V \left[y^2 + 2yy_C + y_C^2 + z^2 + 2zz_C + z_C^2\right]\rho\,dv$$
+          $$= \underbrace{\iiint_V (y^2 + z^2)\rho\,dv}_{{}^{A}I_{xx}} + 2y_C\underbrace{\iiint_V y\,\rho\,dv}_{= 0} + 2z_C\underbrace{\iiint_V z\,\rho\,dv}_{= 0} + (y_C^2 + z_C^2)\underbrace{\iiint_V \rho\,dv}_{= m}$$
+          <p>The two middle integrals vanish because they are first moments about the center of mass. Therefore:</p>
+          $${}^{C}I_{xx} = {}^{A}I_{xx} + m(y_C^2 + z_C^2) \qquad \blacksquare$$
+
+          <p><strong>Proof (for products of inertia, $I_{xy}$):</strong></p>
+          $${}^{C}I_{xy} = \iiint_V (x + x_C)(y + y_C)\,\rho\,dv = \underbrace{\iiint_V xy\,\rho\,dv}_{{}^{A}I_{xy}} + x_C\underbrace{\iiint_V y\,\rho\,dv}_{= 0} + y_C\underbrace{\iiint_V x\,\rho\,dv}_{= 0} + m\,x_C\,y_C$$
+          $${}^{C}I_{xy} = {}^{A}I_{xy} + m\,x_C\,y_C \qquad \blacksquare$$
+
+          <p><strong>Compact tensor form:</strong></p>
+          $${}^{C}\boldsymbol{I} = {}^{A}\boldsymbol{I} + m\left(\boldsymbol{d}^\top\boldsymbol{d}\,\mathbf{E}_3 - \boldsymbol{d}\boldsymbol{d}^\top\right)$$
+          <p>where $\boldsymbol{d} = (x_C, y_C, z_C)^\top$ and $\mathbf{E}_3$ is the $3 \times 3$ identity matrix.</p>
+
+          <p><strong>References</strong>:</p>
+          <ul>
+            <li><a href="https://en.wikipedia.org/wiki/Parallel_axis_theorem" target="_blank">Parallel Axis Theorem &mdash; Wikipedia</a></li>
+            <li><a href="https://phys.libretexts.org/Bookshelves/Classical_Mechanics/Variational_Principles_in_Classical_Mechanics_(Cline)/13:_Rigid-body_Rotation/13.08:_Parallel-Axis_Theorem" target="_blank">Physics LibreTexts: Parallel-Axis Theorem</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.4 ROTATION TRANSFORMATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-4">6.4 Mass Distribution &mdash; Rotation Transformation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=13" target="_blank">PDF p.13</a>
+    </h2>
+
+    <p><strong>Rotation Transformation of Inertia</strong>: When two frames are not oriented in the same manner, the Rotation Transformation must be applied to transform the inertia properties from one frame to another.</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorem &mdash; Rotation Transformation of Inertia</div>
+      <p>If frame $\{A\}$ and frame $\{C\}$ share the same origin but differ in orientation, the inertia tensor transforms as:</p>
+      $$\boxed{{}^{C}\boldsymbol{I} = {}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{I}\; {}^{C}_{A}\boldsymbol{R}^\top}$$
+    </div>
+
+    <div class="figure-desc">Rotation Transformation Diagram (Ch6-13): An irregular body with two coordinate frames at the same origin but different orientations. Frame $\{A\}$ has axes $\hat{X}_A$, $\hat{Y}_A$, $\hat{Z}_A$ and frame $\{C\}$ has axes $\hat{X}_C$, $\hat{Y}_C$, $\hat{Z}_C$, rotated relative to $\{A\}$.</div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does the inertia tensor transform as $R\,I\,R^\top$?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>This transformation rule follows from how the angular momentum vector transforms. In frame $\{A\}$, the angular momentum is:</p>
+        $${}^{A}\boldsymbol{L} = {}^{A}\boldsymbol{I}\; {}^{A}\boldsymbol{\omega}$$
+        <p>To express this in frame $\{C\}$, we use ${}^{C}\boldsymbol{\omega} = {}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{\omega}$ and ${}^{C}\boldsymbol{L} = {}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{L}$:</p>
+        $${}^{C}\boldsymbol{L} = {}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{I}\; {}^{A}\boldsymbol{\omega} = {}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{I}\; \left({}^{C}_{A}\boldsymbol{R}^\top\; {}^{C}\boldsymbol{\omega}\right) = \left({}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{I}\; {}^{C}_{A}\boldsymbol{R}^\top\right) {}^{C}\boldsymbol{\omega}$$
+        <p>Comparing with ${}^{C}\boldsymbol{L} = {}^{C}\boldsymbol{I}\; {}^{C}\boldsymbol{\omega}$ gives ${}^{C}\boldsymbol{I} = {}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{I}\; {}^{C}_{A}\boldsymbol{R}^\top$. This is a "congruence transformation" that preserves symmetry and positive-definiteness.</p>
+        <p><strong>Important for robotics:</strong> In the Newton-Euler algorithm, the inertia tensor of each link is typically known in the link's own frame (${}^{G_i}\boldsymbol{I}_i$). The rotation transformation is used to express it in the base frame or in a neighboring link's frame as needed.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;6.3</div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="inertia-transforms">
+      <span class="concept-check-label">How well do you understand parallel axis theorem and rotation transformation?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.5 ACCELERATION OF A RIGID BODY -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-5">6.5 Acceleration of a Rigid Body
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=14" target="_blank">PDF p.14</a>
+    </h2>
+
+    <p>The absolute velocity of a rigid body in space can be found as the time derivative of the position vector. The linear acceleration is the second derivative.</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Theorems &mdash; Position, Velocity, and Acceleration</div>
+
+      <p><strong>Position</strong>:</p>
+      $${}^{A}\boldsymbol{P}_P = {}^{A}\boldsymbol{P}_{O_B} + {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{P}_P$$
+
+      <p><strong>Velocity</strong>:</p>
+      $${}^{A}\boldsymbol{V}_P = {}^{A}\boldsymbol{V}_{O_B} + {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{V}_P + {}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{P}_P$$
+
+      <p><strong>Linear Acceleration</strong> (five-term formula):</p>
+      $${}^{A}\boldsymbol{a}_P = \underbrace{{}^{A}\boldsymbol{a}_{O_B}}_{\text{Abs. accel. of } O_B} + \underbrace{{}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{a}_P}_{\text{Sliding accel.}} + \underbrace{2\,{}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{V}_P}_{\text{Coriolis accel.}} + \underbrace{{}^{A}\dot{\boldsymbol{\Omega}}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{P}_P}_{\text{Tangential accel.}} + \underbrace{{}^{A}\boldsymbol{\Omega}_B \times ({}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{P}_P)}_{\text{Centripetal accel.}}$$
+    </div>
+
+    <div class="figure-desc">Two-Frame Acceleration Diagram (Ch6-14): Two coordinate frames $\{A\}$ and $\{B\}$ in 3D space. Frame $\{A\}$ at origin $O_A$, frame $\{B\}$ at origin $O_B$. A point $P$ is shown with position vectors from each origin.</div>
+
+    <h3 id="sec-6-5-1">6.5.1 Angular Velocity and Angular Acceleration
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=15" target="_blank">PDF p.15</a>
+    </h3>
+
+    <p>For the angular velocity, consider the case that frame $\{B\}$ is rotating relative to $\{A\}$ with angular velocity ${}^{A}\boldsymbol{\Omega}_B$ and frame $\{C\}$ is rotating relative to $\{B\}$ with ${}^{B}\boldsymbol{\Omega}_C$:</p>
+
+    $${}^{A}\boldsymbol{\Omega}_C = {}^{A}\boldsymbol{\Omega}_B + {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{\Omega}_C$$
+
+    <p>The angular acceleration is determined by taking the time derivative:</p>
+
+    $${}^{A}\dot{\boldsymbol{\Omega}}_C = {}^{A}\dot{\boldsymbol{\Omega}}_B + {}^{A}_{B}\boldsymbol{R}\; {}^{B}\dot{\boldsymbol{\Omega}}_C + {}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{\Omega}_C$$
+
+    <!-- Enrichment: Five-Term Acceleration -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: The Five-Term Acceleration Formula &mdash; Physical Meaning of Each Term</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <ol>
+            <li><strong>Absolute acceleration of $O_B$</strong> (${}^{A}\boldsymbol{a}_{O_B}$): The acceleration of the origin of the moving frame. Even if nothing is happening on the body itself, the fact that the body's reference point is accelerating contributes to the acceleration of every point on the body.</li>
+            <li><strong>Sliding acceleration</strong> (${}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{a}_P$): The acceleration of point $P$ as seen from within the moving frame. This is non-zero only if $P$ is moving relative to the body (e.g., a prismatic joint).</li>
+            <li><strong>Coriolis acceleration</strong> ($2\,{}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{V}_P$): Arises from the interaction between the body's rotation and the point's velocity within the body. The factor of 2 arises from the product rule in differentiation. This term is only non-zero for prismatic joints.</li>
+            <li><strong>Tangential acceleration</strong> (${}^{A}\dot{\boldsymbol{\Omega}}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{P}_P$): Due to the angular acceleration of the body. This component is tangent to the circular path and is responsible for speeding up or slowing down the rotation.</li>
+            <li><strong>Centripetal acceleration</strong> (${}^{A}\boldsymbol{\Omega}_B \times ({}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{P}_P)$): Points radially inward toward the axis of rotation. Even at constant angular velocity, every point on a rotating body experiences this inward acceleration ($\omega^2 r$).</li>
+          </ol>
+          <p><strong>For revolute joints in robotics</strong>, terms 2 and 3 vanish (the point is fixed on the body), leaving only terms 1, 4, and 5. <strong>For prismatic joints</strong>, all five terms are present.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz 2: Acceleration Terms -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>For a robot with only revolute joints, which acceleration terms vanish in the five-term formula?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Centripetal and tangential acceleration</button>
+        <button class="quiz-option" data-correct="true">Sliding acceleration and Coriolis acceleration</button>
+        <button class="quiz-option" data-correct="false">Absolute acceleration and centripetal acceleration</button>
+        <button class="quiz-option" data-correct="false">None &mdash; all five terms are always present</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! For revolute joints, the point is fixed on the body, so ${}^{B}\boldsymbol{V}_P = 0$ and ${}^{B}\boldsymbol{a}_P = 0$. This eliminates the sliding and Coriolis terms." data-incorrect="For revolute joints, the point does not slide relative to the link, so the sliding velocity ${}^{B}\boldsymbol{V}_P$ and sliding acceleration ${}^{B}\boldsymbol{a}_P$ are both zero, eliminating those two terms."></div>
+    </div>
+
+    <div class="concept-check" data-concept="rigid-body-acceleration">
+      <span class="concept-check-label">How well do you understand rigid body acceleration?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.6 NEWTON'S AND EULER'S EQUATIONS -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-6">6.6 Newton's Equation and Euler's Equation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=16" target="_blank">PDF p.16</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <p><strong>Newton's Equation</strong>: The desired linear acceleration ($\dot{\boldsymbol{v}}_G$) of a link with mass $m$ is caused by force $\boldsymbol{F}$:</p>
+      $$\boldsymbol{F} = m\,\dot{\boldsymbol{v}}_G$$
+
+      <p><strong>Euler's Equation</strong>: The desired angular acceleration of a rigid body is caused by an inertial moment:</p>
+      $$\boldsymbol{N} = {}^{G}\boldsymbol{I}\,\dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times {}^{G}\boldsymbol{I}\,\boldsymbol{\omega}$$
+      <p>where ${}^{G}\boldsymbol{I}$ is the inertia tensor written in terms of frame $\{G\}$, $\boldsymbol{\omega}$ and $\dot{\boldsymbol{\omega}}$ are the angular velocity and angular acceleration respectively, and $\boldsymbol{N}$ represents the moment.</p>
+    </div>
+
+    <div class="figure-desc">Newton's Equation Diagram (Ch6-16, top): A point $G$ (center of mass) on a link has a force vector $\boldsymbol{F}$ applied at $G$ and a linear acceleration vector $\dot{v}_G$ pointing outward from $G$.</div>
+    <div class="figure-desc">Euler's Equation Diagram (Ch6-16, bottom): A manipulator link segment with center of mass $G$. Angular velocity $\boldsymbol{\omega}$ and angular acceleration $\dot{\boldsymbol{\omega}}$ vectors are shown at $G$, along with applied moment $\boldsymbol{N}$.</div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does Euler's equation have the extra $\omega \times I\omega$ term?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>This term is the <em>gyroscopic torque</em>. Even if there is zero angular acceleration ($\dot{\boldsymbol{\omega}} = 0$), a rotating body with a non-diagonal inertia tensor (or rotation about a non-principal axis) requires an applied torque to maintain constant angular velocity.</p>
+        <p>The derivation starts from $\boldsymbol{N} = d\boldsymbol{L}/dt$ where $\boldsymbol{L} = \boldsymbol{I}\boldsymbol{\omega}$. Taking the derivative in the body-fixed frame (where $\boldsymbol{I}$ is constant) using the rotating-frame derivative rule:</p>
+        $$\left.\frac{d\boldsymbol{A}}{dt}\right|_{\text{inertial}} = \left.\frac{d\boldsymbol{A}}{dt}\right|_{\text{body}} + \boldsymbol{\omega} \times \boldsymbol{A}$$
+        <p>yields $\boldsymbol{N} = {}^{G}\boldsymbol{I}\,\dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times {}^{G}\boldsymbol{I}\,\boldsymbol{\omega}$. This is why a spinning top precesses and why a rotating satellite can tumble.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, &sect;6.4 &middot; <a href="https://en.wikipedia.org/wiki/Euler%27s_equations_(rigid_body_dynamics)" target="_blank">Wikipedia &mdash; Euler's equations</a></div>
+      </div></div>
+    </div>
+
+    <!-- Proof: Euler's Equation -->
+    <div class="collapsible">
+      <div class="collapsible-header">Proof: Derivation of Euler's Equation for Rigid Body Rotation</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+          <p><strong>Starting point:</strong> Euler's second law states that the net external torque about the center of mass equals the time derivative of the angular momentum:</p>
+          $$\boldsymbol{N} = \frac{d\boldsymbol{L}}{dt} \quad \text{where} \quad \boldsymbol{L} = \boldsymbol{I}\,\boldsymbol{\omega}$$
+          <p><strong>The key subtlety:</strong> If we compute $d\boldsymbol{L}/dt$ in the inertial frame, we get $\boldsymbol{N} = \dot{\boldsymbol{I}}\,\boldsymbol{\omega} + \boldsymbol{I}\,\dot{\boldsymbol{\omega}}$, but $\boldsymbol{I}$ expressed in the inertial frame changes with time as the body rotates, making $\dot{\boldsymbol{I}}$ complicated.</p>
+          <p><strong>The trick:</strong> Express everything in the body-fixed frame where $\boldsymbol{I}$ is constant. Applying the rotating-frame derivative to $\boldsymbol{L} = {}^{G}\boldsymbol{I}\,\boldsymbol{\omega}$:</p>
+          $$\boldsymbol{N} = \frac{d}{dt}\left({}^{G}\boldsymbol{I}\,\boldsymbol{\omega}\right)\bigg|_{\text{body}} + \boldsymbol{\omega} \times {}^{G}\boldsymbol{I}\,\boldsymbol{\omega}$$
+          <p>Since ${}^{G}\boldsymbol{I}$ is constant in the body frame:</p>
+          $$\boldsymbol{N} = {}^{G}\boldsymbol{I}\,\dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times {}^{G}\boldsymbol{I}\,\boldsymbol{\omega} \qquad \blacksquare$$
+          <p><strong>In component form</strong> (along principal axes where $\boldsymbol{I}$ is diagonal):</p>
+          $$N_1 = I_1 \dot{\omega}_1 - (I_2 - I_3)\omega_2 \omega_3$$
+          $$N_2 = I_2 \dot{\omega}_2 - (I_3 - I_1)\omega_3 \omega_1$$
+          $$N_3 = I_3 \dot{\omega}_3 - (I_1 - I_2)\omega_1 \omega_2$$
+          <p><strong>References</strong>:</p>
+          <ul>
+            <li><a href="https://en.wikipedia.org/wiki/Euler%27s_equations_(rigid_body_dynamics)" target="_blank">Euler's Equations &mdash; Wikipedia</a></li>
+            <li><a href="https://ocw.mit.edu/courses/16-07-dynamics-fall-2009/5e1d8699338146e5127080b880b906d6_MIT16_07F09_Lec28.pdf" target="_blank">MIT OCW Lecture 28: Euler's Equations (PDF)</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Video -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Video &mdash; Dynamics of a Single Rigid Body (Modern Robotics)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video</div>
+          <ul>
+            <li><strong>Part 1</strong>: <a href="https://youtu.be/9pdqePt1Nbg" target="_blank">youtu.be/9pdqePt1Nbg</a> &mdash; Covers the wrench-acceleration relationship for a single rigid body</li>
+            <li><strong>Part 2</strong>: <a href="https://youtu.be/2rUWVdslaI4" target="_blank">youtu.be/2rUWVdslaI4</a> &mdash; Continues with the rotational dynamics and the $\omega \times I\omega$ term</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.7 ITERATIVE NEWTON-EULER FORMULATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-7">6.7 Iterative Newton-Euler Dynamic Formulation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=17" target="_blank">PDF p.17</a>
+    </h2>
+
+    <p>The Newton-Euler formulation is a <strong>recursive iteration process</strong>. The velocity and acceleration of the links are determined based on their propagation along the manipulator (base to end-effector). Then, a balance of forces (Newton) and moments (Euler) is performed at each link. An actuator must apply a force/torque to balance forces that act on links that follow the joints (end-effector to base).</p>
+
+    <div class="figure-desc">Newton-Euler Overview Diagram (Ch6-17): A multi-jointed robot arm is shown. An arrow curving from the base toward the end-effector is labeled "Velocity Propagation" (outward direction). An arrow pointing from the end-effector back toward the base is labeled "Balance of Forces and Moments" (inward direction). A downward arrow at the base is labeled "Gravity".</div>
+
+    <h3 id="sec-6-7-1">6.7.1 Outward and Inward Iterations
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=18" target="_blank">PDF p.18</a>
+    </h3>
+
+    <p><strong>Outward Iteration</strong>: Compute the angular velocity, angular acceleration, linear velocity, linear acceleration, and the inertial forces and moments of each link in terms of its preceding link. This process is repeated from $i = 0$ to $i = n - 1$, where $n$ is the number of joints. Set the initial velocity and acceleration values to zero, except for the acceleration of the base which will incorporate gravity.</p>
+
+    <p><strong>Inward Iteration</strong>: Perform the balance of forces and moments about the joints. This process is repeated from $i = n$ to $i = 1$, where $n$ is the number of joints. Set the initial force and moment at $i = n$ (frame $n+1$) to be the external forces and moments being applied to the end-effector.</p>
+
+    <!-- Step-by-step: Newton-Euler Outward Iteration -->
+    <h3 id="sec-6-7-2">6.7.2 Outward Iterations &mdash; Velocities and Accelerations
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=19" target="_blank">PDF p.19</a>
+    </h3>
+
+    <p>This iteration starts with link frame $\{1\}$ and moves successively link by link until link frame $\{n\}$, for $i = 0 \to n-1$.</p>
+
+    <div class="derivation-steps" id="deriv-ch6-outward">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Angular Velocity Propagation</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=19" target="_blank">PDF p.19</a>
+        <p><strong>Revolute joint:</strong></p>
+        $${}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\; {}^{i}\boldsymbol{\omega}_i + \dot{\theta}_{i+1}\; {}^{i+1}\hat{Z}_{i+1}$$
+        <p><strong>Prismatic joint:</strong></p>
+        $${}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\; {}^{i}\boldsymbol{\omega}_i$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Angular Acceleration Propagation</div>
+        <p><strong>Revolute joint:</strong></p>
+        $${}^{i+1}\dot{\boldsymbol{\omega}}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\; {}^{i}\dot{\boldsymbol{\omega}}_i + {}^{i+1}_{i}\boldsymbol{R}\; {}^{i}\boldsymbol{\omega}_i \times \dot{\theta}_{i+1}\; {}^{i+1}\hat{Z}_{i+1} + \ddot{\theta}_{i+1}\; {}^{i+1}\hat{Z}_{i+1}$$
+        <p><strong>Prismatic joint:</strong></p>
+        $${}^{i+1}\dot{\boldsymbol{\omega}}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\; {}^{i}\dot{\boldsymbol{\omega}}_i$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Linear Acceleration Propagation</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=20" target="_blank">PDF p.20</a>
+        <p><strong>Revolute joint:</strong></p>
+        $${}^{i+1}\dot{\boldsymbol{v}}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\left({}^{i}\dot{\boldsymbol{\omega}}_i \times {}^{i}\boldsymbol{P}_{i+1} + {}^{i}\boldsymbol{\omega}_i \times ({}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{i+1}) + {}^{i}\dot{\boldsymbol{v}}_i\right)$$
+        <p><strong>Prismatic joint:</strong></p>
+        $${}^{i+1}\dot{\boldsymbol{v}}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\left({}^{i}\dot{\boldsymbol{\omega}}_i \times {}^{i}\boldsymbol{P}_{i+1} + {}^{i}\boldsymbol{\omega}_i \times ({}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{i+1}) + {}^{i}\dot{\boldsymbol{v}}_i\right) + 2\,{}^{i+1}\boldsymbol{\omega}_{i+1} \times \dot{d}_{i+1}\; {}^{i+1}\hat{Z}_{i+1} + \ddot{d}_{i+1}\; {}^{i+1}\hat{Z}_{i+1}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Center of Mass Acceleration and Inertial Forces/Moments</div>
+        <p><strong>Linear acceleration of the center of mass</strong> (either joint type):</p>
+        $${}^{i}\dot{\boldsymbol{v}}_{G_i} = {}^{i}\dot{\boldsymbol{\omega}}_i \times {}^{i}\boldsymbol{P}_{G_i} + {}^{i}\boldsymbol{\omega}_i \times ({}^{i}\boldsymbol{\omega}_i \times {}^{i}\boldsymbol{P}_{G_i}) + {}^{i}\dot{\boldsymbol{v}}_i$$
+        <p><strong>Inertial force acting on link</strong> (either joint type):</p>
+        $${}^{i}\boldsymbol{F}_i = m_i\; {}^{i}\dot{\boldsymbol{v}}_{G_i}$$
+        <p><strong>Inertial moment acting on link</strong> (either joint type):</p>
+        $${}^{i}\boldsymbol{N}_i = {}^{G_i}\boldsymbol{I}_i\; {}^{i}\dot{\boldsymbol{\omega}}_i + {}^{i}\boldsymbol{\omega}_i \times {}^{G_i}\boldsymbol{I}_i\; {}^{i}\boldsymbol{\omega}_i$$
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous Step</button>
+        <span class="step-counter">Step 1 of 4</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <h3 id="sec-6-7-3">6.7.3 Inward Iterations &mdash; Forces and Torques
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=22" target="_blank">PDF p.22</a>
+    </h3>
+
+    <p>Once the forces and moments acting at the centre of mass of the links that cause the desired motion are found, the joint torque or force can be evaluated with the following equations of balance.</p>
+
+    <div class="figure-desc">Free Body Diagram of Link $i$ (Ch6-22): A curved link segment labeled $\{i\}$ with its center of mass. At the proximal end, force $\boldsymbol{f}_i$ and moment $\boldsymbol{n}_i$ act on the link. At the distal end, force $\boldsymbol{f}_{i+1}$ and moment $\boldsymbol{n}_{i+1}$ from the following link (reaction forces). The inertial force $\boldsymbol{F}_i$ and moment $\boldsymbol{N}_i$ act at the center of mass.</div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Balance Equations</div>
+      <p>Force balance:</p>
+      $${}^{i}\boldsymbol{F}_i = {}^{i}\boldsymbol{f}_i - {}^{i}_{i+1}\boldsymbol{R}\; {}^{i+1}\boldsymbol{f}_{i+1}$$
+      <p>Moment balance:</p>
+      $${}^{i}\boldsymbol{N}_i = {}^{i}\boldsymbol{n}_i - {}^{i}\boldsymbol{n}_{i+1} + {}^{i}\boldsymbol{P}_{G_i} \times {}^{i}\boldsymbol{f}_i + ({}^{i}\boldsymbol{P}_{i+1} - {}^{i}\boldsymbol{P}_{G_i}) \times {}^{i}\boldsymbol{f}_{i+1}$$
+      <p>where $\boldsymbol{f}_i$ is the force exerted on link $i$ by link $i-1$, and $\boldsymbol{n}_i$ is the torque exerted on link $i$ by link $i-1$.</p>
+    </div>
+
+    <!-- Step-by-step: Newton-Euler Inward Iteration -->
+    <div class="derivation-steps" id="deriv-ch6-inward">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Initialize End-Effector</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=23" target="_blank">PDF p.23</a>
+        <p>This iteration starts with link frame $\{n\}$ and moves to link frame $\{1\}$, for $i = n \to 1$.</p>
+        <p>The forces and moments exerted on the last link ${}^{n+1}\boldsymbol{f}_{n+1}$ and ${}^{n+1}\boldsymbol{n}_{n+1}$ are related to external forces (zero if the robot moves in free space).</p>
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Joint Reaction Forces and Moments</div>
+        <p><strong>Force exerted on link $i$</strong> (either joint type):</p>
+        $${}^{i}\boldsymbol{f}_i = {}^{i}\boldsymbol{F}_i + {}^{i}_{i+1}\boldsymbol{R}\; {}^{i+1}\boldsymbol{f}_{i+1}$$
+        <p><strong>Moment exerted on link $i$</strong> (either joint type):</p>
+        $${}^{i}\boldsymbol{n}_i = {}^{i}\boldsymbol{N}_i + {}^{i}_{i+1}\boldsymbol{R}\; {}^{i+1}\boldsymbol{n}_{i+1} + {}^{i}\boldsymbol{P}_{G_i} \times {}^{i}\boldsymbol{F}_i + {}^{i}\boldsymbol{P}_{i+1} \times {}^{i}_{i+1}\boldsymbol{R}\; {}^{i+1}\boldsymbol{f}_{i+1}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Extract Joint Torques/Forces</div>
+        <p><strong>Required torques/forces</strong> are applied in the $z$-direction:</p>
+        <p>Revolute joint $i$ (torque):</p>
+        $$\tau_i = {}^{i}\boldsymbol{n}_i^\top\; {}^{i}\hat{Z}_i$$
+        <p>Prismatic joint $i$ (force):</p>
+        $$\tau_i = {}^{i}\boldsymbol{f}_i^\top\; {}^{i}\hat{Z}_i$$
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous Step</button>
+        <span class="step-counter">Step 1 of 3</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <h3 id="sec-6-7-4">6.7.4 Inclusion of Gravity Forces
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=24" target="_blank">PDF p.24</a>
+    </h3>
+
+    <p>The effect of gravity loading on the links can be included by setting:</p>
+    $${}^{i=0}\dot{\boldsymbol{v}}_{i=0} = \boldsymbol{G}$$
+    <p>where $\boldsymbol{G}$ has the magnitude of the gravity vector, but points in the <strong>opposite direction</strong>.</p>
+    <p>This is equivalent to saying that the base of the robot is accelerating upward with $1g$ acceleration. This fictitious upward acceleration causes the same effect on the links as gravity would &mdash; no extra computation is needed for including gravity effects.</p>
+
+    <!-- Enrichment: Gravity Trick -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: The "Gravity Trick" in Newton-Euler</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>The equivalence principle at work:</strong> Einstein's equivalence principle states that gravitational acceleration is locally indistinguishable from being in an accelerating reference frame. The Newton-Euler algorithm exploits this: rather than adding a $m_i \boldsymbol{g}$ force to every link individually, we pretend the base is accelerating upward at $9.81 \text{ m/s}^2$.</p>
+          <p><strong>Why this is useful:</strong></p>
+          <ul>
+            <li>It requires <strong>zero additional computation</strong> &mdash; gravity is handled automatically</li>
+            <li>No special gravity terms need to be added to any equation</li>
+            <li>The algorithm structure remains identical whether gravity is present or not</li>
+          </ul>
+          <p><strong>Practical implementation:</strong> If gravity points in the $-Z_0$ direction:</p>
+          $${}^{0}\dot{\boldsymbol{v}}_0 = \begin{bmatrix} 0 \\ 0 \\ +9.81 \end{bmatrix} \text{ m/s}^2$$
+          <p>Note the <strong>positive</strong> sign &mdash; the base "accelerates upward" (opposite to gravity).</p>
+          <p><strong>Reference</strong>: <a href="https://scaron.info/robotics/newton-euler-equations.html" target="_blank">Newton-Euler Equations &mdash; scaron.info</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Video -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Video &mdash; Newton-Euler Inverse Dynamics (Modern Robotics)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video</div>
+          <p>This video walks through the complete recursive Newton-Euler algorithm step by step:</p>
+          <ul>
+            <li><strong>Newton-Euler Inverse Dynamics</strong>: <a href="https://youtu.be/ZASVKAlegfQ" target="_blank">youtu.be/ZASVKAlegfQ</a> (~6 min)</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Why Link's Own Frame -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Why All Quantities Are Expressed in the Link's Own Frame</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>The leading superscript $i$ in ${}^{i}\boldsymbol{\omega}_i$, ${}^{i}\boldsymbol{F}_i$, etc. means "expressed in frame $\{i\}$."</p>
+          <p><strong>Why use each link's own frame?</strong></p>
+          <ol>
+            <li><strong>The inertia tensor is constant in the body frame.</strong> Since ${}^{G_i}\boldsymbol{I}_i$ is defined with respect to the link's center of mass frame, it never changes during motion. If we expressed everything in the base frame, we would need to recompute ${}^{0}\boldsymbol{I}_i = {}^{0}_i\boldsymbol{R}\; {}^{G_i}\boldsymbol{I}_i\; {}^{0}_i\boldsymbol{R}^\top$ at every time step.</li>
+            <li><strong>Computational efficiency.</strong> Expressing quantities in adjacent link frames means the rotation matrix ${}^{i+1}_i\boldsymbol{R}$ (from DH parameters) is all that is needed. No full base-to-link rotation needed.</li>
+          </ol>
+          <p>This frame choice is a key reason the recursive Newton-Euler algorithm achieves $O(n)$ computational complexity (linear in the number of joints), making it the preferred method for real-time control.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz 3: Newton-Euler -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>In the Newton-Euler formulation, gravity is included by:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Adding $m_i \boldsymbol{g}$ to the force on each link individually</button>
+        <button class="quiz-option" data-correct="false">Subtracting $\boldsymbol{g}$ from every link's linear acceleration</button>
+        <button class="quiz-option" data-correct="true">Setting the base frame's linear acceleration to $-\boldsymbol{g}$ (opposite to gravity)</button>
+        <button class="quiz-option" data-correct="false">Including gravity only in the inward iteration as an external force</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! Setting ${}^{0}\dot{v}_0 = -\boldsymbol{g}$ (i.e., pointing upward) is equivalent to the base accelerating upward. This fictitious acceleration propagates through the outward iteration and produces exactly the same effect as real gravity on every link." data-incorrect="The Newton-Euler algorithm uses a clever trick: setting the base acceleration to $-\boldsymbol{g}$ (opposite to gravity direction). This avoids adding gravity forces to each link separately."></div>
+    </div>
+
+    <div class="concept-check" data-concept="newton-euler">
+      <span class="concept-check-label">How well do you understand the Newton-Euler formulation?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6.8 LAGRANGIAN FORMULATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-6-8">6.8 Lagrangian Formulation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=25" target="_blank">PDF p.25</a>
+    </h2>
+
+    <p>Whereas the Newton-Euler formulation is based on a "force-balance" approach, the <strong>Lagrangian Formulation</strong> is based on an "energy balance" approach.</p>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Lagrangian Function<span class="tooltip-content">The difference between kinetic and potential energy of a mechanical system: $\mathcal{L} = k - u$. The Lagrangian encodes all the dynamics of a conservative system and is the starting point for deriving the equations of motion via Lagrange's equations.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, &sect;6.6</span></span></span></strong>: The Lagrangian function $\mathcal{L}$ is defined as the difference between the kinetic and potential energy of a mechanical system:</p>
+      $$\mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}}) = k(\boldsymbol{q}, \dot{\boldsymbol{q}}) - u(\boldsymbol{q})$$
+
+      <p><strong>Lagrange's Equations of Motion</strong>: Formulated in terms of the Lagrangian function:</p>
+      $$\frac{d}{dt}\left(\frac{\partial \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}})}{\partial \dot{\boldsymbol{q}}}\right) - \frac{\partial \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}})}{\partial \boldsymbol{q}_i} = \boldsymbol{Q}_i$$
+      <p>where $\boldsymbol{Q}_i$ is a generalized force (e.g., torque, external force, etc.).</p>
+    </div>
+
+    <h3 id="sec-6-8-1">6.8.1 Kinetic Energy
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=26" target="_blank">PDF p.26</a>
+    </h3>
+
+    <p>The kinetic energy of the $i$-th link in terms of the inertial reference frame can be expressed as:</p>
+    $$k_i = \frac{1}{2}\; {}^{0}\boldsymbol{v}_{G_i}^\top m_i\; {}^{0}\boldsymbol{v}_{G_i} + \frac{1}{2}\; {}^{0}\boldsymbol{\omega}_i^\top\; {}^{0}\boldsymbol{I}_i\; {}^{0}\boldsymbol{\omega}_i$$
+
+    <p>where ${}^{0}\boldsymbol{I}_i$ is the inertia tensor of link $\{i\}$ referred to frame $\{0\}$. Since ${}^{G_i}\boldsymbol{I}_i$ (described with respect to centre of mass) is known, the rotation transformation must be applied:</p>
+    $${}^{0}\boldsymbol{I}_i = {}^{0}_{i}\boldsymbol{R}\; {}^{G_i}\boldsymbol{I}_i\; {}^{0}_{i}\boldsymbol{R}^\top$$
+
+    <p>Given that the links are moving, ${}^{0}_{i}\boldsymbol{R}$ is changing and therefore the inertia ${}^{0}\boldsymbol{I}_i$ will be constantly changing.</p>
+
+    <!-- Derivation: Kinetic Energy via Jacobians -->
+    <h3>Kinetic Energy via Jacobians
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=27" target="_blank">PDF p.27</a>
+    </h3>
+
+    <div class="derivation-steps" id="deriv-ch6-lagrange-ke">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Express velocities via Jacobians</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=27" target="_blank">PDF p.27</a>
+        <p>The velocity of the centre of mass ${}^{0}\boldsymbol{v}_{G_i}$ and the angular velocity ${}^{0}\boldsymbol{\omega}_i$ of link $i$ can be found using the forward velocity problem:</p>
+        $${}^{0}\boldsymbol{V}_{G_i} = \begin{bmatrix} {}^{0}\boldsymbol{v}_{G_i} \\ {}^{0}\boldsymbol{\omega}_i \end{bmatrix} = {}^{0}\boldsymbol{J}_{G_i}\,\dot{\boldsymbol{q}}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Expand the Jacobian structure</div>
+        $$\begin{bmatrix} {}^{0}\boldsymbol{v}_{G_i} \\ {}^{0}\boldsymbol{\omega}_i \end{bmatrix} = \begin{bmatrix} {}^{0}\boldsymbol{J}_{V_{Gi}}^{(1)} & {}^{0}\boldsymbol{J}_{V_{Gi}}^{(2)} & \cdots & {}^{0}\boldsymbol{J}_{V_{Gi}}^{(i)} & \boldsymbol{0} & \cdots & \boldsymbol{0} \\ {}^{0}\boldsymbol{J}_{\omega_i}^{(1)} & {}^{0}\boldsymbol{J}_{\omega_i}^{(2)} & \cdots & {}^{0}\boldsymbol{J}_{\omega_i}^{(i)} & \boldsymbol{0} & \cdots & \boldsymbol{0} \end{bmatrix} \begin{bmatrix} \dot{q}_1 \\ \dot{q}_2 \\ \vdots \\ \dot{q}_i \\ \dot{q}_{i+1} \\ \vdots \\ \dot{q}_n \end{bmatrix}$$
+        <p>The velocity of link $i$ is not affected by the joints that follow the link. Only joints that precede link $i$ affect its velocity.</p>
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Jacobian column formulas</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=28" target="_blank">PDF p.28</a>
+        $${}^{0}\boldsymbol{J}_{V_{Gi}}^{(i)} = \begin{cases} {}^{0}\hat{Z}_i \times {}^{0}\boldsymbol{P}_{i \to G_i} = \dfrac{\partial\; {}^{0}\boldsymbol{P}_{G_i}}{\partial \theta_i} & \text{Revolute Joint} \\[6pt] {}^{0}\hat{Z}_j = \dfrac{\partial\; {}^{0}\boldsymbol{P}_{G_i}}{\partial d_j} & \text{Prismatic Joint} \end{cases}$$
+        $${}^{0}\boldsymbol{J}_{\omega_i}^{(i)} = \begin{cases} {}^{0}\hat{Z}_i & \text{Revolute Joint} \\ \boldsymbol{0}_{3 \times 1} & \text{Prismatic Joint} \end{cases}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Total kinetic energy in Jacobian form</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=29" target="_blank">PDF p.29</a>
+        $$k = \frac{1}{2}\sum_{i=1}^{n}\left({}^{0}\boldsymbol{v}_{G_i}^\top m_i\; {}^{0}\boldsymbol{v}_{G_i} + {}^{0}\boldsymbol{\omega}_i^\top\; {}^{0}\boldsymbol{I}_i\; {}^{0}\boldsymbol{\omega}_i\right)$$
+        $$= \frac{1}{2}\sum_{i=1}^{n}\left(({}^{0}\boldsymbol{J}_{V_{Gi}}\dot{\boldsymbol{q}})^\top m_i\; {}^{0}\boldsymbol{J}_{V_{Gi}}\dot{\boldsymbol{q}} + ({}^{0}\boldsymbol{J}_{\omega_i}\dot{\boldsymbol{q}})^\top\; {}^{0}\boldsymbol{I}_i\; {}^{0}\boldsymbol{J}_{\omega_i}\dot{\boldsymbol{q}}\right)$$
+        $$= \frac{1}{2}\dot{\boldsymbol{q}}^\top \left(\sum_{i=1}^{n} {}^{0}\boldsymbol{J}_{V_{Gi}}^\top m_i\; {}^{0}\boldsymbol{J}_{V_{Gi}} + {}^{0}\boldsymbol{J}_{\omega_i}^\top\; {}^{0}\boldsymbol{I}_i\; {}^{0}\boldsymbol{J}_{\omega_i}\right)\dot{\boldsymbol{q}}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 5: Compact form with Mass Matrix</div>
+        $$k = \frac{1}{2}\dot{\boldsymbol{q}}^\top \boldsymbol{M}\,\dot{\boldsymbol{q}}$$
+        <p>where the <strong>Mass Matrix</strong> is:</p>
+        $$\boxed{\boldsymbol{M} = \sum_{i=1}^{n}\left({}^{0}\boldsymbol{J}_{V_{Gi}}^\top m_i\; {}^{0}\boldsymbol{J}_{V_{Gi}} + {}^{0}\boldsymbol{J}_{\omega_i}^\top\; {}^{0}\boldsymbol{I}_i\; {}^{0}\boldsymbol{J}_{\omega_i}\right)}$$
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous Step</button>
+        <span class="step-counter">Step 1 of 5</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <h3 id="sec-6-8-2">6.8.2 Potential Energy
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=30" target="_blank">PDF p.30</a>
+    </h3>
+
+    <p>The potential energy stored in link $i$ is defined as the amount of work required to raise the centre of mass of link $i$ from a horizontal reference plane to its present position under the influence of gravity:</p>
+    $$u = -\sum_{i=1}^{n} m_i\,\boldsymbol{g}^\top\; {}^{0}\boldsymbol{P}_{G_i}$$
+
+    <h3 id="sec-6-8-3">6.8.3 Generalized Forces
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=30" target="_blank">PDF p.30</a>
+    </h3>
+
+    <p>The generalized forces are those forces that act on the manipulator: torques, external forces, friction, etc.</p>
+    $$\boldsymbol{Q} = \boldsymbol{\tau} - \boldsymbol{J}^\top \boldsymbol{F} - \boldsymbol{f}_r$$
+
+    <h3 id="sec-6-8-4">6.8.4 General Form of the Dynamic Equation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=31" target="_blank">PDF p.31</a>
+    </h3>
+
+    <p>Starting from Lagrange's equation:</p>
+    $$\frac{d}{dt}\left(\frac{\partial \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}})}{\partial \dot{\boldsymbol{q}}}\right) - \frac{\partial \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}})}{\partial \boldsymbol{q}_i} = \boldsymbol{Q}_i \qquad \text{with} \qquad \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}}) = k(\boldsymbol{q}, \dot{\boldsymbol{q}}) - u(\boldsymbol{q})$$
+
+    <p>The differentiation of the Lagrangian equation yields:</p>
+    $$\sum_{j=1}^{n} \boldsymbol{M}_{ij}\,\ddot{q}_j + \boldsymbol{V}_i + \boldsymbol{G}_i = \boldsymbol{Q}_i$$
+
+    <p>where $\boldsymbol{M}_{ij}$ is a mass matrix element, and:</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Dynamic Equation Terms</div>
+      <p><strong>Velocity coupling term</strong> (centrifugal and Coriolis):</p>
+      $$\boldsymbol{V}_i = \sum_{j=1}^{n}\sum_{k=1}^{n}\left(\frac{\partial \boldsymbol{M}_{ij}}{\partial q_k} - \frac{1}{2}\frac{\partial \boldsymbol{M}_{jk}}{\partial q_i}\right)\dot{q}_j\,\dot{q}_k$$
+
+      <p><strong>Gravity term</strong>:</p>
+      $$\boldsymbol{G}_i = \sum_{j=1}^{n} m_j\,\boldsymbol{g}^\top\; {}^{0}\boldsymbol{J}_{V_{Gj}}^{(i)}$$
+
+      <p><strong>Final compact form</strong>:</p>
+      $$\boxed{\boldsymbol{\tau} = \boldsymbol{M}(\boldsymbol{\Theta})\ddot{\boldsymbol{\Theta}} + \boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}) + \boldsymbol{G}(\boldsymbol{\Theta})}$$
+    </div>
+
+    <h3 id="sec-6-8-5">6.8.5 Kinetic Energy (Alternative Form)
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=32" target="_blank">PDF p.32</a>
+    </h3>
+
+    <p>The kinetic energy of the $i$-th link can alternatively be expressed in terms of the link's own frame rather than the inertial frame:</p>
+    $$k_i = \frac{1}{2}\; {}^{i}\boldsymbol{v}_{G_i}^\top m_i\; {}^{i}\boldsymbol{v}_{G_i} + \frac{1}{2}\; {}^{i}\boldsymbol{\omega}_i^\top\; {}^{G_i}\boldsymbol{I}_i\; {}^{i}\boldsymbol{\omega}_i$$
+    <p>where ${}^{G_i}\boldsymbol{I}_i$ is the inertia tensor of link $\{i\}$ with respect to the centre of mass. This form avoids the need to continuously re-compute ${}^{0}\boldsymbol{I}_i$ via rotation transformation.</p>
+
+    <!-- Enrichment: Properties of the Mass Matrix -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Properties of the Mass Matrix</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>The mass matrix $\boldsymbol{M}(\boldsymbol{\Theta})$ has several important properties:</p>
+          <ol>
+            <li><strong>Symmetric:</strong> $\boldsymbol{M} = \boldsymbol{M}^\top$. Each term in the sum is of the form $\boldsymbol{A}^\top \boldsymbol{B} \boldsymbol{A}$ which is always symmetric.</li>
+            <li><strong>Positive definite:</strong> $\dot{\boldsymbol{q}}^\top \boldsymbol{M} \dot{\boldsymbol{q}} > 0$ for all $\dot{\boldsymbol{q}} \neq 0$. The kinetic energy must be strictly positive whenever the robot is moving.</li>
+            <li><strong>Configuration-dependent:</strong> Unlike a point mass, the mass matrix changes as the robot moves. This is why robot dynamics are nonlinear.</li>
+            <li><strong>Bounded:</strong> $\lambda_{\min}\boldsymbol{E} \leq \boldsymbol{M}(\boldsymbol{\Theta}) \leq \lambda_{\max}\boldsymbol{E}$. Important for proving stability of control algorithms.</li>
+            <li><strong>$\dot{\boldsymbol{M}} - 2\boldsymbol{C}$ is skew-symmetric:</strong> Exploited in passivity-based control proofs.</li>
+          </ol>
+          <p><strong>Reference</strong>: <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/8-1-3-understanding-the-mass-matrix/" target="_blank">Modern Robotics: Understanding the Mass Matrix</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Velocity Coupling and Christoffel Symbols -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: The Velocity Coupling Term and Christoffel Symbols</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>The velocity coupling term can be rewritten using the <strong>Christoffel symbols of the first kind</strong>:</p>
+          $$c_{ijk} = \frac{1}{2}\left(\frac{\partial M_{ij}}{\partial q_k} + \frac{\partial M_{ik}}{\partial q_j} - \frac{\partial M_{jk}}{\partial q_i}\right)$$
+          <p>so that $\boldsymbol{V}_i = \sum_{j=1}^{n}\sum_{k=1}^{n} c_{ijk}\,\dot{q}_j\,\dot{q}_k$.</p>
+          <ul>
+            <li><strong>Centrifugal terms</strong> (when $j = k$): $c_{ijj}\dot{q}_j^2$ &mdash; the force on joint $i$ due to joint $j$ rotating at speed $\dot{q}_j$.</li>
+            <li><strong>Coriolis terms</strong> (when $j \neq k$): $2c_{ijk}\dot{q}_j\dot{q}_k$ &mdash; the force on joint $i$ due to the interaction between velocities of joints $j$ and $k$.</li>
+          </ul>
+          <p>At low speeds, the $\boldsymbol{V}$ term is negligible compared to the gravity term $\boldsymbol{G}$. At high speeds, these velocity-dependent forces become dominant.</p>
+          <p><strong>Reference</strong>: <a href="https://arxiv.org/abs/2010.01033" target="_blank">Numerical Methods to Compute the Coriolis Matrix and Christoffel Symbols (arXiv)</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Newton-Euler vs Lagrangian -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Newton-Euler vs. Lagrangian &mdash; When to Use Which</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Comparison</div>
+          <table>
+            <thead><tr><th>Property</th><th>Newton-Euler</th><th>Lagrangian</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Approach</strong></td><td>Force/torque balance (link by link)</td><td>Energy-based (system-wide)</td></tr>
+              <tr><td><strong>Internal forces</strong></td><td>Explicitly computed</td><td>Automatically eliminated</td></tr>
+              <tr><td><strong>Computational form</strong></td><td>Recursive/numerical</td><td>Closed-form/symbolic</td></tr>
+              <tr><td><strong>Complexity</strong></td><td>$O(n)$ &mdash; linear in joints</td><td>$O(n^3)$ to $O(n^4)$ &mdash; symbolic differentiation</td></tr>
+              <tr><td><strong>Best for</strong></td><td>Real-time control, simulation</td><td>Deriving closed-form equations, analysis</td></tr>
+              <tr><td><strong>Provides</strong></td><td>Joint torques directly</td><td>$\boldsymbol{M}$, $\boldsymbol{V}$, $\boldsymbol{G}$ separately</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Both formulations are mathematically equivalent</strong> &mdash; they produce the same torques for the same inputs.</p>
+          <p><strong>References</strong>:</p>
+          <ul>
+            <li><a href="https://eureka.patsnap.com/article/lagrangian-vs-newton-euler-methods-which-is-better-for-your-robot" target="_blank">Lagrangian vs. Newton-Euler Methods: Which is Better?</a></li>
+            <li><a href="https://journals.sagepub.com/doi/10.1177/027836498200100204" target="_blank">On the Equivalence of Lagrangian and Newton-Euler Dynamics (Silver, 1982)</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Video -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Video &mdash; Lagrangian Formulation of Dynamics (Modern Robotics)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video</div>
+          <ul>
+            <li><strong>Part 1</strong>: <a href="https://youtu.be/1U6y_68CjeY" target="_blank">youtu.be/1U6y_68CjeY</a> &mdash; Introduces the Lagrangian, kinetic/potential energy, and derives $\tau = M\ddot{q} + c + g$</li>
+            <li><strong>Part 2</strong>: <a href="https://youtu.be/BjD-pL819LA" target="_blank">youtu.be/BjD-pL819LA</a> &mdash; Continues with the velocity-product terms</li>
+            <li><strong>Understanding the Mass Matrix</strong>: <a href="https://youtu.be/7PFQou5l9do" target="_blank">youtu.be/7PFQou5l9do</a> &mdash; Physical interpretation and configuration-dependence</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Robot Academy videos -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Video &mdash; Robot Academy &mdash; Velocity Coupling and Inertia Coupling</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Video</div>
+          <ul>
+            <li><strong>Inertia and Acceleration Coupling</strong>: <a href="https://robotacademy.net.au/lesson/inertia-and-acceleration-coupling/" target="_blank">robotacademy.net.au</a></li>
+            <li><strong>Velocity Coupling</strong>: <a href="https://robotacademy.net.au/lesson/velocity-coupling/" target="_blank">robotacademy.net.au</a></li>
+            <li><strong>Gravity and Payload</strong>: <a href="https://robotacademy.net.au/lesson/gravity-and-payload/" target="_blank">robotacademy.net.au</a></li>
+            <li><strong>Forces Acting On Robot Links</strong>: <a href="https://robotacademy.net.au/lesson/forces-acting-on-robot-links/" target="_blank">robotacademy.net.au</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: 2R Example -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: A Worked 2R Example for Building Intuition</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Example</div>
+          <p>For a two-link (2R) planar manipulator, the resulting dynamic equation has the form:</p>
+          $$\begin{bmatrix} \tau_1 \\ \tau_2 \end{bmatrix} = \begin{bmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{bmatrix} \begin{bmatrix} \ddot{\theta}_1 \\ \ddot{\theta}_2 \end{bmatrix} + \begin{bmatrix} -h\dot{\theta}_2^2 - 2h\dot{\theta}_1\dot{\theta}_2 \\ h\dot{\theta}_1^2 \end{bmatrix} + \begin{bmatrix} G_1 \\ G_2 \end{bmatrix}$$
+          <p>where $h = m_2 l_1 l_{c2} \sin\theta_2$ and:</p>
+          <ul>
+            <li>$M_{11} = m_1 l_{c1}^2 + m_2(l_1^2 + l_{c2}^2 + 2l_1 l_{c2}\cos\theta_2) + I_1 + I_2$ &mdash; depends on $\theta_2$</li>
+            <li>$M_{12} = M_{21} = m_2(l_{c2}^2 + l_1 l_{c2}\cos\theta_2) + I_2$ &mdash; the coupling term</li>
+            <li>$M_{22} = m_2 l_{c2}^2 + I_2$ &mdash; constant (does not depend on configuration)</li>
+          </ul>
+          <p><strong>Key observations:</strong></p>
+          <ul>
+            <li>$M_{11}$ changes with $\theta_2$ because the effective inertia seen by joint 1 depends on how the second link is oriented</li>
+            <li>$M_{22}$ is constant because joint 2 only sees its own link's inertia regardless of configuration</li>
+            <li>The Coriolis terms ($-2h\dot{\theta}_1\dot{\theta}_2$) and centrifugal terms ($-h\dot{\theta}_2^2$ and $h\dot{\theta}_1^2$) all involve $\sin\theta_2$ and vanish when the arm is fully extended ($\theta_2 = 0$)</li>
+          </ul>
+          <p><strong>References</strong>:</p>
+          <ul>
+            <li><a href="https://mec560sbu.github.io/2016/08/30/2R_EOM_dynamics_example/" target="_blank">Deriving Equations of Motion for a 2-R Manipulator Using MATLAB</a></li>
+            <li><a href="https://adamheins.com/blog/lagrangian-mechanics-three-ways" target="_blank">Implementing Lagrangian Mechanics Three Ways (Adam Heins)</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz 4: Lagrangian -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>The mass matrix $\boldsymbol{M}(\boldsymbol{\Theta})$ in the Lagrangian formulation is derived from:</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">The potential energy of the system</button>
+        <button class="quiz-option" data-correct="true">The kinetic energy of the system, expressed as $k = \frac{1}{2}\dot{\boldsymbol{q}}^\top \boldsymbol{M}\,\dot{\boldsymbol{q}}$</button>
+        <button class="quiz-option" data-correct="false">The Jacobian transpose times external forces</button>
+        <button class="quiz-option" data-correct="false">The sum of centrifugal and Coriolis terms</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The mass matrix appears when the total kinetic energy is written in the quadratic form $k = \frac{1}{2}\dot{q}^T M \dot{q}$. It is built from the sum of Jacobian-weighted link masses and inertia tensors." data-incorrect="The mass matrix is extracted from the kinetic energy expression. When the total kinetic energy is written as $k = \frac{1}{2}\dot{q}^T M \dot{q}$, the mass matrix $M$ naturally appears as the coefficient matrix."></div>
+    </div>
+
+    <div class="concept-check" data-concept="lagrangian">
+      <span class="concept-check-label">How well do you understand the Lagrangian formulation?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <div class="quiz-score"></div>
+
+    <!-- ============================================================ -->
+    <!-- KEY EQUATIONS SUMMARY -->
+    <!-- ============================================================ -->
+    <h2 id="key-equations">Key Equations Summary</h2>
+
+    <h3>6.1 General Dynamic Equation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=3" target="_blank">PDF p.3</a>
+    </h3>
+    <ol>
+      <li>General dynamic equation: $\boldsymbol{Q} = \boldsymbol{M}(\boldsymbol{\Theta})\ddot{\boldsymbol{\Theta}} + \boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}) + \boldsymbol{G}(\boldsymbol{\Theta})$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=3" target="_blank">PDF p.3</a></li>
+      <li>Generalized force vector: $\boldsymbol{Q} = \boldsymbol{\tau} - \boldsymbol{J}^\top \boldsymbol{F} - \boldsymbol{f}_r$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=3" target="_blank">PDF p.3</a></li>
+      <li>State-space equation: $\boldsymbol{\tau} = \boldsymbol{M}(\boldsymbol{\Theta})\ddot{\boldsymbol{\Theta}} + \boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}) + \boldsymbol{G}(\boldsymbol{\Theta})$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=4" target="_blank">PDF p.4</a></li>
+    </ol>
+
+    <h3>6.2&ndash;6.4 Mass Distribution
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=8" target="_blank">PDF p.8</a>
+    </h3>
+    <ol start="4">
+      <li>Inertia tensor: ${}^{A}\boldsymbol{I} = \begin{bmatrix} I_{xx} & -I_{xy} & -I_{xz} \\ -I_{xy} & I_{yy} & -I_{yz} \\ -I_{xz} & -I_{yz} & I_{zz} \end{bmatrix}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=8" target="_blank">PDF p.8</a></li>
+      <li>Parallel axis theorem (moments): ${}^{C}I_{xx} = {}^{A}I_{xx} + m(z_C^2 + y_C^2)$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=12" target="_blank">PDF p.12</a></li>
+      <li>Parallel axis theorem (products): ${}^{C}I_{xy} = {}^{A}I_{xy} + m\,x_C\,y_C$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=12" target="_blank">PDF p.12</a></li>
+      <li>Rotation transformation of inertia: ${}^{C}\boldsymbol{I} = {}^{C}_{A}\boldsymbol{R}\; {}^{A}\boldsymbol{I}\; {}^{C}_{A}\boldsymbol{R}^\top$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=13" target="_blank">PDF p.13</a></li>
+    </ol>
+
+    <h3>6.5 Acceleration
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=14" target="_blank">PDF p.14</a>
+    </h3>
+    <ol start="8">
+      <li>Angular velocity composition: ${}^{A}\boldsymbol{\Omega}_C = {}^{A}\boldsymbol{\Omega}_B + {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{\Omega}_C$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=15" target="_blank">PDF p.15</a></li>
+      <li>Angular acceleration: ${}^{A}\dot{\boldsymbol{\Omega}}_C = {}^{A}\dot{\boldsymbol{\Omega}}_B + {}^{A}_{B}\boldsymbol{R}\; {}^{B}\dot{\boldsymbol{\Omega}}_C + {}^{A}\boldsymbol{\Omega}_B \times {}^{A}_{B}\boldsymbol{R}\; {}^{B}\boldsymbol{\Omega}_C$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=15" target="_blank">PDF p.15</a></li>
+    </ol>
+
+    <h3>6.6 Newton's and Euler's Equations
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=16" target="_blank">PDF p.16</a>
+    </h3>
+    <ol start="10">
+      <li>Newton's equation: $\boldsymbol{F} = m\,\dot{\boldsymbol{v}}_G$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=16" target="_blank">PDF p.16</a></li>
+      <li>Euler's equation: $\boldsymbol{N} = {}^{G}\boldsymbol{I}\,\dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times {}^{G}\boldsymbol{I}\,\boldsymbol{\omega}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=16" target="_blank">PDF p.16</a></li>
+    </ol>
+
+    <h3>6.7 Newton-Euler Iterations
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=19" target="_blank">PDF p.19</a>
+    </h3>
+    <ol start="12">
+      <li>Angular velocity (revolute): ${}^{i+1}\boldsymbol{\omega}_{i+1} = {}^{i+1}_{i}\boldsymbol{R}\; {}^{i}\boldsymbol{\omega}_i + \dot{\theta}_{i+1}\; {}^{i+1}\hat{Z}_{i+1}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=19" target="_blank">PDF p.19</a></li>
+      <li>Joint reaction force: ${}^{i}\boldsymbol{f}_i = {}^{i}\boldsymbol{F}_i + {}^{i}_{i+1}\boldsymbol{R}\; {}^{i+1}\boldsymbol{f}_{i+1}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=23" target="_blank">PDF p.23</a></li>
+      <li>Joint reaction moment: ${}^{i}\boldsymbol{n}_i = {}^{i}\boldsymbol{N}_i + {}^{i}_{i+1}\boldsymbol{R}\; {}^{i+1}\boldsymbol{n}_{i+1} + {}^{i}\boldsymbol{P}_{G_i} \times {}^{i}\boldsymbol{F}_i + {}^{i}\boldsymbol{P}_{i+1} \times {}^{i}_{i+1}\boldsymbol{R}\; {}^{i+1}\boldsymbol{f}_{i+1}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=23" target="_blank">PDF p.23</a></li>
+      <li>Joint torque (revolute): $\tau_i = {}^{i}\boldsymbol{n}_i^\top\; {}^{i}\hat{Z}_i$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=23" target="_blank">PDF p.23</a></li>
+      <li>Gravity inclusion: ${}^{0}\dot{\boldsymbol{v}}_0 = \boldsymbol{G}$ (opposite direction to gravity)
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=24" target="_blank">PDF p.24</a></li>
+    </ol>
+
+    <h3>6.8 Lagrangian Formulation
+      <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=25" target="_blank">PDF p.25</a>
+    </h3>
+    <ol start="18">
+      <li>Lagrangian function: $\mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}}) = k(\boldsymbol{q}, \dot{\boldsymbol{q}}) - u(\boldsymbol{q})$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=25" target="_blank">PDF p.25</a></li>
+      <li>Mass matrix: $\boldsymbol{M} = \sum_{i=1}^{n}\left({}^{0}\boldsymbol{J}_{V_{Gi}}^\top m_i\; {}^{0}\boldsymbol{J}_{V_{Gi}} + {}^{0}\boldsymbol{J}_{\omega_i}^\top\; {}^{0}\boldsymbol{I}_i\; {}^{0}\boldsymbol{J}_{\omega_i}\right)$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=29" target="_blank">PDF p.29</a></li>
+      <li>Compact kinetic energy: $k = \frac{1}{2}\dot{\boldsymbol{q}}^\top \boldsymbol{M}\,\dot{\boldsymbol{q}}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=29" target="_blank">PDF p.29</a></li>
+      <li>Potential energy: $u = -\sum_{i=1}^{n} m_i\,\boldsymbol{g}^\top\; {}^{0}\boldsymbol{P}_{G_i}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=30" target="_blank">PDF p.30</a></li>
+      <li>Velocity coupling term: $\boldsymbol{V}_i = \sum_{j=1}^{n}\sum_{k=1}^{n}\left(\frac{\partial \boldsymbol{M}_{ij}}{\partial q_k} - \frac{1}{2}\frac{\partial \boldsymbol{M}_{jk}}{\partial q_i}\right)\dot{q}_j\,\dot{q}_k$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=31" target="_blank">PDF p.31</a></li>
+      <li>Gravity term: $\boldsymbol{G}_i = \sum_{j=1}^{n} m_j\,\boldsymbol{g}^\top\; {}^{0}\boldsymbol{J}_{V_{Gj}}^{(i)}$
+        <a class="source-link" href="../Slides/MSE492 - Chapter6-rev2.pdf#page=31" target="_blank">PDF p.31</a></li>
+    </ol>
+
+    <!-- ============================================================ -->
+    <!-- FLASHCARD DECK -->
+    <!-- ============================================================ -->
+    <h2 id="flashcards">Flashcard Deck</h2>
+
+    <div class="flashcard-deck">
+      <div class="flashcard-deck-header">Key Definitions &amp; Equations</div>
+      <div class="flashcard-container">
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">General Dynamic Equation</div>
+            <div class="flashcard-text">What is the general dynamic equation relating joint torques to motion?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\boldsymbol{\tau} = \boldsymbol{M}(\boldsymbol{\Theta})\ddot{\boldsymbol{\Theta}} + \boldsymbol{V}(\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}) + \boldsymbol{G}(\boldsymbol{\Theta})$<br><br>$\boldsymbol{M}$ = mass matrix, $\boldsymbol{V}$ = velocity coupling (centrifugal/Coriolis), $\boldsymbol{G}$ = gravity vector.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Inverse vs. Forward Dynamics</div>
+            <div class="flashcard-text">What is the key difference between inverse dynamics and forward dynamics?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text"><strong>Inverse:</strong> Given motion ($\boldsymbol{\Theta}, \dot{\boldsymbol{\Theta}}, \ddot{\boldsymbol{\Theta}}$), find required torques $\boldsymbol{\tau}$. Used for <em>control</em>.<br><br><strong>Forward:</strong> Given torques $\boldsymbol{\tau}$, find resulting motion. Used for <em>simulation</em>. Requires solving a differential equation.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Inertia Tensor</div>
+            <div class="flashcard-text">What is the structure of the 3x3 inertia tensor, and what do its entries represent?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">${}^{A}\boldsymbol{I} = \begin{bmatrix} I_{xx} & -I_{xy} & -I_{xz} \\ -I_{xy} & I_{yy} & -I_{yz} \\ -I_{xz} & -I_{yz} & I_{zz} \end{bmatrix}$<br><br>Diagonal: moments of inertia (resistance to rotation about each axis). Off-diagonal: products of inertia (coupling between axes).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Euler's Equation</div>
+            <div class="flashcard-text">What is Euler's equation for rigid body rotation, and what is the extra term beyond $I\dot\omega$?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\boldsymbol{N} = {}^{G}\boldsymbol{I}\,\dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times {}^{G}\boldsymbol{I}\,\boldsymbol{\omega}$<br><br>The $\boldsymbol{\omega} \times \boldsymbol{I}\boldsymbol{\omega}$ is the <em>gyroscopic torque</em> &mdash; needed even at constant angular velocity if $\boldsymbol{\omega}$ is not along a principal axis.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Newton-Euler Algorithm</div>
+            <div class="flashcard-text">What are the two passes of the recursive Newton-Euler algorithm?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text"><strong>Outward (base to tip):</strong> Propagate angular velocity, angular acceleration, linear acceleration, then compute inertial forces and moments for each link.<br><br><strong>Inward (tip to base):</strong> Compute joint reaction forces/moments, then extract the joint torque ($\tau_i = n_i^T \hat{Z}_i$).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Lagrangian Function</div>
+            <div class="flashcard-text">What is the Lagrangian, and how is the mass matrix extracted from it?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\mathcal{L} = k - u$ (kinetic minus potential energy).<br><br>The kinetic energy is written as $k = \frac{1}{2}\dot{q}^T M \dot{q}$, which defines the mass matrix: $M = \sum_i J_{V_i}^T m_i J_{V_i} + J_{\omega_i}^T I_i J_{\omega_i}$.</div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="flashcard-btn flashcard-prev">Prev</button>
+        <span class="flashcard-counter">1 / 6</span>
+        <button class="flashcard-btn flashcard-next">Next</button>
+        <button class="flashcard-shuffle">Shuffle</button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED PRACTICE -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Practice</h3>
+      <ul>
+        <li><a href="MSE429_Tutorial_4.html">Tutorial 4</a> &mdash; Velocity Analysis (velocity propagation for 3R and 3-DOF arms)</li>
+        <li><a href="MSE429_Tutorial_5.html">Tutorial 5</a> &mdash; Jacobians &amp; Forces (Stanford Jacobian both methods)</li>
+      </ul>
+    </div>
+
+    <button class="quick-ref-toggle" title="Quick Reference">&Sigma;</button>
+    <div class="quick-ref-panel">
+      <h3>Ch 6 Quick Reference</h3>
+      <div class="ref-item">
+        <div class="ref-name">Dynamic Equation</div>
+        <div class="ref-eq">$\tau = M(\Theta)\ddot\Theta + V(\Theta,\dot\Theta) + G(\Theta)$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Newton's Equation</div>
+        <div class="ref-eq">$F = m\,\dot{v}_G$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Euler's Equation</div>
+        <div class="ref-eq">$N = {}^G I\,\dot\omega + \omega \times {}^G I\,\omega$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Parallel Axis Theorem</div>
+        <div class="ref-eq">${}^C I_{xx} = {}^A I_{xx} + m(z_C^2 + y_C^2)$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Inertia Rotation</div>
+        <div class="ref-eq">${}^C I = {}^C_A R \; {}^A I \; {}^C_A R^T$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Mass Matrix</div>
+        <div class="ref-eq">$M = \sum_i J_{V_i}^T m_i J_{V_i} + J_{\omega_i}^T I_i J_{\omega_i}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Lagrangian</div>
+        <div class="ref-eq">$\mathcal{L} = k - u$, with $k = \tfrac{1}{2}\dot{q}^T M\,\dot{q}$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Gravity Trick</div>
+        <div class="ref-eq">${}^0\dot{v}_0 = -g$ (base accelerates opposite to gravity)</div>
+      </div>
+    </div>
+
+    <!-- Page navigation -->
+    <nav class="page-nav"></nav>
+
+  </main>
+
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

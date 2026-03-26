@@ -1,0 +1,145 @@
+                                                                         School of Mechatronic Systems Engineering
+
+                                       MSE 429/894 – Assignment 3
+
+15 Problem 1: Sketch the fingertip workspace of the three-link manipulator shown below for the case 𝐿𝐿1 = 15,
+   𝐿𝐿2 = 10, and 𝐿𝐿3 = 3. You may include an isometric as well as a cross-section view.
+
+
+
+
+    Solutions:
+    The radius of the inner hollow region of the toroid is 7“. The distance between the central joint and the out
+    edge of the toroid is 28” inches. The distance between the inner edge and the axis of rotation is 2”.
+
+
+
+
+                                                  5
+
+
+
+
+                                                 10
+
+
+
+
+   Problem 2: For the manipulator shown in problem 1, derive the inverse kinematics for the case where the
+30 only the desired position (no rotation) of the last link is known.
+
+                                                      Page 1 of 5
+                                                                        School of Mechatronic Systems Engineering
+
+  Hint: start with assuming 3𝑃𝑃tool = 𝐿𝐿3 𝑋𝑋�3.
+
+  Solution:
+                                                      6
+
+
+
+
+                                                  5
+
+
+
+
+                                  4
+
+
+
+
+                                      7
+
+
+                                             3
+
+
+
+
+                                                           5
+
+
+
+
+5 Problem 3: Given a desired position and orientation of the and of a three-link planar rotary-jointed
+  manipulator, there are two possible solutions. If we add one more rotational joint (in such a way that the arm
+  is still planar), how many solutions are there?
+
+                                                          Page 2 of 5
+                                                                        School of Mechatronic Systems Engineering
+
+
+
+
+   Solution:
+
+
+
+
+15 Problem 4: For the two-link planar arm shown in problem 2, let the second link be half as long as the first –
+   that is, 𝐿𝐿1 = 2𝐿𝐿2 . The joint range limits in degrees are:
+                                                        0 < 𝜃𝜃1 < 180
+                                                     −90 < 𝜃𝜃2 < 180
+   Sketch the approximate reachable workspace (an area) of the tip of link 2.
+
+   Solution:
+
+
+
+
+15 Problem 5: The following kinematic equations arise in a certain problem:
+                                             sin 𝜉𝜉 = 𝑎𝑎 sin 𝜃𝜃 + 𝑏𝑏
+                                             sin 𝜙𝜙 = 𝑐𝑐 cos 𝜃𝜃 + 𝑑𝑑
+                                                  𝜓𝜓 = 𝜉𝜉 + 𝜙𝜙
+
+                                                     Page 3 of 5
+                                                                              School of Mechatronic Systems Engineering
+
+    Given 𝑎𝑎, 𝑏𝑏, 𝑐𝑐, 𝑑𝑑, and 𝜓𝜓, show that, in the general case, show that, there are four solutions for 𝜃𝜃. Find a special
+    condition under which there are joist two solutions for 𝜃𝜃.
+
+    Solution:
+
+
+
+
+20 Problem 6: A 4R manipulator is shown schematically. The nonzero link parameters are
+   𝛼𝛼1 = −90𝑜𝑜 , 𝑑𝑑2 = 1, 𝛼𝛼2 = 45𝑜𝑜 , 𝑑𝑑3 = 1, and 𝑎𝑎3 = 1 and the mechanism is pictured in the configuration
+   corresponding to Θ = [0,0,90𝑜𝑜 , 0]⊤ . Each join has ±180𝑜𝑜 as limits. Find all values of 𝜃𝜃3 such that
+                                             0
+                                              𝑃𝑃4𝑂𝑂𝑂𝑂𝑂𝑂 = [1.29, 1.99, 0.0947]⊤ .
+
+
+
+
+    Solution:
+
+
+
+
+                                                          Page 4 of 5
+                      School of Mechatronic Systems Engineering
+
+
+
+
+                                        6
+
+
+
+
+4
+
+
+
+
+    6
+
+                            4
+
+
+
+
+        Page 5 of 5
+

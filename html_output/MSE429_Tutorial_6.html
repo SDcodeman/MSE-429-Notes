@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial 6 — MSE429 Study Pages</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}], throwOnError: false});"></script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+  <main class="main-content">
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&gt;</span>
+      <a href="index.html#tutorials">MSE429</a><span class="sep">&gt;</span>
+      Tutorial 6
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Tutorial 6: Dynamics</h1>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 6.1                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 6.1</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=1" target="_blank">PDF p.1</a>
+      <p><strong>Problem:</strong> For the rectangular body shown, let the moment of inertia around the C.G. be known, where frame $\{G\}$ is located. Use the parallel axis theorem to evaluate the inertia tensor with respect to a frame $\{A\}$ located at the lower left corner of the body. Consider uniform density.</p>
+
+      <p><strong>Given:</strong> A rectangular body with dimensions $w$ (width), $\ell$ (length), and $h$ (height). Volume $V = abc$. The inertia tensor about the center of mass (from Slide 7) for a rectangular body is:</p>
+
+      $$I_{xx} = \frac{1}{12}m(b^2 + c^2), \quad I_{yy} = \frac{1}{12}m(a^2 + c^2), \quad I_{zz} = \frac{1}{12}m(a^2 + b^2)$$
+
+      <p>so the inertia tensor with respect to the center of mass is:</p>
+
+      $${}^{G}\mathbf{I} = \frac{m}{12}\begin{bmatrix} \ell^2 + h^2 & 0 & 0 \\ 0 & w^2 + h^2 & 0 \\ 0 & 0 & w^2 + \ell^2 \end{bmatrix}$$
+
+      <button class="solution-toggle" data-target="sol-tut6-1">Show Solution</button>
+      <div class="solution-content" id="sol-tut6-1">
+
+        <h4>Translation of the Inertia Tensor from Frame $\{G\}$ to Frame $\{A\}$</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=1" target="_blank">PDF p.1</a>
+
+        <p>The position of the center of mass relative to the corner frame $\{A\}$ is:</p>
+
+        $$X_A = P^x_{G \to A} = -\frac{w}{2}, \quad Y_A = P^y_{G \to A} = -\frac{\ell}{2}, \quad Z_A = P^z_{G \to A} = -\frac{h}{2}$$
+
+        <p><strong>From Slide 12 (Parallel Axis Theorem):</strong></p>
+
+        $${}^{A}I_{xx} = {}^{G}I_{xx} + m(Y_A^2 + Z_A^2) = \frac{1}{12}m(\ell^2 + h^2) + m\left(\left(-\frac{\ell}{2}\right)^2 + \left(-\frac{h}{2}\right)^2\right) = \frac{1}{3}m(\ell^2 + h^2)$$
+
+        <p>Similarly:</p>
+
+        $${}^{A}I_{yy} = \frac{1}{3}m(w^2 + h^2), \quad {}^{A}I_{zz} = \frac{1}{3}m(\ell^2 + w^2)$$
+
+        <h4>Products of Inertia</h4>
+
+        $${}^{A}I_{xy} = {}^{G}I_{xy} + m\,X_A\,Y_A = 0 + m\left(-\frac{w}{2}\right)\left(-\frac{\ell}{2}\right) = \frac{m}{4}w\ell$$
+
+        <p>Similarly:</p>
+
+        $${}^{A}I_{yz} = \frac{m}{4}wh, \quad {}^{A}I_{ye} = \frac{m}{4}\ell h$$
+
+        <h4>The Inertia Tensor at Corner Frame $\{A\}$</h4>
+
+        $${}^{A}\mathbf{I} = \begin{bmatrix} \frac{m}{3}(\ell^2 + h^2) & -\frac{m}{4}w\ell & -\frac{m}{4}wh \\ -\frac{m}{4}w\ell & \frac{m}{3}(w^2 + h^2) & -\frac{m}{4}\ell h \\ -\frac{m}{4}wh & -\frac{m}{4}\ell h & \frac{m}{3}(\ell^2 + w^2) \end{bmatrix}$$
+
+        <div class="callout callout-theorem">
+          <div class="callout-label">Key Property</div>
+          <p>${}^{A}\mathbf{I}$ is always a positive definite matrix and is symmetric. All eigenvalues of ${}^{A}\mathbf{I}$ are positive.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 6.2                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 6.2</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=2" target="_blank">PDF p.2</a>
+      <p><strong>Problem:</strong> Compute the closed form dynamic equation of the two revolute jointed planar manipulator using the Lagrangian formulation.</p>
+      <p><strong>Characteristics of the system:</strong></p>
+      <ul>
+        <li>Assume the links to be slender bars</li>
+        <li>Let the center of mass be in the middle of each link</li>
+        <li>Assume the base is not rotating</li>
+        <li>No forces or moments are being applied at the end-effector</li>
+      </ul>
+      <p><strong>Lagrangian equation:</strong></p>
+      $$\frac{d}{dt}\frac{\partial L}{\partial \dot{q}_i} - \frac{\partial L}{\partial q_i} = \tau_i$$
+      $$L = k_1 + u_1 + k_2 - u_2$$
+
+      <button class="solution-toggle" data-target="sol-tut6-2">Show Solution</button>
+      <div class="solution-content" id="sol-tut6-2">
+
+        <h4>Kinetic and Potential Energy of Link 1</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=2" target="_blank">PDF p.2</a>
+
+        <p><strong>Kinetic energy of Link 1:</strong></p>
+        $$k_1 = \frac{1}{2}\,{}^{1}v_{G1}^T\,m_1\,{}^{1}v_{G1} + \frac{1}{2}\,{}^{1}\omega_1^T\,{}^{G_1}I_1\,{}^{1}\omega_1$$
+
+        <p>The inertia tensor of link 1 about its center of mass:</p>
+        $${}^{G_1}I_1 = \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy} & 0 \\ 0 & 0 & I_{zz} \end{bmatrix}$$
+
+        <p>Angular velocity of link 1:</p>
+        $${}^{1}\omega_1 = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix}$$
+
+        <p>Linear velocity of the center of mass of link 1:</p>
+        $${}^{1}v_{G1} = {}^{1}\omega_1 \times {}^{1}P_{G1} = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} l_1/2 \\ 0 \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ l_1\dot{\theta}_1/2 \\ 0 \end{bmatrix}$$
+
+        <p><strong>Translational kinetic energy of link 1:</strong></p>
+        $$\frac{1}{2}\,{}^{0}v_{G1}^T\,m_1\,{}^{0}v_{G1} = \frac{1}{2}m_1\begin{bmatrix} 0 & l_1\dot{\theta}_1/2 & 0 \end{bmatrix}\begin{bmatrix} 0 \\ l_1\dot{\theta}_1/2 \\ 0 \end{bmatrix} = \frac{m_1(l_1\dot{\theta}_1)^2}{8}$$
+
+        <p><strong>Rotational kinetic energy of link 1:</strong></p>
+        $${}^{1}\omega_1^T\,{}^{G_1}I_1\,{}^{1}\omega_1 = \begin{bmatrix} 0 & 0 & \dot{\theta}_1 \end{bmatrix}\begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy} & 0 \\ 0 & 0 & I_{zz} \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} = I_{zz}\dot{\theta}_1^2$$
+
+        <p><strong>Total kinetic energy of link 1:</strong></p>
+        $$k_1 = \frac{m_1(l_1\dot{\theta}_1)^2}{8} + \frac{I_{zz}\dot{\theta}_1^2}{2}$$
+
+        <h4>Potential Energy of Link 1</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=3" target="_blank">PDF p.3</a>
+
+        $$u_1 = -m_1 g^T\,{}^{0}P_{G1} = -m_1\begin{bmatrix} 0 & -g & 0 \end{bmatrix}\begin{bmatrix} l_1 c_1/2 \\ l_1 s_1/2 \\ 0 \end{bmatrix} = m_1 g \frac{l_1 s_1}{2}$$
+
+        <h4>Kinetic and Potential Energy of Link 2</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=3" target="_blank">PDF p.3</a>
+
+        <p><strong>Kinetic energy of Link 2:</strong></p>
+        $$k_2 = \frac{1}{2}\,{}^{2}v_{G2}^T\,m_2\,{}^{2}v_{G2} + \frac{1}{2}\,{}^{2}\omega_2^T\,{}^{G_2}I_2\,{}^{2}\omega_2$$
+
+        <p>Inertia tensor:</p>
+        $${}^{G_2}I_2 = \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy} & 0 \\ 0 & 0 & I_{zz} \end{bmatrix}$$
+
+        <p>Angular velocity:</p>
+        $${}^{2}\omega_2 = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_2 \end{bmatrix}$$
+
+        <p><strong>Linear velocity of center of mass of link 2:</strong></p>
+        $${}^{2}v_{G2} = {}^{2}R_1\,{}^{1}v_1 + {}^{2}\omega_2 \times {}^{2}P_{G2}$$
+
+        $$= \begin{bmatrix} c_2 & s_2 & 0 \\ -s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} l_1 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} \times \begin{bmatrix} l_2/2 \\ 0 \\ 0 \end{bmatrix} = \begin{bmatrix} s_2 l_1 \dot{\theta}_1 \\ c_2 l_1 \dot{\theta}_1 + l_2(\dot{\theta}_1 + \dot{\theta}_2)/2 \\ 0 \end{bmatrix}$$
+
+        <p><strong>Translational kinetic energy of link 2:</strong></p>
+        $$\frac{1}{2}\,{}^{2}v_{G2}^T\,m_2\,{}^{2}v_{G2} = \frac{1}{2}m_2\left[(s_2 l_1 \dot{\theta}_1)^2 + (c_2 l_1 \dot{\theta}_1 + l_2(\dot{\theta}_1 + \dot{\theta}_2)/2)^2\right]$$
+
+        $$= m_2\left((l_1\dot{\theta}_1)^2/2 + c_2 l_1 \dot{\theta}_1 l_2 (\dot{\theta}_1 + \dot{\theta}_2)/2 + (l_2(\dot{\theta}_1 + \dot{\theta}_2))^2/8\right)$$
+
+        <p><strong>Rotational kinetic energy of link 2:</strong></p>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=3" target="_blank">PDF p.3</a>
+        $$\frac{1}{2}\,{}^{2}\omega_2^T\,{}^{G_2}I_2\,{}^{2}\omega_2 = \begin{bmatrix} 0 & 0 & \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix}\begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy2} & 0 \\ 0 & 0 & I_{zz2} \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} = \frac{1}{2}I_{zz2}(\dot{\theta}_1 + \dot{\theta}_2)^2$$
+
+        <p><strong>Total kinetic energy of link 2:</strong></p>
+        $$k_2 = m_2(l_1\dot{\theta}_1)^2/2 + m_2 c_2 l_1 l_2 \dot{\theta}_1^2/2 + m_2 c_2 l_1 \dot{\theta}_1 l_2 \dot{\theta}_2/2 + \frac{m_2(l_2\dot{\theta}_1)^2}{8} + \frac{m_2(l_2\dot{\theta}_2)^2}{8} + \frac{m_2 l_2 \dot{\theta}_1 \dot{\theta}_2}{4} + \frac{I_{zz2}\dot{\theta}_1^2}{2} + \frac{I_{zz2}\dot{\theta}_2^2}{2} + I_{zz2}\dot{\theta}_1\dot{\theta}_2$$
+
+        <h4>Potential Energy of Link 2</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=4" target="_blank">PDF p.4</a>
+
+        $$u_2 = -m_2 g^T\,{}^{0}P_{G2} = -m_2\begin{bmatrix} 0 & -g & 0 \end{bmatrix}\begin{bmatrix} l_1 c_1 + \frac{l_2 c_{12}}{2} \\ l_1 s_1 + \frac{l_2 s_{12}}{2} \\ 0 \end{bmatrix} = m_2 g\left(l_1 c_1 + \frac{l_2 c_{12}}{2}\right)$$
+
+        <h4>The Lagrangian</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=4" target="_blank">PDF p.4</a>
+
+        $$L = k_1 + u_1 + k_2 - u_2$$
+
+        $$= \frac{m_1(l_1\dot{\theta}_1)^2}{8} + \frac{I_{zz1}\dot{\theta}_1^2}{2} + m_2(l_1\dot{\theta}_1)^2/2 + m_2 c_2 l_1 l_2 \dot{\theta}_1^2/2 + m_2 c_2 l_1 \dot{\theta}_1 l_2 \dot{\theta}_2/2 + \frac{m_2(l_2\dot{\theta}_1)^2}{8}$$
+
+        $$+ \frac{m_2(l_2\dot{\theta}_2)^2}{8} + \frac{m_2 l_2 \dot{\theta}_1 \dot{\theta}_2}{4} + \frac{I_{zz2}\dot{\theta}_1^2}{2} + \frac{I_{zz2}\dot{\theta}_2^2}{2} + I_{zz2}\dot{\theta}_1\dot{\theta}_2 - m_1 g\frac{l_1 s_1}{2} - m_2 g\left(l_1 s_1 + \frac{l_2 s_{12}}{2}\right)$$
+
+        <h4>Applying the Euler-Lagrange Equation</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=4" target="_blank">PDF p.4</a>
+
+        $$\frac{d}{dt}\frac{\partial L}{\partial \dot{q}_i} - \frac{\partial L}{\partial q_i} = \tau_i$$
+
+        <h4>For $\theta_1$:</h4>
+
+        $$\frac{\partial L}{\partial \dot{\theta}_1} = \frac{m_1 l_1^2 \dot{\theta}_1}{4} + I_{zz1}\dot{\theta}_1 + m_2 l_1^2 \dot{\theta}_1/2 + m_2 c_2 l_1 l_2 \dot{\theta}_1 + m_2 c_2 l_1 l_2 \dot{\theta}_2/2 + \frac{m_2 l_2^2 \dot{\theta}_1}{4} + \frac{m_2 l_2^2 \dot{\theta}_2}{4} + I_{zz2}\dot{\theta}_1 + I_{zz2}\dot{\theta}_2$$
+
+        $$\frac{d}{dt}\frac{\partial L}{\partial \dot{\theta}_1} = \frac{m_1 l_1^2 \ddot{\theta}_1}{4} + I_{zz1}\ddot{\theta}_1 + m_2 l_1^2 \ddot{\theta}_1/2 - m_2 s_2 \dot{\theta}_2 l_1 l_2 \dot{\theta}_1 + m_2 c_2 l_1 l_2 \ddot{\theta}_1 - m_2 s_2 l_1 l_2 \dot{\theta}_2^2/2 + m_2 c_2 l_1 l_2 \ddot{\theta}_2/2$$
+
+        $$+ \frac{m_2 l_2^2 \ddot{\theta}_1}{4} + \frac{m_2 l_2^2 \ddot{\theta}_2}{4} + I_{zz2}\ddot{\theta}_1 + I_{zz2}\ddot{\theta}_2$$
+
+        $$-\frac{\partial L}{\partial \theta_1} = m_1 g\left(\frac{l_1 c_1}{2}\right) + m_2 g\left(l_1 c_1 + \frac{l_2 c_{12}}{2}\right)$$
+
+        <p><strong>Joint torque $\tau_1$:</strong></p>
+
+        $$\tau_1 = \frac{d}{dt}\frac{\partial L}{\partial \dot{\theta}_1} - \frac{\partial L}{\partial \theta_1} = \frac{m_1 l_1^2 \ddot{\theta}_1}{4} + I_{zz1}\ddot{\theta}_1 + m_2 l_1^2 \ddot{\theta}_1/2 + m_2 c_2 l_1 l_2 \ddot{\theta}_1 + m_2 c_2 l_1 l_2 \ddot{\theta}_2/2 + \frac{m_2 l_2^2 \ddot{\theta}_1}{4} + \frac{m_2 l_2^2 \ddot{\theta}_2}{4} + I_{zz2}\ddot{\theta}_1$$
+
+        $$+ I_{zz2}\ddot{\theta}_2 + m_1 g\left(\frac{l_1 c_1}{2}\right) + m_2 g\left(l_1 c_1 + \frac{l_2 c_{12}}{2}\right)$$
+
+        <h4>For $\theta_2$:</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=5" target="_blank">PDF p.5</a>
+
+        $$\frac{\partial L}{\partial \dot{\theta}_2} = m_2 c_2 l_1 l_2 \dot{\theta}_1/2 + \frac{m_2 l_2^2 \dot{\theta}_2}{4} + \frac{m_2 l_2 \dot{\theta}_1}{4} + I_{zz2}\dot{\theta}_2 + I_{zz2}\dot{\theta}_1$$
+
+        $$\frac{d}{dt}\frac{\partial L}{\partial \dot{\theta}_2} = -m_2 s_2 \dot{\theta}_2 l_1 l_2 \dot{\theta}_1/2 + m_2 c_2 l_1 l_2 \ddot{\theta}_1/2 + \frac{m_2 l_2^2 \ddot{\theta}_2}{4} + \frac{m_2 l_2 \ddot{\theta}_1}{4} + I_{zz2}\ddot{\theta}_2 + I_{zz2}\ddot{\theta}_1$$
+
+        $$-\frac{\partial L}{\partial \theta_2} = +m_2 s_2 l_1 l_2 \dot{\theta}_1^2 + m_2 s_2 l_1 l_2 \dot{\theta}_1 \dot{\theta}_2/2 + m_2 g\frac{l_2 c_{12}}{2}$$
+
+        <p><strong>Joint torque $\tau_2$:</strong></p>
+
+        $$\tau_2 = \frac{d}{dt}\frac{\partial L}{\partial \dot{\theta}_2} - \frac{\partial L}{\partial \theta_2} = m_2 c_2 l_1 l_2 \ddot{\theta}_1/2 + \frac{m_2 l_2^2 \ddot{\theta}_2}{4} + \frac{m_2 l_2 \ddot{\theta}_1}{4} + I_{zz2}\ddot{\theta}_2 + I_{zz2}\ddot{\theta}_1 + m_2 g\frac{l_2 c_{12}}{2}$$
+
+        <h4>Matrix Form of Dynamic Equations</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=5" target="_blank">PDF p.5</a>
+
+        $$\begin{bmatrix} \tau_1 \\ \tau_2 \end{bmatrix} = \begin{bmatrix} \frac{m_1 l_1^2}{4} + I_{zz1} + m_2 l_1/2 + m_2 c_2 l_1 l_2 + \frac{m_2 l_2^2}{4} + I_{zz2} & m_2 c_2 l_1 l_2/2 + \frac{m_2 l_2^2}{4} + I_{zz2} \\ m_2 c_2 l_1 l_2/2 + \frac{m_2 l_2}{4} + I_{zz2} & \frac{m_2 l_2^2}{4} + I_{zz2} \end{bmatrix}\begin{bmatrix} \ddot{\theta}_1 \\ \ddot{\theta}_2 \end{bmatrix}$$
+
+        $$+ \begin{bmatrix} -m_2 s_2 \dot{\theta}_2 l_1 l_2 \dot{\theta}_1 - m_2 s_2 l_1 l_2 \dot{\theta}_2^2/2 \\ m_2 s_2 l_1 l_2 \dot{\theta}_1^2 \end{bmatrix} + \begin{bmatrix} m_1\left(\frac{l_1 c_1}{2}\right) + m_2\left(l_1 c_1 + \frac{l_2 c_{12}}{2}\right) \\ m_2 \frac{l_2 c_{12}}{2} \end{bmatrix}g$$
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROBLEM 6.3                                                   -->
+    <!-- ============================================================ -->
+    <div class="callout callout-example">
+      <div class="callout-label">Problem 6.3</div>
+      <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=6" target="_blank">PDF p.6</a>
+      <p><strong>Problem:</strong> Compute the closed form dynamic equation of the two revolute jointed planar manipulator using the Newton-Euler recursive formulation.</p>
+      <p><strong>Characteristics of the system:</strong></p>
+      <ul>
+        <li>Assume the links to be slender bars</li>
+        <li>Let the center of mass be in the middle of each link</li>
+        <li>Assume the base is not rotating</li>
+        <li>No forces or moments are being applied at the end-effector</li>
+      </ul>
+
+      <button class="solution-toggle" data-target="sol-tut6-3">Show Solution</button>
+      <div class="solution-content" id="sol-tut6-3">
+
+        <h4>Setup: Homogeneous Matrices, Rotation Matrices, and Position Vectors</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=6" target="_blank">PDF p.6</a>
+
+        <p><strong>Link 1 (Frame 0 to 1):</strong></p>
+
+        $${}^{0}_{1}T = \begin{bmatrix} c_1 & -s_1 & 0 & 0 \\ s_1 & c_1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{0}P_1 = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}, \quad {}^{1}P_{G_1} = \begin{bmatrix} l_1/2 \\ 0 \\ 0 \end{bmatrix}$$
+
+        $${}^{1}_{0}R = \begin{bmatrix} c_1 & -s_1 & 0 \\ s_1 & c_1 & 0 \\ 0 & 0 & 1 \end{bmatrix}, \quad {}^{0}_{1}R = \begin{bmatrix} c_1 & s_1 & 0 \\ -s_1 & c_1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+
+        <p><strong>Link 2 (Frame 1 to 2):</strong></p>
+
+        $${}^{1}_{2}T = \begin{bmatrix} c_2 & -s_2 & 0 & 0 \\ s_2 & c_2 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{1}P_2 = \begin{bmatrix} l_1 \\ 0 \\ 0 \end{bmatrix}, \quad {}^{2}P_{G_2} = \begin{bmatrix} l_2/2 \\ 0 \\ 0 \end{bmatrix}$$
+
+        $${}^{1}_{2}R = \begin{bmatrix} c_2 & -s_2 & 0 \\ s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}, \quad {}^{2}_{1}R = \begin{bmatrix} c_2 & s_2 & 0 \\ -s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+
+        <p><strong>End-effector (Frame 2 to 3):</strong></p>
+
+        $${}^{2}_{3}T = \begin{bmatrix} 1 & 0 & 0 & l_2 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad {}^{2}_{3}R = {}^{3}_{2}R = I_{3\times3} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}, \quad {}^{2}P_3 = \begin{bmatrix} l_2 \\ 0 \\ 0 \end{bmatrix}$$
+
+        <h4>Inertia Tensors (Slender Bars)</h4>
+
+        <p>From Slide 1, the inertia tensors of the links (which are slender bars) are:</p>
+
+        $${}^{G_1}I_1 = \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy_1} & 0 \\ 0 & 0 & I_{zz_1} \end{bmatrix} = \frac{1}{12}m_1 l_1^2\begin{bmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+
+        $${}^{G_2}I_2 = \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy_2} & 0 \\ 0 & 0 & I_{zz_2} \end{bmatrix} = \frac{1}{12}m_2 l_2^2\begin{bmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+
+        <div class="callout callout-definition">
+          <div class="callout-label">Note</div>
+          <p>$I_{xx_1} = I_{xx_2} = 0$</p>
+        </div>
+
+        <h4>Initial Conditions</h4>
+
+        <p>Given that the base is not rotating:</p>
+        $${}^{0}\vec{\omega}_0 = 0 = {}^{0}\dot{\vec{\omega}}_0$$
+
+        <p>Applying the gravity effect:</p>
+        $${}^{0}\dot{\vec{v}}_0 = \begin{bmatrix} 0 \\ g \\ 0 \end{bmatrix}$$
+        <p>(In the figure, $\hat{y}$ is the vertical axis.)</p>
+
+        <p>No forces/moments at end-effector:</p>
+        $${}^{3}\vec{f}_3 = {}^{3}\vec{n}_3 = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}$$
+
+        <h4>Outward Kinematics: $i = 0 \to 1$</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=7" target="_blank">PDF p.7</a>
+
+        <p><strong>Angular velocity of link 1 ($i=0$):</strong></p>
+        $${}^{1}\vec{\omega}_1 = {}^{1}_{0}R\,{}^{0}\vec{\omega}_0 + \dot{\theta}_1\,{}^{1}\hat{z}_1 = \vec{0} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix}$$
+
+        <p><strong>Angular acceleration of link 1:</strong></p>
+        $${}^{1}\dot{\vec{\omega}}_1 = {}^{1}_{0}R\,{}^{0}\dot{\vec{\omega}}_0 + {}^{1}_{0}R\,{}^{0}\vec{\omega}_0 \times \dot{\theta}_1\,{}^{1}\hat{z}_1 + \ddot{\theta}_1\,{}^{1}\hat{z}_1 = \vec{0} + \vec{0} + \begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 \end{bmatrix}$$
+
+        <p><strong>Linear acceleration (using Slide #20):</strong></p>
+        $${}^{1}\dot{\vec{v}}_1 = {}^{1}_{0}R\left({}^{0}\dot{\vec{\omega}}_0 \times {}^{0}P_1 + {}^{0}\vec{\omega}_0 \times ({}^{0}\vec{\omega}_0 \times {}^{0}P_1) + {}^{0}\dot{\vec{v}}_0\right)$$
+
+        $$= \begin{bmatrix} c_1 & s_1 & 0 \\ -s_1 & c_1 & 0 \\ 0 & 0 & 1 \end{bmatrix}\left(\vec{0} + \vec{0} + \begin{bmatrix} 0 \\ g \\ 0 \end{bmatrix}\right) = \begin{bmatrix} s_1 g \\ c_1 g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Linear acceleration of center of mass of link 1:</strong></p>
+        $${}^{1}\dot{\vec{v}}_{G_1} = {}^{1}\dot{\vec{\omega}}_1 \times {}^{1}P_{G_1} + {}^{1}\vec{\omega}_1 \times ({}^{1}\vec{\omega}_1 \times {}^{1}P_{G_1}) + {}^{1}\dot{\vec{v}}_1$$
+
+        $$= \begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} l_1/2 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \left(\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} l_1/2 \\ 0 \\ 0 \end{bmatrix}\right) + \begin{bmatrix} s_1 g \\ c_1 g \\ 0 \end{bmatrix}$$
+
+        $$= \begin{bmatrix} 0 \\ \ddot{\theta}_1(l_1/2) \\ 0 \end{bmatrix} + \begin{bmatrix} -\dot{\theta}_1^2(l_1/2) \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} s_1 g \\ c_1 g \\ 0 \end{bmatrix} = \begin{bmatrix} -\dot{\theta}_1^2(l_1/2) + s_1 g \\ \ddot{\theta}_1(l_1/2) + c_1 g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Force acting on link 1:</strong></p>
+        $${}^{1}\vec{F}_1 = m_1\,{}^{1}\dot{\vec{v}}_{G_1} = \begin{bmatrix} -\dot{\theta}_1^2 m_1(l_1/2) + s_1 m_1 g \\ \ddot{\theta}_1 m_1(l_1/2) + c_1 m_1 g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Torque acting on link 1:</strong></p>
+        $${}^{1}\vec{N}_1 = {}^{G_1}I_1\,{}^{1}\dot{\vec{\omega}}_1 + {}^{1}\vec{\omega}_1 \times {}^{G_1}I_1\,{}^{1}\vec{\omega}_1$$
+
+        $$= \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy_1} & 0 \\ 0 & 0 & I_{zz_1} \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy_1} & 0 \\ 0 & 0 & I_{zz_1} \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ I_{zz_1}\ddot{\theta}_1 \end{bmatrix}$$
+
+        <h4>Outward Kinematics: $i = 1$</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=8" target="_blank">PDF p.8</a>
+
+        <p><strong>Angular velocity of link 2:</strong></p>
+        $${}^{2}\vec{\omega}_2 = {}^{2}_{1}R\,{}^{1}\vec{\omega}_1 + \dot{\theta}_2\,{}^{2}\hat{z}_2 = \begin{bmatrix} c_2 & s_2 & 0 \\ -s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix}$$
+
+        <p><strong>Angular acceleration of link 2:</strong></p>
+        $${}^{2}\dot{\vec{\omega}}_2 = {}^{2}_{1}R\,{}^{1}\dot{\vec{\omega}}_1 + \ddot{\theta}_2\,{}^{2}\hat{z}_2 = \begin{bmatrix} c_2 & s_2 & 0 \\ -s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 + \ddot{\theta}_2 \end{bmatrix}$$
+
+        <p><strong>Linear acceleration of link 2:</strong></p>
+        $${}^{2}\dot{\vec{v}}_2 = {}^{2}_{1}R\left({}^{1}\dot{\vec{\omega}}_1 \times {}^{1}P_2 + {}^{1}\vec{\omega}_1 \times ({}^{1}\vec{\omega}_1 \times {}^{1}P_2) + {}^{1}\dot{\vec{v}}_1\right)$$
+
+        $$= \begin{bmatrix} c_2 & s_2 & 0 \\ -s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}\left(\begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} l_1 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 \end{bmatrix} \times \begin{bmatrix} l_1 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} s_1 g \\ c_1 g \\ 0 \end{bmatrix}\right)$$
+
+        $$= \begin{bmatrix} c_2 & s_2 & 0 \\ -s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}\begin{bmatrix} -\dot{\theta}_1^2 l_1 + s_1 g \\ \ddot{\theta}_1 l_1 + c_1 g \\ 0 \end{bmatrix} = \begin{bmatrix} -c_2\dot{\theta}_1^2 l_1 + s_2\ddot{\theta}_1 l_1 + s_{12}g \\ s_2\dot{\theta}_1^2 l_1 + c_2\ddot{\theta}_1 l_1 + c_{12}g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Linear acceleration of center of mass of link 2:</strong></p>
+        $${}^{2}\dot{\vec{v}}_{G_2} = {}^{2}\dot{\vec{\omega}}_2 \times {}^{2}P_{G_2} + {}^{2}\vec{\omega}_2 \times ({}^{2}\vec{\omega}_2 \times {}^{2}P_{G_2}) + {}^{2}\dot{\vec{v}}_2$$
+
+        $$= \begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 + \ddot{\theta}_2 \end{bmatrix} \times \begin{bmatrix} l_2/2 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} \times \left(\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} \times \begin{bmatrix} l_2/2 \\ 0 \\ 0 \end{bmatrix}\right) + \begin{bmatrix} -c_2\dot{\theta}_1^2 l_1 + s_2\ddot{\theta}_1 l_1 + s_{12}g \\ s_2\dot{\theta}_1^2 l_1 + c_2\ddot{\theta}_1 l_1 + c_{12}g \\ 0 \end{bmatrix}$$
+
+        $$= \begin{bmatrix} s_2\ddot{\theta}_1 l_1 - c_2\dot{\theta}_1^2 l_1 - (\dot{\theta}_1 + \dot{\theta}_2)^2(l_2/2) + s_{12}g \\ c_2\ddot{\theta}_1 l_1 + s_2\dot{\theta}_1^2 l_1 + (\dot{\theta}_1 + \dot{\theta}_2)^2(l_2/2) + c_{12}g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Force acting on link 2:</strong></p>
+        $${}^{2}\vec{F}_2 = m_2\,{}^{2}\dot{\vec{v}}_{G_2} = m_2\begin{bmatrix} s_2\ddot{\theta}_1 l_1 - c_2\dot{\theta}_1^2 l_1 - (\dot{\theta}_1 + \dot{\theta}_2)^2(l_2/2) + s_{12}g \\ c_2\ddot{\theta}_1 l_1 + s_2\dot{\theta}_1^2 l_1 + (\dot{\theta}_1 + \dot{\theta}_2)(l_2/2) + s_2\dot{\theta}_1^2 l_2 + c_{12}g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Torque acting on link 2:</strong></p>
+        $${}^{2}\vec{N}_2 = {}^{G_2}I_2\,{}^{2}\dot{\vec{\omega}}_2 + {}^{2}\vec{\omega}_2 \times {}^{G_2}I_2\,{}^{2}\vec{\omega}_2$$
+
+        $$= \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy_2} & 0 \\ 0 & 0 & I_{zz_2} \end{bmatrix}\begin{bmatrix} 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} \times \begin{bmatrix} 0 & 0 & 0 \\ 0 & I_{yy_2} & 0 \\ 0 & 0 & I_{zz_2} \end{bmatrix}\begin{bmatrix} 0 \\ 0 \\ \dot{\theta}_1 + \dot{\theta}_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ (\ddot{\theta}_1 + \ddot{\theta}_2)I_{zz_2} \end{bmatrix}$$
+
+        <h4>Inward Force Iterations: $i = 2 \to 1$</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=9" target="_blank">PDF p.9</a>
+
+        <p><strong>$i = 2$:</strong></p>
+
+        <p><strong>Force on link 2 joint:</strong></p>
+        $${}^{2}\vec{f}_2 = {}^{2}_{3}R\,{}^{3}\vec{f}_3 + {}^{2}\vec{F}_2 = m_2\begin{bmatrix} s_2\ddot{\theta}_1 l_1 - c_2\dot{\theta}_1^2 l_1 - (\dot{\theta}_1 + \dot{\theta}_2)^2(l_2/2) + s_{12}g \\ c_2\ddot{\theta}_1 l_1 + (\dot{\theta}_1 + \dot{\theta}_2)^2(l_2/2) + s_2\dot{\theta}_1^2 l_2 + c_{12}g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Moment on link 2:</strong></p>
+        $${}^{2}\vec{n}_2 = {}^{2}\vec{N}_2 + {}^{2}_{3}R\,{}^{3}\vec{n}_3 + {}^{2}P_{G_2} \times {}^{2}\vec{F}_2 + {}^{2}P_3 \times {}^{2}_{3}R\,{}^{3}\vec{f}_3$$
+
+        $$= \begin{bmatrix} 0 \\ 0 \\ (\ddot{\theta}_1 + \ddot{\theta}_2)I_{zz_2} \end{bmatrix} + \begin{bmatrix} l_2/2 \\ 0 \\ 0 \end{bmatrix} \times {}^{2}\vec{F}_2$$
+
+        <p><strong>Joint torque $\tau_2$ (for revolute joint):</strong></p>
+        $$\tau_2 = {}^{2}\vec{n}_2^T\,{}^{2}\hat{z}_2 = (\ddot{\theta}_1 + \ddot{\theta}_2)I_{zz_2} + (c_2 l_1 + l_2/2)\frac{l_2}{2}m_2\ddot{\theta}_1 + \frac{l_2^2}{4}m_2\ddot{\theta}_2 + s_2 l_1\frac{l_2}{2}m_2\dot{\theta}_1^2 + \frac{l_2}{2}c_{12}m_2 g \quad \text{...(Eq. 1)}$$
+
+        <p><strong>$i = 1$:</strong></p>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=9" target="_blank">PDF p.9</a>
+
+        <p><strong>Force on link 1 joint:</strong></p>
+        $${}^{1}\vec{f}_1 = {}^{1}_{2}R\,{}^{2}\vec{f}_2 + {}^{1}\vec{F}_1 = \begin{bmatrix} c_2 & -s_2 & 0 \\ s_2 & c_2 & 0 \\ 0 & 0 & 1 \end{bmatrix}{}^{2}\vec{f}_2 + \begin{bmatrix} -(l_1/2)m_1\dot{\theta}_1^2 + s_1 m_1 g \\ (l_1/2)m_1\ddot{\theta}_1 + c_1 m_1 g \\ 0 \end{bmatrix}$$
+
+        $$= \begin{bmatrix} -l_1 m_2\dot{\theta}_1^2 - c_2\frac{l_2}{2}m_2(\dot{\theta}_1 + \dot{\theta}_2)^2 + s_2\frac{l_2}{2}m_2(\ddot{\theta}_1 + \ddot{\theta}_2) - \frac{l_1}{2}m_1\dot{\theta}_1^2 + s_1 m_1 g + s_1 m_2 g \\ l_1 m_2\ddot{\theta}_1 - s_2\frac{l_2}{2}m_2(\dot{\theta}_1 + \dot{\theta}_2)^2 + c_2\frac{l_2}{2}m_2(\ddot{\theta}_1 + \ddot{\theta}_2) + \frac{l_1}{2}m_1\ddot{\theta}_1 + c_1 m_1 g + c_1 m_2 g \\ 0 \end{bmatrix}$$
+
+        <p><strong>Moment on link 1:</strong></p>
+        $${}^{1}\vec{n}_1 = {}^{1}\vec{N}_1 + {}^{1}_{2}R\,{}^{2}\vec{n}_2 + {}^{1}P_{G_1} \times {}^{1}\vec{F}_1 + {}^{1}P_2 \times {}^{1}_{2}R\,{}^{2}\vec{f}_2$$
+
+        $$= \begin{bmatrix} 0 \\ 0 \\ \ddot{\theta}_1 I_{zz_1} \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \tau_2 \end{bmatrix} + \begin{bmatrix} l_1/2 \\ 0 \\ 0 \end{bmatrix} \times {}^{1}\vec{F}_1 + \begin{bmatrix} l_1 \\ 0 \\ 0 \end{bmatrix} \times {}^{1}_{2}R\,{}^{2}\vec{f}_2$$
+
+        <p>The z-component gives:</p>
+        $$= I_{zz_1}\ddot{\theta}_1 + \tau_2 + \ddot{\theta}_1 m_1\frac{l_1^2}{4} + c_1\frac{l_1}{2}m_1 g + c_1 l_1 m_2 g + l_1^2 m_2\ddot{\theta}_1 - s_2\frac{l_2 l_1}{2}m_2(\dot{\theta}_1 + \dot{\theta}_2)^2 + c_2\frac{l_2 l_1}{2}m_2(\ddot{\theta}_1 + \ddot{\theta}_2)$$
+
+        <p><strong>Joint torque $\tau_1$:</strong></p>
+        $$\tau_1 = {}^{1}\vec{n}_1^T\,{}^{1}\hat{z}_1 = I_{zz_1}\ddot{\theta}_1 + \tau_2 + \ddot{\theta}_1 m_1\frac{l_1^2}{4} + c_1\frac{l_1}{2}m_1 g + c_2 l_1 m_2 g + l_1^2 m_2\ddot{\theta}_1$$
+
+        $$- s_2\frac{l_2 l_1}{2}m_2(\dot{\theta}_1 + \dot{\theta}_2)^2 + c_2\frac{l_2 l_1}{2}m_2(\ddot{\theta}_1 + \ddot{\theta}_2) \quad \text{...(Eq. 2)}$$
+
+        <h4>Final Matrix Form of Dynamic Equations</h4>
+        <a class="source-link" href="../Slides/MSE429 - Tutorials 6 (Solutions).pdf#page=10" target="_blank">PDF p.10</a>
+
+        <p>Writing the joint torques (from Eqs. 1 and 2) in matrix form:</p>
+
+        $$\begin{Bmatrix} \tau_1 \\ \tau_2 \end{Bmatrix} = \underbrace{\begin{bmatrix} I_{zz_1} + I_{zz_2} + \frac{l_2^2}{4}m_2 + l_1 l_2 c_2 m_2 + \frac{1}{2}l_1^2 m_1 + m_2 & I_{zz_2} + \frac{1}{4}m_2 l_2^2 + \frac{1}{2}m_2 c_2 l_1 l_2 \\ I_{zz_2} + \frac{1}{4}m_2 l_1^2 + \frac{1}{2}l_1 l_2 c_2 m_2 & I_{zz_2} + \frac{l_2^2}{4}m_2 \end{bmatrix}}_{M(\vec{\theta})}\begin{Bmatrix} \ddot{\theta}_1 \\ \ddot{\theta}_2 \end{Bmatrix}$$
+
+        $$+ \underbrace{\begin{Bmatrix} -\frac{1}{2}l_1 l_2 s_2 m_2\dot{\theta}_2^2 - l_1 l_2 s_2 m_2\dot{\theta}_1\dot{\theta}_2 \\ \frac{1}{2}l_1 l_2 s_2 m_2\dot{\theta}_1^2 \end{Bmatrix}}_{\vec{V}(\vec{\theta},\dot{\vec{\theta}})} + \underbrace{\begin{Bmatrix} \frac{1}{2}l_2 c_{12} m_2 + \frac{1}{2}l_1 c_1 m_1 + l_1 c_1 m_2 \\ \frac{1}{2}l_2 c_{12} m_2 \end{Bmatrix}}_{\vec{G}(\vec{\theta})}g$$
+
+        <p>The dynamic equations become:</p>
+        $$\vec{\tau} = [M(\vec{\theta})]\ddot{\vec{\theta}} + \vec{V}(\vec{\theta}, \dot{\vec{\theta}}) + \vec{G}(\vec{\theta})$$
+
+        <div class="callout callout-definition">
+          <div class="callout-label">Notation</div>
+          <ul>
+            <li>$[M(\vec{\theta})]$ is the $n \times n$ <strong>mass matrix</strong></li>
+            <li>$\vec{V}(\vec{\theta}, \dot{\vec{\theta}})$ is an $n \times 1$ vector which includes <strong>centrifugal and Coriolis terms</strong></li>
+            <li>$\vec{G}(\vec{\theta})$ is an $n \times 1$ vector which includes the <strong>gravitational terms</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RELATED CHAPTERS                                              -->
+    <!-- ============================================================ -->
+    <div class="related-practice">
+      <h3>Related Chapter</h3>
+      <p>This tutorial covers material from Chapter 6: Dynamics (Parallel Axis Theorem, Lagrangian Formulation, Newton-Euler Recursive Formulation).</p>
+    </div>
+
+    <nav class="page-nav"></nav>
+  </main>
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

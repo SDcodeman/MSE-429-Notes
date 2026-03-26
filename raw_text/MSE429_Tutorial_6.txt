@@ -1,0 +1,253 @@
+Problem 1: For the rectangular body shown, let the moment of inertia around be known known
+around C.G. where frame 𝐺 is locted. Use parallel axis therem to evaluate the inertia tensor with
+resepct to the a frame located at the lower left corner of it. Consider uniform density.
+
+
+
+
+                                           Problem 1 Page 1
+              Problem 2: Compute the closed form dynamic equation
+              of the two revolute jointed planar manipulator using the
+              Lagrangian formulation.
+
+              Characteristics of the system:
+                 • Assume the links to be slender bars.
+                 • Let the center of mass be in the middle of each
+                     link.
+                 • Assume the base is not rotating.
+                 • No forces or moments are being applied at the
+                     end-eﬀector.
+
+
+               d ∂L ∂L
+                      −    τ
+                           = i
+               dt ∂qi ∂qi
+               L = k1 + u1 + k2 − u2
+
+
+
+                     11 T 1           1
+    =k1                   vG1 m1 vG1 + 1ω1T 0 I1 1ω1
+                      2               2
+                        0 0       0
+               G1
+                  I1 = 0 I yy 0 
+                        
+                        0 0 I zz 
+                         0
+               1
+                   ω1 =  0 
+                         θ1 
+                    0  l1 / 2   0 
+  vG1 = ω1 × PG1 =  0  ×  0  = l1θ1 / 2 
+               1           1
+
+
+                    θ1   0   0 
+                                                 0 
+ 10 T 0           1                                           m1 (l1θ1 ) 2
+=   vG1 m1 vG1     =  m1 0 l1θ1 / 2    0  l1θ1 / 2 
+ 2                2                                               8
+                                                 0 
+                               0 0          0 0
+  ω1 I1 ω1 0 0 θ1  0
+ 1 T G1 1
+               =                   I yy 0   0  I zzθ12
+                               0 0 I zz  θ1 
+                        m1 (l1θ1 ) 2 I zzθ12
+         =k1                         +
+                            8            2
+        u1 = −m1 g T 0 PG1
+                                     l1c1 
+                                     2 
+                                     
+                                      ls         ls
+             =
+             − m1 [ 0 − g        0]  1 1  m1
+                                             = g 11
+                                     2          2
+                                     
+                                     
+                                     
+
+                12 T 2            1
+=k2                 vG 2 m2 vG 2 + 2ω2T G2 I 2 2ω2
+                2                 2
+                  0 0       0
+         G2
+            I 2 = 0 I yy 0 
+                  
+                  0 0 I zz 
+                0
+         2
+          ω2 =  0 
+                θ2 
+                                         c2          s2    0   0  l1   0  l2 / 2                         s2l1θ1            
+                                        −s                                                                                           
+         2
+           vG 2 =2
+                   R1 1v1 + 2ω2 × PG 2 = 2           c2    0   0  ×  0  +  0  ×  0  =                 
+                                                                                                          c2l1θ1 + l2 (θ1 + θ 2 ) / 2 
+                                         0          0     1  θ1   0  θ1 + θ2   0               0              
+                                                                                                                                       
+                                                                                            s2l1θ1          
+  12 T 2                 1                                                                                   
+    =vG 2 m  2 vG 2         m2  s2l1θ1 c2l1θ1 + l2 (θ1 + θ2 ) / 2 0  c2l1θ1 + l2 (θ1 + θ2 ) / 2 
+  2                      2
+                                                                                                0            
+                                                                                                             
+    1
+=     m2 [( s2l1θ1 ) 2 + (c2l1θ1 + l2 (θ1 + θ2 ) / 2)
+                                                    =     2
+                                                            ] m2 ((l1θ1 ) 2 / 2 + c2l1θ1l2 (θ1 + θ2 ) / 2 + (l2 (θ1 + θ2 )) 2 / 8)
+    2
+                                                  0 0         0  0 
+  1 2 T G2 2                                                                         1
+     ω2 I 2 ω2 0 0   =             θ1 + θ2  0 I yy 2 0   0 
+                                                                                  =     I zz 2 (θ      2
+                                                                                                   1 + θ2 )
+  2                                                                                  2
+                                                  0 0 I zz 2  θ1 + θ2 
+                                                                            2           2                     2          2
+       k
+       =   m (l θ ) 2 / 2 + m c l l θ 2 / 2 + m c l θ l θ / 2 + m2 (l2θ1 ) + m2 (l2θ 2 ) + m2l2θ1θ 2 + I zz 2θ 2 + I zz 2θ1 + I θ θ
+         2  2 1 1             2 2 1 2 1          2 2 1 1 2 2                                                                       zz 2 1 2
+                                                                        8             8           4            2           2
+u2 = −m2 g T 0 PG 2
+                          l2 c12 
+                   l1c1 + 2 
+                                 
+                          l2 s12                l2 c12
+   =
+   − m2 [ 0 − g 0] l1s1 +            m
+                                     =2 g (l1c1 +        )
+                             2                     2
+                         0       
+                                 
+                                
+
+
+
+                  m1 (l1θ1 ) 2 I zz1θ12                                                             m (l θ ) 2
+L = k1 + u1 + k2 − u2 =         +          + m2 (l1θ1 ) 2 / 2 + m2 c2l1l2θ12 + m2 c2l1θ1l2θ2 / 2 + 2 2 1
+                      8              2                                                                   8
+                 
+    m (l θ ) m l θ θ
+            2            I θ     2
+                                      I θ    2
+                                                                     ls                      ls
+   + 2 2 2 + 2 2 1 2 + zz 2 1 + zz 2 2 + I zz 2θ1θ2 − m1 g ( 1 1 ) − m2 g (l1s1 + 2 12 )
+        8       4              2          2                            2                       2
+
+
+
+d ∂L ∂L
+       −    τ
+            = i
+dt ∂qi ∂qi
+
+
+
+for θ1
+∂L m1l12θ1                                                              m l 2θ m l 2θ
+     =      + I zz1θ1 + m2l12θ1 / 2 + m2 c2l1l2θ1 + m2 c2l1l2θ2 / 2 + 2 2 1 + 2 2 2 + I zz 2θ1 + I zz 2θ2
+∂θ1   4                                                                   4        4
+
+                                                                                                                    2       2 
+d ∂L m1l12θ1            + m l 2θ / 2 − m s θ l l θ + m c l l θ − m s l l θ 2 / 2 + m c l l θ / 2 + m2l2 θ1 + m2l2 θ 2
+        =         + I    θ
+dt ∂θ1
+                      zz1 1    2 1 1          2 2 2 1 2 1     2 2 1 2 1     2 2 1 2 2          2 2 1 2 2
+             4                                                                                                    4          4
+          + I θ + I θ
+               zz 2 1    zz 2
+
+
+
+  ∂L      lc                   lc
+− = m1 g ( 1 1 ) + m2 g (l1c1 + 2 12 )
+  ∂θ1       2                    2
+
+
+
+     d ∂L ∂L m1l12θ1               2                                    m2l2 2θ1 m2l2 2θ2
+τ 1=        − =        + I zz1θ1 + m2l1 θ1 / 2 + m2 c2l1l2θ1 + m2 c2l1l2θ 2 / 2 +           +           + I zz 2θ1
+     dt ∂θ1 ∂θ1 4                                                                  4           4
+                      lc                   lc
+   + I zzθ2 + m1 g ( 1 1 ) + m2 g (l1c1 + 2 12 )
+                        2                    2
+ for θ 2
+∂L                    m2l22θ2 m2l2θ1
+=    m2 c2l1l2θ1 / 2 +         +        + I zz 2θ2 + I zz 2θ1
+∂θ2                     4        4
+
+                                                     2         
+ d ∂L
+         =
+         − m  s θ l l θ / 2 + m c l l θ / 2 + m2l2 θ 2 + m2l2θ1 + I θ + I θ
+ dt ∂θ2
+            2  2  2 1 2  1       2 2 1 2  1                            zz 2 2  zz 2 1
+                                                    4          4
+
+
+    ∂L                                               lc
+−        =
+         + m2 s2l1l2θ12 + m2 s2l1l2θ1θ2 / 2 + m2 g 2 12
+    ∂θ 2                                               2
+
+
+
+                                        2         
+τ2 =
+       d ∂L ∂L
+              =
+              −     m c l l  / 2 + m2l2 θ 2 + m2l2θ1 + I θ + I θ + m g l2 c12
+                            θ
+       dt ∂θ2 ∂θ 2
+                     2 2 1 2 1                            zz 2 2  zz 2 1  2
+                                       4          4                             2
+
+
+
+
+        m1l12                                          m2l2 2                                     m2l2 2          
+               + I      + m   l  / 2 + m  c    l l   +          + I        m    c  l l    / 2  +         + I zz 2  
+τ 1        4
+                    zz 1     2  1        2    2  1  2
+                                                            4
+                                                                     zz 2      2  2  1  2
+                                                                                                     4                θ1 
+τ  =                                                                                                               
+ 2                                   m2l2                                             m2l22                      θ2 
+                      m2 c2l1l2 / 2 +           + I zz 2                                       + I zz 2          
+                                           4                                                4
+                                                          l1c1                           l2 c12 
+                                                         m  (    )  +  m  ( l c   +           )
+           −m2 s2θ 2l1l2θ1 − m2 s2l1l2θ 2 / 2  
+                                            2                1
+                                                                 2
+                                                                           2    1  1
+                                                                                             2
+       +                                            +                                          g
+                       m2 s2l1l2θ12                                    l2 c12                 
+                                                                       m2
+                                                                            2                   
+Problem 3: Compute the closed form dynamic equation of the two revolute jointed
+planar manipulator using the Newton‐Euler recursive formulation.
+
+Characteristics of the system:
+  • Assume the links to be slender bars
+  • Let the center of mass be in the middle of each link
+  • Assume the base is not rotating
+  • No forces or moments are being applied at the end‐effector
+
+
+
+
+                                          Problem 3 Page 1
+Problem 3 Page 2
+problem 3 page 3
+Problem 3 Page 4
+Problem 3 Page 5
+

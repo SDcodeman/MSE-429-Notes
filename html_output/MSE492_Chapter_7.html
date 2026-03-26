@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch 7: Trajectory Generation &mdash; MSE 492</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});"></script>
+</head>
+<body>
+  <button class="sidebar-toggle">&#9776;</button>
+  <button class="theme-toggle"></button>
+  <nav class="sidebar"></nav>
+
+  <main class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+      <a href="index.html">Home</a><span class="sep">&rsaquo;</span>
+      MSE492<span class="sep">&rsaquo;</span>
+      Chapter 7
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+      <div class="progress-bar-label"></div>
+    </div>
+
+    <h1>Ch 7: Trajectory Generation
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=1" target="_blank">PDF p.1</a>
+    </h1>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <h2 id="overview">Overview
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=2" target="_blank">PDF p.2</a>
+    </h2>
+
+    <p>This chapter covers the following topics:</p>
+    <ul>
+      <li>Types of Trajectory Generation</li>
+      <li>Definition of Trajectory Generation</li>
+      <li>Types of Motion: Point to Point and Continuous Path</li>
+      <li>Point to Point
+        <ul>
+          <li>Cubic, Quintic, and Trapezoidal Schemes</li>
+        </ul>
+      </li>
+      <li>Continuous Path
+        <ul>
+          <li>Via Point and Cartesian</li>
+        </ul>
+      </li>
+    </ul>
+
+    <!-- Enrichment: Video Overview -->
+    <div class="callout callout-enrichment">
+      <div class="callout-label">Enrichment &mdash; Video: Trajectory Generation Overview (Modern Robotics)</div>
+      <p>The Modern Robotics video series by Kevin Lynch at Northwestern University provides an excellent parallel treatment of trajectory generation. The Chapter 9 videos cover the same core topics as this chapter (point-to-point trajectories, polynomial time scaling, trapezoidal profiles, via-point trajectories) but from a slightly different mathematical perspective using time-scaling functions.</p>
+      <p><strong>Recommended videos:</strong></p>
+      <ul>
+        <li><strong>Point-to-Point Trajectories (Part 1 of 2)</strong> &mdash; Introduces paths, trajectories, and time scaling; covers straight-line and screw-motion paths: <a href="https://youtu.be/1JRMqfEm79c" target="_blank">YouTube</a></li>
+        <li><strong>Point-to-Point Trajectories (Part 2 of 2)</strong> &mdash; Covers cubic, quintic, and trapezoidal time-scaling methods: <a href="https://youtu.be/0ZqeBEa_MWo" target="_blank">YouTube</a></li>
+        <li><strong>Polynomial Via Point Trajectories</strong> &mdash; Cubic polynomial interpolation through a sequence of timed via points: <a href="https://youtu.be/sWPpq9-5YOc" target="_blank">YouTube</a></li>
+      </ul>
+      <p>Full Chapter 9 playlist: <a href="https://www.youtube.com/playlist?list=PLggLP4f-rq00wo1z_Or2rRPAt1pStwmlY" target="_blank">YouTube Playlist</a></p>
+      <p><strong>Why watch this</strong>: Lynch uses the concept of a "time scaling" $s(t)$ that maps $[0, T] \to [0, 1]$, then parameterizes the path as $\theta(s)$. This separation of path shape from timing is a powerful abstraction that complements Craig's direct polynomial approach.</p>
+    </div>
+
+    <!-- Enrichment: References -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Textbook and Supplementary Sources</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; References</div>
+          <p>The primary textbook for this course is:</p>
+          <ul>
+            <li><strong>Craig, J.J.</strong> <em>Introduction to Robotics: Mechanics and Control</em>, 4th Edition, Pearson. Chapter 7 covers trajectory generation.</li>
+          </ul>
+          <p>Additional references:</p>
+          <ul>
+            <li><strong>Lynch, K.M. and Park, F.C.</strong> <em>Modern Robotics</em>, Cambridge University Press, 2017. Chapter 9. <a href="https://hades.mech.northwestern.edu/images/2/2e/MR-largefont-v2.pdf" target="_blank">Free PDF</a></li>
+            <li><strong>Clemson University Open Textbook</strong>: <a href="https://opentextbooks.clemson.edu/wangrobotics/chapter/trajectory-generation/" target="_blank">Trajectory Generation</a></li>
+            <li><strong>Stanford CS223A Handout 6</strong>: <a href="https://see.stanford.edu/materials/aiircs223a/handout6_Trajectory.pdf" target="_blank">Trajectory Generation</a></li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.1 TYPES OF PATH GENERATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-1">7.1 Types of Path Generation
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=3" target="_blank">PDF p.3</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Online Programming<span class="tooltip-content">The task of the robot is programmed online using a teach pendant. Several points (configurations) are defined and saved, then the robot moves sequentially through all the points.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: The task of the robot is programmed online using a teach pendant. Several points (configurations of the manipulator) are defined and saved. Then the robot is asked to move sequentially through all the points.</p>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Off-line Programming<span class="tooltip-content">Software is used to generate the codes that provide the trajectory of the task. Displacements are input as codes. Each manufacturer uses their own language.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: Software is used to generate the codes that provide the trajectory of the task. Displacements are input as codes. Each manufacturer of robot hardware uses their own software.
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=4" target="_blank">PDF p.4</a>
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Robot Brand</th><th>Language Name</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ABB</td><td>RAPID</td></tr>
+          <tr><td>Comau</td><td>PDL2</td></tr>
+          <tr><td>Fanuc</td><td>Karel</td></tr>
+          <tr><td>Kawasaki</td><td>AS</td></tr>
+          <tr><td>Kuka</td><td>KRL</td></tr>
+          <tr><td>Staubli</td><td>VAL3</td></tr>
+          <tr><td>Yaskawa</td><td>Inform</td></tr>
+        </tbody>
+      </table>
+
+      <p>Other languages such as C, Java, Python are also commonly used.</p>
+
+      <p><strong><span class="tooltip-term" tabindex="0">Sensor-based Programming<span class="tooltip-content">Accomplished by hand guiding the manipulator through space while sensors record each position. The robot replicates the motion. Autonomous robots use sensor data to make decisions in hostile environments.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: This can be accomplished by hand guiding the manipulator through space and the sensors record each position. The robot will eventually replicate the motion. Autonomous robots accomplish tasks in hostile environments by making decisions depending on the readings captured by sensors.
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=5" target="_blank">PDF p.5</a>
+      </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.2 TRAJECTORY GENERATION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-2">7.2 Trajectory Generation
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=7" target="_blank">PDF p.7</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Trajectory<span class="tooltip-content">A trajectory describes the desired motion of the manipulator: position, velocity, and acceleration of each degree of freedom as functions of time. It is a path combined with a time law.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: A trajectory describes the desired motion of the manipulator. This is position, velocity, and acceleration of each degree of freedom. The basic problem of trajectory generation is how to move the manipulator from an initial to a final position and orientation.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 7): Two side-by-side drawings of a multi-link robot arm. Left: initial configuration. Right: final configuration. Shows the arm in two distinct postures, illustrating the start and end of a trajectory (from Craig 2003).</div>
+
+    <!-- Enrichment: Path vs Trajectory -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Path vs. Trajectory &mdash; The Distinction</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>Students often confuse "path" and "trajectory." The distinction is important:</p>
+          <ul>
+            <li>A <strong>path</strong> is a purely geometric description &mdash; the set of configurations the robot passes through, with no notion of timing. Think of it as a curve in joint space (or task space).</li>
+            <li>A <strong>trajectory</strong> is a path combined with a time law &mdash; it specifies <em>where</em> the robot should be and <em>when</em> it should be there, along with velocities and accelerations at each instant.</li>
+          </ul>
+          <p>Mathematically: a path is $\theta(s)$ where $s \in [0, 1]$ is a path parameter, while a trajectory is $\theta(t)$ where $t$ is time. A trajectory is created by choosing a time-scaling function $s(t)$ and composing: $\theta(t) = \theta(s(t))$.</p>
+          <p><strong>Reference</strong>: Lynch &amp; Park, <em>Modern Robotics</em>, Section 9.1.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.3 MATHEMATICAL SCHEMES -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-3">7.3 Mathematical Schemes
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=8" target="_blank">PDF p.8</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Mathematical Scheme<span class="tooltip-content">A mathematical function (commonly a polynomial) used to establish the time history of a change in position and orientation of the manipulator.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: A mathematical function (commonly a polynomial) used to establish the time history of a change in position and orientation of the manipulator.</p>
+    </div>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Smoothness Requirement</div>
+      <p>In order to have smooth motion, the second time derivative of the scheme function (acceleration) must be continuous. Rough jerky motions tend to wear out the device.</p>
+    </div>
+
+    <p><strong>Per-Joint Application</strong>: The trajectory scheme is applied for each joint individually. For joint $k$:</p>
+    $$\theta_k(t) = f(t), \qquad \dot{\theta}_k(t) = f'(t), \qquad \ddot{\theta}_k(t) = f''(t)$$
+
+    <!-- Enrichment: Why Polynomials -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Why Polynomials? And How Many Degrees Do We Need?</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>Why polynomials?</strong> Polynomials are the natural choice for trajectory generation because:</p>
+          <ol>
+            <li><strong>They are infinitely differentiable</strong> &mdash; you can always compute velocity, acceleration, jerk, etc.</li>
+            <li><strong>Their coefficients can be solved from boundary conditions</strong> using simple linear algebra (a system of linear equations).</li>
+            <li><strong>They are computationally cheap</strong> to evaluate in real-time on a robot controller.</li>
+          </ol>
+          <p><strong>How to choose the polynomial degree:</strong> The degree of the polynomial is determined by the number of boundary conditions you need to satisfy:</p>
+          <table>
+            <thead>
+              <tr><th>Polynomial Degree</th><th># Coefficients</th><th>Constraints You Can Specify</th><th>Continuity Guaranteed</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Cubic (3rd order)</td><td>4</td><td>Position and velocity at start and end</td><td>$C^1$ (velocity continuous)</td></tr>
+              <tr><td>Quintic (5th order)</td><td>6</td><td>Position, velocity, and acceleration at start and end</td><td>$C^2$ (acceleration continuous)</td></tr>
+              <tr><td>Septic (7th order)</td><td>8</td><td>Position, velocity, acceleration, and jerk at start and end</td><td>$C^3$ (jerk continuous)</td></tr>
+            </tbody>
+          </table>
+          <p>The general rule: an $n$-th degree polynomial has $n+1$ coefficients, so it can satisfy $n+1$ boundary conditions.</p>
+          <p><strong>Reference</strong>: Craig, <em>Introduction to Robotics</em>, Chapter 7; also see <a href="https://www.cs.columbia.edu/~allen/F15/NOTES/trajectory.pdf" target="_blank">Columbia University trajectory planning notes</a>.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="mathematical-schemes">
+      <span class="concept-check-label">How well do you understand mathematical schemes and polynomial choice?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.4 TYPES OF MOTION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-4">7.4 Types of Motion
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=9" target="_blank">PDF p.9</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definitions</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Point-to-Point (PTP) Motion<span class="tooltip-content">A trajectory where each joint moves independently from each other. The resulting end-effector path is not controlled &mdash; it follows a curved path due to the nonlinear forward kinematics mapping.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: This trajectory is based on the joint variables. Each joint moves independently from each other, therefore the resulting end-effector path is not controlled.</p>
+      <p><strong><span class="tooltip-term" tabindex="0">Continuous Path (CP) Motion<span class="tooltip-content">The goal is to move the end-effector linearly along a particular path. Joints have to work together to accomplish the desired path. Requires inverse kinematics at each time step.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: The goal is to move the end-effector linearly along a particular path. Joints have to work together to accomplish the desired path.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 9): Two side-by-side photos of a Kuka robot arm. Left: PTP motion &mdash; the TCP follows a curved, uncontrolled path from $P_1$ to $P_2$. Right: CP motion &mdash; the TCP follows a straight line from $P_1$ to $P_2$.</div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does PTP motion produce a curved end-effector path?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>Even if $\theta_1(t)$ and $\theta_2(t)$ each vary smoothly and linearly in time, the end-effector position:</p>
+        $$x(t) = l_1 \cos\theta_1(t) + l_2 \cos(\theta_1(t) + \theta_2(t))$$
+        $$y(t) = l_1 \sin\theta_1(t) + l_2 \sin(\theta_1(t) + \theta_2(t))$$
+        <p>traces a curve in Cartesian space because the $\sin$ and $\cos$ functions are nonlinear. The only way to force a straight-line end-effector path is to plan the trajectory in Cartesian space (CP motion) and solve the inverse kinematics at each time step.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, Ch. 7</div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.5 POINT-TO-POINT MOTION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-5">7.5 Point-to-Point Motion
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=10" target="_blank">PDF p.10</a>
+    </h2>
+
+    <p>In PTP motion, each joint moves independently from each other; consequently the path followed is a function of the joint displacements. Since the desired path is usually established in terms of the end-effector space variables, the inverse kinematics is applied to describe the path in terms of the joint variables.</p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Equal-Time Constraint</div>
+      <p>The time required to move from point $P_1$ to point $P_2$ must be the same for each joint. For example, for a 2-revolute jointed robot, let $P_1 = [30 \;\; 45]^\mathsf{T}$ and $P_2 = [70 \;\; 25]^\mathsf{T}$, thus the change of displacement between postures is $\Delta P = [40 \;\; {-20}]^\mathsf{T}$ implying that joint 1 has to move twice as fast as joint 2.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 10): A diagram showing a 2-revolute jointed robot within its circular workspace. Points $P_1$ and $P_2$ are marked, connected by a curved path (the end-effector trajectory resulting from independent joint motion).</div>
+
+    <!-- ============================================================ -->
+    <!-- 7.6 CUBIC POLYNOMIAL SCHEME -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-6">7.6 Cubic Polynomial Scheme (PTP)
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=11" target="_blank">PDF p.11</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong>Cubic Polynomial Scheme</strong>: The simplest mathematical scheme. The goal is to establish the history of change in displacement, velocity, and acceleration of a joint during a specific period of time using a cubic polynomial.</p>
+    </div>
+
+    <!-- Step-by-step derivation: Cubic polynomial -->
+    <h3 id="sec-7-6-deriv">Cubic Polynomial Derivation</h3>
+
+    <div class="derivation-steps" id="deriv-ch7-cubic">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Define the cubic polynomial</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=11" target="_blank">PDF p.11</a>
+        <p>For joint $k$:</p>
+        $$q_k(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3 \quad \text{(Eq. 1)}$$
+        <p>where $q$ is the type of joint ($\theta$ for revolute and $d$ for prismatic), $k$ is the joint number, $a_i$ are coefficients (to be determined), and $t$ varies from initial time $t_0$ to final time $t_f$.</p>
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Take derivatives</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=11" target="_blank">PDF p.11</a>
+        <p>Velocity:</p>
+        $$\dot{q}_k(t) = a_1 + 2a_2 t + 3a_3 t^2 \quad \text{(Eq. 2)}$$
+        <p>Acceleration:</p>
+        $$\ddot{q}_k(t) = 2a_2 + 6a_3 t \quad \text{(Eq. 3)}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Establish boundary conditions</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=12" target="_blank">PDF p.12</a>
+        <p>For a cubic polynomial with four coefficients, four constraints can be satisfied. Two constraints define the initial and final positions:</p>
+        $$q_k(t_0) = q_{k_0} \quad \text{(Eq. 4)}$$
+        $$q_k(t_f) = q_{k_f} \quad \text{(Eq. 5)}$$
+        <p>The other two constraints specify the velocity (e.g., start and stop from rest):</p>
+        $$\dot{q}_k(t_0) = 0 \quad \text{(Eq. 6)}$$
+        $$\dot{q}_k(t_f) = 0 \quad \text{(Eq. 7)}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Solve for coefficients (zero velocity case)</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=13" target="_blank">PDF p.13</a>
+        <p>Combining Eqs. (4&ndash;7) with Eqs. (1&ndash;2). For the case with zero initial and final velocities (starting from $t_0 = 0$):</p>
+        $$a_0 = q_{k_0}$$
+        $$a_1 = 0$$
+        $$a_2 = \frac{3}{t_f^2}\left(q_{k_f} - q_{k_0}\right) \quad \text{(Eq. 8)}$$
+        $$a_3 = -\frac{2}{t_f^3}\left(q_{k_f} - q_{k_0}\right)$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 5: Generic case (nonzero velocities)</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=13" target="_blank">PDF p.13</a>
+        <p>With $\dot{q}_k(t_0) = \dot{q}_{k_0}$ and $\dot{q}_k(t_f) = \dot{q}_{k_f}$:</p>
+        $$a_0 = q_{k_0}$$
+        $$a_1 = \dot{q}_{k_0}$$
+        $$a_2 = \frac{3}{t_f^2}\left(q_{k_f} - q_{k_0}\right) - \frac{2}{t_f}\dot{q}_{k_0} - \frac{1}{t_f}\dot{q}_{k_f} \quad \text{(Eq. 9)}$$
+        $$a_3 = -\frac{2}{t_f^3}\left(q_{k_f} - q_{k_0}\right) + \frac{1}{t_f^2}\left(\dot{q}_{k_f} + \dot{q}_{k_0}\right)$$
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous Step</button>
+        <span class="step-counter">Step 1 of 5</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does the cubic scheme have 4 coefficients and 4 boundary conditions?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>An $n$-th degree polynomial has $n+1$ coefficients. A cubic ($n=3$) therefore has 4 coefficients ($a_0, a_1, a_2, a_3$), and you need exactly 4 equations (boundary conditions) to uniquely determine them. The 4 conditions are: initial position, final position, initial velocity, and final velocity.</p>
+        <p>This means you <strong>cannot</strong> independently specify initial and final accelerations with a cubic &mdash; there are not enough free parameters. That limitation is exactly what motivates the quintic polynomial scheme in Section 7.7.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, Ch. 7</div>
+      </div></div>
+    </div>
+
+    <!-- Worked Example: Cubic -->
+    <h3 id="sec-7-6-example">Worked Example: Cubic Polynomial PTP Trajectory
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=14" target="_blank">PDF p.14</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example</div>
+      <p><strong>Problem</strong>: A two-revolute jointed manipulator starts from rest and stops at the end of the trajectory. Initial joint angles $\boldsymbol{\theta}_0 = [10 \;\; 25]^\mathsf{T}$ deg, final joint angles $\boldsymbol{\theta}_f = [75 \;\; 60]^\mathsf{T}$ deg. Duration is 5 sec. Determine the trajectory.</p>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch7-cubic">Show Solution</button>
+    <div id="sol-ch7-cubic" class="solution-content">
+      <p><strong>Solution</strong>: Using Eq. 8 with zero initial and final velocities, $t_f = 5$ s:</p>
+      <p><strong>Joint 1</strong>: $q_{k_0} = 10°$, $q_{k_f} = 75°$</p>
+      $$a_0 = 10, \quad a_1 = 0, \quad a_2 = \frac{3}{25}(65) = 7.8, \quad a_3 = -\frac{2}{125}(65) = -1.04$$
+      <p><strong>Joint 2</strong>: $q_{k_0} = 25°$, $q_{k_f} = 60°$</p>
+      $$a_0 = 25, \quad a_1 = 0, \quad a_2 = \frac{3}{25}(35) = 4.2, \quad a_3 = -\frac{2}{125}(35) = -0.56$$
+      <p><strong>Result</strong>: The displacement profiles are smooth S-shaped curves. Velocity profiles are bell-shaped (parabolic), starting and ending at zero. However, the <strong>acceleration profile is discontinuous at the beginning and end</strong> &mdash; joints would require infinite jerks.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 15): Three side-by-side plots &mdash; Time vs Displacement (smooth S-curves), Time vs Velocity (bell-shaped curves peaking at $t = 2.5$ s), Time vs Acceleration (linear profiles with discontinuous jumps at $t = 0$ and $t = 5$ s).
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=15" target="_blank">PDF p.15</a>
+    </div>
+
+    <!-- Enrichment: Cubic coefficient proof -->
+    <div class="collapsible">
+      <div class="collapsible-header">Proof: Cubic Polynomial Coefficient Derivation (Matrix Form)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+          <p><strong>Setup</strong>: Given the generic cubic polynomial and its derivative with boundary conditions at $t_0 = 0$ and $t = t_f$:</p>
+          $$q(0) = a_0 = q_0$$
+          $$\dot{q}(0) = a_1 = \dot{q}_0$$
+          $$q(t_f) = a_0 + a_1 t_f + a_2 t_f^2 + a_3 t_f^3 = q_f$$
+          $$\dot{q}(t_f) = a_1 + 2a_2 t_f + 3a_3 t_f^2 = \dot{q}_f$$
+
+          <p><strong>Matrix form</strong> $\mathbf{M}\mathbf{a} = \mathbf{b}$:</p>
+          $$\begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 1 & t_f & t_f^2 & t_f^3 \\ 0 & 1 & 2t_f & 3t_f^2 \end{bmatrix} \begin{bmatrix} a_0 \\ a_1 \\ a_2 \\ a_3 \end{bmatrix} = \begin{bmatrix} q_0 \\ \dot{q}_0 \\ q_f \\ \dot{q}_f \end{bmatrix}$$
+
+          <p>From rows 1 and 2: $a_0 = q_0$ and $a_1 = \dot{q}_0$. Substituting into rows 3 and 4:</p>
+          $$a_2 t_f^2 + a_3 t_f^3 = q_f - q_0 - \dot{q}_0 t_f$$
+          $$2a_2 t_f + 3a_3 t_f^2 = \dot{q}_f - \dot{q}_0$$
+
+          <p>Solving this $2 \times 2$ system yields:</p>
+          $$\boxed{a_2 = \frac{3}{t_f^2}(q_f - q_0) - \frac{2}{t_f}\dot{q}_0 - \frac{1}{t_f}\dot{q}_f}$$
+          $$\boxed{a_3 = -\frac{2}{t_f^3}(q_f - q_0) + \frac{1}{t_f^2}(\dot{q}_f + \dot{q}_0)}$$
+
+          <p>These match Eq. 9 from the slides exactly. Setting $\dot{q}_0 = \dot{q}_f = 0$ recovers the zero-velocity case (Eq. 8).</p>
+          <p><strong>Reference</strong>: Craig, <em>Introduction to Robotics</em>, Chapter 7, Section 7.3.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="cubic-polynomial">
+      <span class="concept-check-label">How well do you understand the cubic polynomial scheme?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.7 QUINTIC POLYNOMIAL SCHEME -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-7">7.7 Quintic Polynomial Scheme (PTP)
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=16" target="_blank">PDF p.16</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Quintic Polynomial Scheme<span class="tooltip-content">A higher-order (5th degree) polynomial scheme often used in industrial applications. It allows satisfying six constraints: initial and final conditions for position, velocity, and acceleration. This guarantees $C^2$ continuity.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: A higher-order (5th degree) polynomial scheme often used in industrial applications. It allows satisfying six constraints: initial and final conditions for position, velocity, and acceleration.</p>
+    </div>
+
+    <!-- Step-by-step derivation: Quintic polynomial -->
+    <h3 id="sec-7-7-deriv">Quintic Polynomial Derivation</h3>
+
+    <div class="derivation-steps" id="deriv-ch7-quintic">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Define the quintic polynomial and its derivatives</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=16" target="_blank">PDF p.16</a>
+        $$q_k(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3 + a_4 t^4 + a_5 t^5$$
+        $$\dot{q}_k(t) = a_1 + 2a_2 t + 3a_3 t^2 + 4a_4 t^3 + 5a_5 t^4$$
+        $$\ddot{q}_k(t) = 2a_2 + 6a_3 t + 12a_4 t^2 + 20a_5 t^3$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Six boundary conditions</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=16" target="_blank">PDF p.16</a>
+        <p>Six boundary conditions can now be satisfied: initial and final position, velocity, and acceleration. This gives 6 equations for 6 unknowns ($a_0$ through $a_5$).</p>
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: General coefficients (starting from $t_0 = 0$)</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=16" target="_blank">PDF p.16</a>
+        $$a_0 = q_{k_0}$$
+        $$a_1 = \dot{q}_{k_0}$$
+        $$a_2 = \ddot{q}_{k_0}/2$$
+        $$a_3 = \frac{20(q_{k_f} - q_{k_0}) - (8\dot{q}_{k_f} + 12\dot{q}_{k_0})t_f + (\ddot{q}_{k_f} - 3\ddot{q}_{k_0})t_f^2}{2t_f^3}$$
+        $$a_4 = \frac{-30(q_{k_f} - q_{k_0}) + (14\dot{q}_{k_f} + 16\dot{q}_{k_0})t_f - (2\ddot{q}_{k_f} - 3\ddot{q}_{k_0})t_f^2}{2t_f^4}$$
+        $$a_5 = \frac{12(q_{k_f} - q_{k_0}) - (6\dot{q}_{k_f} + 6\dot{q}_{k_0})t_f + (\ddot{q}_{k_f} - \ddot{q}_{k_0})t_f^2}{2t_f^5}$$
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous Step</button>
+        <span class="step-counter">Step 1 of 3</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why does the quintic fix the acceleration discontinuity problem?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>The cubic polynomial only has 4 free coefficients, so it can only satisfy position and velocity at both endpoints &mdash; it has no control over acceleration. The acceleration ends up being a linear function that jumps discontinuously at the start and end.</p>
+        <p>The quintic has 6 coefficients, so it can additionally satisfy initial and final acceleration conditions. Setting $\ddot{q}(t_0) = \ddot{q}(t_f) = 0$ forces the acceleration to smoothly ramp from zero and return to zero, producing finite jerk everywhere. In practice, this means the motors change torque gradually, reducing vibration and wear.</p>
+        <div class="why-source">Source: Craig, <em>Introduction to Robotics</em>, Ch. 7 &middot; <a href="https://www.mathworks.com/help/robotics/ref/quinticpolytraj.html" target="_blank">MATLAB quinticpolytraj</a></div>
+      </div></div>
+    </div>
+
+    <!-- Worked Example: Quintic -->
+    <h3 id="sec-7-7-example">Worked Example: Quintic Polynomial PTP Trajectory
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=17" target="_blank">PDF p.17</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example</div>
+      <p><strong>Problem</strong>: Same setup as the cubic example. Two-revolute jointed manipulator starts from rest ($\dot{q} = 0$, $\ddot{q} = 0$) and stops at the end. Initial joint angles $\boldsymbol{\theta}_0 = [10 \;\; 25]^\mathsf{T}$ deg, final joint angles $\boldsymbol{\theta}_f = [75 \;\; 60]^\mathsf{T}$ deg. Duration is 5 sec.</p>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch7-quintic">Show Solution</button>
+    <div id="sol-ch7-quintic" class="solution-content">
+      <p><strong>Solution</strong>: With all initial and final velocities and accelerations equal to zero, the resulting profiles show that <strong>both velocity and acceleration start and end at zero</strong>, resolving the discontinuity problem of the cubic scheme.</p>
+      <p>The displacement profiles are smooth S-curves (similar shape to cubic but with different curvature). Velocity profiles are smooth bell curves. Acceleration profiles are smooth curves that start at zero, go positive, cross zero at midpoint, go negative, and return to zero &mdash; no discontinuities.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 18): Three side-by-side plots &mdash; Time vs Displacement (smooth S-curves), Time vs Velocity (smooth bell curves, both starting and ending at exactly zero), Time vs Acceleration (smooth curves with no discontinuities).
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=18" target="_blank">PDF p.18</a>
+    </div>
+
+    <!-- Enrichment: Quintic proof -->
+    <div class="collapsible">
+      <div class="collapsible-header">Proof: Quintic Polynomial Coefficient Derivation (Matrix Form)</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+          <p>The first three boundary conditions at $t_0 = 0$ immediately yield:</p>
+          $$q(0) = a_0 = q_0, \quad \dot{q}(0) = a_1 = \dot{q}_0, \quad \ddot{q}(0) = 2a_2 = \ddot{q}_0 \implies a_2 = \frac{\ddot{q}_0}{2}$$
+
+          <p>The remaining three conditions at $t = t_f$ form a $3 \times 3$ system for $(a_3, a_4, a_5)$:</p>
+          $$\begin{bmatrix} t_f^3 & t_f^4 & t_f^5 \\ 3t_f^2 & 4t_f^3 & 5t_f^4 \\ 6t_f & 12t_f^2 & 20t_f^3 \end{bmatrix} \begin{bmatrix} a_3 \\ a_4 \\ a_5 \end{bmatrix} = \begin{bmatrix} q_f - q_0 - \dot{q}_0 t_f - \frac{\ddot{q}_0}{2} t_f^2 \\ \dot{q}_f - \dot{q}_0 - \ddot{q}_0 t_f \\ \ddot{q}_f - \ddot{q}_0 \end{bmatrix}$$
+
+          <p>Inverting this $3 \times 3$ matrix (determinant $2t_f^9$) yields the closed-form expressions for $a_3$, $a_4$, $a_5$.</p>
+
+          <p><strong>Simplified case</strong> (all zero boundary velocities/accelerations): Let $h = q_f - q_0$:</p>
+          $$a_0 = q_0, \quad a_1 = 0, \quad a_2 = 0$$
+          $$a_3 = \frac{10h}{t_f^3}, \quad a_4 = \frac{-15h}{t_f^4}, \quad a_5 = \frac{6h}{t_f^5}$$
+
+          <p>These produce the time scaling $s(t) = 10\tau^3 - 15\tau^4 + 6\tau^5$ where $\tau = t/t_f$, which approximates the smoothness of human reaching movements.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Cubic vs Quintic comparison -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Cubic vs. Quintic &mdash; Direct Comparison</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <table>
+            <thead>
+              <tr><th>Property</th><th>Cubic</th><th>Quintic</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Degree</td><td>3</td><td>5</td></tr>
+              <tr><td>Free coefficients</td><td>4</td><td>6</td></tr>
+              <tr><td>Position continuity at endpoints</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Velocity continuity at endpoints</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Acceleration continuity at endpoints</td><td><strong>No</strong></td><td>Yes</td></tr>
+              <tr><td>Jerk ($\dddot{q}$) at start/end</td><td><strong>Infinite</strong></td><td>Finite</td></tr>
+              <tr><td>Peak velocity (same displacement, same duration)</td><td>Lower (~$1.5 \frac{\Delta q}{t_f}$)</td><td>Higher (~$1.88 \frac{\Delta q}{t_f}$)</td></tr>
+            </tbody>
+          </table>
+          <p><strong>The critical practical issue</strong>: A cubic trajectory has a <em>linear</em> acceleration profile that jumps discontinuously at $t = 0$ and $t = t_f$. This means infinite jerk, which excites structural vibrations, causes excessive wear, and can trigger safety stops on industrial controllers. The quintic eliminates this entirely.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz: Cubic vs Quintic -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>What is the key limitation of the cubic polynomial scheme that the quintic scheme fixes?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">The cubic cannot match initial and final positions</button>
+        <button class="quiz-option" data-correct="false">The cubic produces oscillations in the position profile</button>
+        <button class="quiz-option" data-correct="true">The cubic has discontinuous acceleration (infinite jerk) at the start and end</button>
+        <button class="quiz-option" data-correct="false">The cubic requires more coefficients than the quintic</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! The cubic has only 4 coefficients, so it cannot independently set acceleration at the endpoints. The result is a linear acceleration that jumps discontinuously, producing infinite jerk." data-incorrect="Not quite. The cubic matches positions and velocities just fine, and has fewer (not more) coefficients. The issue is that acceleration is discontinuous at the endpoints."></div>
+    </div>
+
+    <div class="concept-check" data-concept="quintic-polynomial">
+      <span class="concept-check-label">How well do you understand the quintic polynomial scheme?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.8 TRAPEZOIDAL SCHEME -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-8">7.8 Trapezoidal Scheme (PTP)
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=19" target="_blank">PDF p.19</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Trapezoidal Scheme<span class="tooltip-content">Also called Linear Segment with Parabolic Blends (LSPB). The velocity profile has a trapezoidal shape: ramp up (acceleration), constant velocity (cruise), ramp down (deceleration). Widely used in industry for its simplicity.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span> (Linear Segment with Parabolic Blends)</strong>: This scheme is based on having a linear function with parabolic blends to maintain a smooth path. The velocity profile has a trapezoidal shape. The trajectory is composed of three phases:</p>
+      <ol>
+        <li><strong>Acceleration phase</strong> (initial phase)</li>
+        <li><strong>Constant velocity phase</strong> (middle phase)</li>
+        <li><strong>Deceleration phase</strong> (final phase)</li>
+      </ol>
+      <p><strong><span class="tooltip-term" tabindex="0">Blend time $t_b$<span class="tooltip-content">The duration of the acceleration and deceleration phases in the trapezoidal scheme. Both phases have equal duration by symmetry.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: The duration of the acceleration and deceleration phases is equal, denoted $t_b$.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 19): Displacement vs. time plot showing the S-shaped trajectory composed of three phases &mdash; parabolic blend (acceleration), linear segment (constant velocity), parabolic blend (deceleration).
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=19" target="_blank">PDF p.19</a>
+    </div>
+
+    <!-- Step-by-step derivation: Trapezoidal -->
+    <h3 id="sec-7-8-deriv">Trapezoidal Scheme Derivation</h3>
+
+    <div class="derivation-steps" id="deriv-ch7-trap">
+      <div class="derivation-step visible">
+        <div class="step-label">Step 1: Equal acceleration/deceleration magnitudes</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=20" target="_blank">PDF p.20</a>
+        <p>Since the duration of the acceleration and deceleration phases is equal:</p>
+        $$|\ddot{\theta}_k(t_b)| = |\ddot{\theta}_k(t_f - t_b)|$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 2: Velocity matching at phase transitions</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=20" target="_blank">PDF p.20</a>
+        <p>The magnitude of the velocity during the transition of the phases must be the same:</p>
+        $$\ddot{\theta}_{k_b} \, t_b = \frac{\theta_{k_h} - \theta_{k_b}}{t_h - t_b}$$
+        <p>where subscript $h$ represents the halfway point:</p>
+        $$\theta_{k_h} = \frac{\theta_{k_0} + \theta_{k_f}}{2}, \qquad t_h = \frac{t_f}{2}$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 3: Parabolic blend position</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=21" target="_blank">PDF p.21</a>
+        <p>Since the blends are parabolic and $\dot{\theta}_k(t_0) = 0$:</p>
+        $$\theta_{k_b} = \theta_{k_0} + \frac{1}{2}\ddot{\theta}_{k_b} \, t_b^2$$
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 4: Combine to get quadratic in $t_b$</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=21" target="_blank">PDF p.21</a>
+        <p>Combining the previous equations yields:</p>
+        $$\ddot{\theta}_{k_b} \, t_b^2 - \ddot{\theta}_{k_b} \, t_f \, t_b + (\theta_{k_f} - \theta_{k_0}) = 0 \quad \text{(Eq. *)}$$
+        <p>where $t_b$ and $\ddot{\theta}_{k_b}$ are unknown variables.</p>
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 5: Solve for $t_b$</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=21" target="_blank">PDF p.21</a>
+        <p>Usually $\ddot{\theta}_{k_b}$ is prescribed and $t_b$ is found with Eq. (*):</p>
+        $$t_b = \frac{t_f}{2} - \frac{\sqrt{(\ddot{\theta}_{k_b} \, t_f)^2 - 4\ddot{\theta}_{k_b}(\theta_{k_f} - \theta_{k_0})}}{2\ddot{\theta}_{k_b}}$$
+        <p>Make sure the term inside the square root is positive.</p>
+      </div>
+
+      <div class="derivation-step">
+        <div class="step-label">Step 6: Ensuring real solutions</div>
+        <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=22" target="_blank">PDF p.22</a>
+        <p>Define $\ddot{\theta}_{k_b}$ as:</p>
+        $$\ddot{\theta}_{k_b} = \frac{4(\theta_{k_f} - \theta_{k_0})}{t_f^2} \, f_b \qquad \text{with} \quad f_b \geq 1$$
+        <p>Set $f_b$, find $\ddot{\theta}_{k_b}$, then solve for $t_b$.</p>
+      </div>
+
+      <div class="step-controls">
+        <button class="step-btn step-prev" disabled>Previous Step</button>
+        <span class="step-counter">Step 1 of 6</span>
+        <button class="step-btn step-next">Next Step</button>
+        <button class="step-btn step-show-all">Show All</button>
+      </div>
+    </div>
+
+    <!-- Piecewise equations table -->
+    <h3 id="sec-7-8-piecewise">Piecewise Equations
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=22" target="_blank">PDF p.22</a>
+    </h3>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">Trapezoidal Scheme Piecewise Equations</div>
+      <table>
+        <thead>
+          <tr><th>Phase</th><th>Displacement</th><th>Velocity</th><th>Acceleration</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$0 \leq t \leq t_b$</td>
+            <td>$\theta_k(t) = \theta_{k_0} + \frac{1}{2}\ddot{\theta}_{k_b} \, t^2$</td>
+            <td>$\dot{\theta}_k(t) = \ddot{\theta}_{k_b} \, t$</td>
+            <td>$\ddot{\theta}_k(t) = \ddot{\theta}_{k_b}$</td>
+          </tr>
+          <tr>
+            <td>$t_b \leq t \leq t_f - t_b$</td>
+            <td>$\theta_k(t) = \theta_{k_0} + \ddot{\theta}_{k_b} \, t_b\!\left(t - \frac{t_b}{2}\right)$</td>
+            <td>$\dot{\theta}_k(t) = \ddot{\theta}_{k_b} \, t_b$</td>
+            <td>$\ddot{\theta}_k(t) = 0$</td>
+          </tr>
+          <tr>
+            <td>$t_f - t_b \leq t \leq t_f$</td>
+            <td>$\theta_k(t) = \theta_{k_f} - \frac{1}{2}\ddot{\theta}_{k_b}(t_f - t)^2$</td>
+            <td>$\dot{\theta}_k(t) = \ddot{\theta}_{k_b}(t_f - t)$</td>
+            <td>$\ddot{\theta}_k(t) = -\ddot{\theta}_{k_b}$</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="why-box">
+      <button class="why-toggle">Why is the trapezoidal scheme so popular in industry despite having step-function acceleration?</button>
+      <div class="why-content"><div class="why-content-inner">
+        <p>The trapezoidal scheme has <strong>two major practical advantages</strong>:</p>
+        <ol>
+          <li><strong>Simplicity</strong>: Only 3 parameters are needed ($\ddot{\theta}_b$, $t_b$, $t_f$), and the piecewise equations are trivially cheap to evaluate in real time.</li>
+          <li><strong>Optimal use of actuator capacity</strong>: During each phase, the actuator operates at either maximum acceleration, zero acceleration, or maximum deceleration &mdash; it is a time-optimal profile under constant acceleration limits.</li>
+        </ol>
+        <p>The acceleration discontinuities <em>are</em> a drawback, but for many industrial applications (pick-and-place, palletizing) the speeds are moderate enough that the resulting jerk is tolerable. For smoother motion, industry uses S-curve profiles (7-segment) that add ramp segments to the acceleration.</p>
+        <div class="why-source">Source: PMD Corp, <a href="https://www.pmdcorp.com/resources/type/articles/get/mathematics-of-motion-control-profiles-article" target="_blank">"Mathematics of Motion Control Profiles"</a></div>
+      </div></div>
+    </div>
+
+    <!-- Worked Example: Trapezoidal -->
+    <h3 id="sec-7-8-example">Worked Example: Trapezoidal PTP Trajectory
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=23" target="_blank">PDF p.23</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example</div>
+      <p><strong>Problem</strong>: Same setup as before. Two-revolute jointed manipulator starts from rest and stops at the end. Initial joint angles $\boldsymbol{\theta}_0 = [10 \;\; 25]^\mathsf{T}$ deg, final joint angles $\boldsymbol{\theta}_f = [75 \;\; 60]^\mathsf{T}$ deg. Duration is 5 sec. Determine the trajectory using a trapezoidal scheme.</p>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch7-trap">Show Solution</button>
+    <div id="sol-ch7-trap" class="solution-content">
+      <p><strong>Solution</strong>: Using the trapezoidal scheme equations with prescribed acceleration. The resulting profiles show the characteristic three-phase behavior: displacement has a distinct linear middle section, velocity is trapezoidal, and acceleration is a step function.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 24): Three side-by-side plots &mdash; Time vs Displacement (S-curves with linear middle section), Time vs Velocity (trapezoidal profiles), Time vs Acceleration (step functions).
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=24" target="_blank">PDF p.24</a>
+    </div>
+
+    <!-- Enrichment: Trapezoidal blend time proof -->
+    <div class="collapsible">
+      <div class="collapsible-header">Proof: Trapezoidal Blend Time Derivation</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Proof</div>
+          <p><strong>Goal</strong>: Find the blend time $t_b$ given a prescribed acceleration $\ddot{\theta}_b$ and total time $t_f$.</p>
+
+          <p><strong>Step 1</strong>: The velocity at the end of the acceleration phase equals the cruise velocity:</p>
+          $$v_{cruise} = \ddot{\theta}_b \cdot t_b$$
+
+          <p><strong>Step 2</strong>: Total displacement is the sum of all three phases:</p>
+          $$\Delta\theta = \theta_f - \theta_0 = \underbrace{\frac{1}{2}\ddot{\theta}_b t_b^2}_{\text{accel.}} + \underbrace{\ddot{\theta}_b t_b (t_f - 2t_b)}_{\text{cruise}} + \underbrace{\frac{1}{2}\ddot{\theta}_b t_b^2}_{\text{decel.}}$$
+
+          <p><strong>Step 3</strong>: Simplify:</p>
+          $$\Delta\theta = \ddot{\theta}_b t_b t_f - \ddot{\theta}_b t_b^2$$
+
+          <p><strong>Step 4</strong>: Rearrange to the quadratic in $t_b$:</p>
+          $$\ddot{\theta}_b t_b^2 - \ddot{\theta}_b t_f t_b + \Delta\theta = 0$$
+
+          <p>Applying the quadratic formula and taking the minus sign (to ensure $t_b < t_f/2$):</p>
+          $$t_b = \frac{t_f}{2} - \frac{\sqrt{\ddot{\theta}_b^2 t_f^2 - 4\ddot{\theta}_b \Delta\theta}}{2\ddot{\theta}_b}$$
+
+          <p><strong>Physical interpretation of $f_b$</strong>: When $f_b = 1$, the blend time equals $t_f/2$, meaning the cruise phase has zero duration and the velocity profile becomes <em>triangular</em>. As $f_b$ increases, $t_b$ decreases, and the cruise phase gets longer.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Trapezoidal vs S-curve -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Trapezoidal vs. S-Curve Profiles in Industry</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <table>
+            <thead>
+              <tr><th>Property</th><th>Trapezoidal (3-segment)</th><th>S-Curve (7-segment)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Velocity profile shape</td><td>Trapezoid (sharp corners)</td><td>Trapezoid with rounded corners</td></tr>
+              <tr><td>Acceleration</td><td>Piecewise constant (step function)</td><td>Piecewise linear (continuous)</td></tr>
+              <tr><td>Jerk</td><td>Infinite at transitions</td><td>Finite (bounded constant)</td></tr>
+              <tr><td>Vibration excitation</td><td>Higher</td><td>Significantly lower</td></tr>
+              <tr><td>Implementation complexity</td><td>Simple</td><td>Moderate</td></tr>
+            </tbody>
+          </table>
+          <p>Modern industrial controllers (KUKA, ABB, Fanuc, etc.) typically offer both profile types, with S-curve profiles preferred for applications requiring smooth motion and low vibration.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz: Trapezoidal -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>In the trapezoidal velocity scheme, what happens when $f_b = 1$ (minimum acceleration)?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">The trajectory becomes a pure cubic polynomial</button>
+        <button class="quiz-option" data-correct="true">The velocity profile becomes triangular (no constant-velocity phase)</button>
+        <button class="quiz-option" data-correct="false">The blend time $t_b$ equals zero</button>
+        <button class="quiz-option" data-correct="false">The acceleration becomes infinite</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! When $f_b = 1$, the acceleration is at its minimum feasible value and $t_b = t_f/2$, so the cruise phase has zero duration. The velocity ramps up and immediately ramps down, forming a triangle." data-incorrect="Not quite. When $f_b = 1$, the blend time $t_b = t_f/2$, meaning the acceleration and deceleration phases fill the entire trajectory with no room for a constant-velocity cruise phase."></div>
+    </div>
+
+    <div class="concept-check" data-concept="trapezoidal-scheme">
+      <span class="concept-check-label">How well do you understand the trapezoidal scheme?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.9 CONTINUOUS PATH MOTION -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-9">7.9 Continuous Path (CP) Motion
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=25" target="_blank">PDF p.25</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong>Continuous Path (CP) Motion</strong>: Used in applications where the end-effector must follow a straight line (e.g., arc welding, spray painting). In CP motion, joints have to work together to accomplish the desired path.</p>
+      <p>A continuous path can be generated following two different methods:</p>
+      <ul>
+        <li><strong>Via Points Scheme</strong> (Joint Space)</li>
+        <li><strong>Cartesian Scheme</strong> (Task Space)</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.10 VIA POINTS -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-10">7.10 Via Points (CP)
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=26" target="_blank">PDF p.26</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong><span class="tooltip-term" tabindex="0">Via Points<span class="tooltip-content">Intermediate points that divide a desired path into segments. Each segment between via points can use polynomial schemes. Via points enable piecewise trajectory planning while approximating a continuous path.<span class="tooltip-source">Craig, <em>Introduction to Robotics</em>, Ch. 7</span></span></span></strong>: A practical solution to generating a straight path is to divide the line into multiple points that are connected. Each segment between via points can use the polynomial schemes seen before.</p>
+    </div>
+
+    <p><strong>Problem with individual segments</strong>: Having individual segments implies that the manipulator stops at every point, which is not desired.</p>
+
+    <p><strong>Solutions for continuous motion</strong>:</p>
+    <ul>
+      <li>Prescribed Velocity (Section 7.11)</li>
+      <li>Matching Velocity and Accelerations (Section 7.12)</li>
+    </ul>
+
+    <!-- Enrichment: Why via points -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Why Via Points Are Necessary for Continuous Paths</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>Why not just use a single high-degree polynomial to connect the start and end?</p>
+          <ol>
+            <li><strong>Runge's phenomenon</strong>: High-degree polynomials tend to oscillate wildly between interpolation points. Piecewise low-degree polynomials avoid this.</li>
+            <li><strong>Obstacle avoidance</strong>: Via points allow the path to be shaped around obstacles in the workspace.</li>
+            <li><strong>Geometric fidelity</strong>: More via points along a line keep the actual path closer to the desired straight line.</li>
+            <li><strong>Real-time computation</strong>: Solving for 4 or 8 coefficients per segment is cheap. Solving for 50+ coefficients in one polynomial is numerically ill-conditioned.</li>
+          </ol>
+          <p>This is the same idea behind <em>cubic spline interpolation</em> in numerical analysis.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.11 VIA POINTS: PRESCRIBED VELOCITY -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-11">7.11 Via Points: Prescribed Velocity (CP)
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=27" target="_blank">PDF p.27</a>
+    </h2>
+
+    <p><strong>Prescribed Velocity at Via Point</strong>: A simple solution where the velocity between two joint segments is prescribed. Each segment is defined by a cubic polynomial scheme.</p>
+
+    <h3 id="sec-7-11-deriv">Two Cubic Segments with Prescribed Velocity</h3>
+
+    <p>Segment 1 (initial to via point):</p>
+    $$q_{k_1}(t) = a_{10} + a_{11}t + a_{12}t^2 + a_{13}t^3$$
+    <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=27" target="_blank">PDF p.27</a>
+
+    <p>Segment 2 (via point to final):</p>
+    $$q_{k_2}(t) = a_{20} + a_{21}t + a_{22}t^2 + a_{23}t^3$$
+
+    <p>The velocity at the via point is the same at the end of segment 1 and the beginning of segment 2:</p>
+    $$\dot{q}_{k_v} = \dot{q}_{k_1}(t_{f_1}) = \dot{q}_{k_2}(0)$$
+
+    <h4>Segment 1 Coefficients
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=28" target="_blank">PDF p.28</a>
+    </h4>
+    $$a_{10} = q_{k_0}, \quad a_{11} = 0$$
+    $$a_{12} = \frac{3}{t_{f_1}^2}(q_{k_v} - q_{k_0}) - \frac{1}{t_{f_1}}\dot{q}_{k_v}$$
+    $$a_{13} = -\frac{2}{t_{f_1}^3}(q_{k_v} - q_{k_0}) + \frac{1}{t_{f_1}^2}(\dot{q}_{k_v})$$
+
+    <h4>Segment 2 Coefficients</h4>
+    $$a_{20} = q_{k_v}, \quad a_{21} = \dot{q}_{k_v}$$
+    $$a_{22} = \frac{3}{t_{f_2}^2}(q_{k_f} - q_{k_v}) - \frac{2}{t_{f_2}}\dot{q}_{k_v}$$
+    $$a_{23} = -\frac{2}{t_{f_2}^3}(q_{k_f} - q_{k_v}) + \frac{1}{t_{f_2}^2}(\dot{q}_{k_v})$$
+
+    <!-- Worked Example: Prescribed velocity = 0 -->
+    <h3 id="sec-7-11-example1">Worked Example: Prescribed Velocity $\dot{\theta}_v = 0$
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=29" target="_blank">PDF p.29</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example</div>
+      <p><strong>Problem</strong>: Let $\theta_0 = 5°$, $\theta_v = 15°$, and $\theta_f = -10°$. Assume the velocity at the via point is $\dot{\theta}_v = 0$. The duration per segment is 2 seconds.</p>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch7-via1">Show Solution</button>
+    <div id="sol-ch7-via1" class="solution-content">
+      <p><strong>Segment 1</strong> ($\dot{\theta}_0 = 0$):</p>
+      $$a_{10} = 5, \quad a_{11} = 0, \quad a_{12} = \frac{3}{4}(10) = \frac{15}{2}, \quad a_{13} = -\frac{2}{8}(10) = -\frac{5}{2}$$
+
+      <p><strong>Segment 2</strong> ($\dot{\theta}_g = 0$):</p>
+      $$a_{20} = 15, \quad a_{21} = 0, \quad a_{22} = \frac{3}{4}(-25) = -\frac{75}{4}, \quad a_{23} = -\frac{2}{8}(-25) = \frac{25}{4}$$
+
+      <p><strong>Result</strong>: Position goes from 5 to 15 deg, then from 15 to -10 deg. Velocity is zero at start, via, and end. <strong>Acceleration is discontinuous at the via point</strong> ($t = 2$ s).</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 30): Single plot with position (solid), velocity (dash-dot), and acceleration (dotted) vs. time. Acceleration is discontinuous at the via point.
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=30" target="_blank">PDF p.30</a>
+    </div>
+
+    <!-- Worked Example: Prescribed velocity = -10 -->
+    <h3 id="sec-7-11-example2">Worked Example: Prescribed Velocity $\dot{\theta}_v = -10$
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=31" target="_blank">PDF p.31</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example</div>
+      <p><strong>Problem</strong>: Same as above, but now the velocity at the via point is $\dot{\theta}_v = -10$.</p>
+      <p><strong>Result</strong>: The prescribed non-zero velocity changes the shape of all profiles. The position curve is smoother through the via point. The velocity is continuous but the <strong>acceleration still has a discontinuity</strong> at the via point.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 31): Similar layout. Position curve is smoother through the via point. Velocity passes through $-10$ deg/s at $t = 2$ s. Acceleration still shows discontinuity.
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=31" target="_blank">PDF p.31</a>
+    </div>
+
+    <!-- Enrichment: Acceleration discontinuity -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: The Acceleration Discontinuity Problem at Via Points</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>Why does the discontinuity occur?</strong> Each segment is an independent cubic polynomial with its own 4 boundary conditions. The two segments share position and velocity at the via point, but there is no constraint linking their accelerations. At the via point:</p>
+          <ul>
+            <li>Segment 1's acceleration: $\ddot{q}_1(t_{f_1}) = 2a_{12} + 6a_{13} t_{f_1}$</li>
+            <li>Segment 2's acceleration: $\ddot{q}_2(0) = 2a_{22}$</li>
+          </ul>
+          <p>These are generally different, producing a step change in acceleration (impulsive jerk).</p>
+          <p><strong>The fix</strong>: To eliminate this, you need one more constraint (acceleration matching) at each via point. Section 7.12 solves both segments simultaneously as a coupled system.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz: Via Points -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>In the prescribed-velocity via-point method, why is acceleration discontinuous at the via point?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">The polynomial degree is too high</button>
+        <button class="quiz-option" data-correct="false">The via-point position is not matched between segments</button>
+        <button class="quiz-option" data-correct="true">Each segment is solved independently with no constraint linking their accelerations at the via point</button>
+        <button class="quiz-option" data-correct="false">The cubic polynomial cannot produce continuous velocity</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! Each cubic segment uses its 4 boundary conditions for position and velocity at its two endpoints. With no leftover constraint to match acceleration, the accelerations at the via point are generally different." data-incorrect="Not quite. The position and velocity are matched at the via point. The issue is that each segment is solved independently with 4 conditions, leaving no constraint for acceleration continuity."></div>
+    </div>
+
+    <div class="concept-check" data-concept="via-points">
+      <span class="concept-check-label">How well do you understand via-point trajectories?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.12 VIA POINTS: MATCHING VEL/ACC -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-12">7.12 Via Points: Matching Velocities and Accelerations (CP)
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=32" target="_blank">PDF p.32</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong>Matching Velocities and Accelerations</strong>: An alternative approach where, instead of prescribing velocity at the via point, conditions are combined between segments so that both velocity and acceleration are continuous at the via point. This eliminates acceleration discontinuities.</p>
+    </div>
+
+    <h3 id="sec-7-12-deriv">Derivation: 8x8 Coupled System</h3>
+
+    <p>For a two-cubic polynomial trajectory, there are <strong>8 coefficients</strong> and therefore 8 conditions can be satisfied.
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=32" target="_blank">PDF p.32</a>
+    </p>
+
+    <div class="callout callout-theorem">
+      <div class="callout-label">8 Boundary Conditions</div>
+      <p><strong>At initial configuration:</strong></p>
+      <ul>
+        <li>$q_{k_1}(0) = q_{k_0}$ (initial position)</li>
+        <li>$\dot{q}_{k_1}(0) = 0$ (starts from rest)</li>
+      </ul>
+      <p><strong>At via point:</strong></p>
+      <ul>
+        <li>$q_{k_1}(t_{f_1}) = q_{k_v}$ (segment 1 ends at via)</li>
+        <li>$q_{k_2}(0) = q_{k_v}$ (segment 2 starts at via)</li>
+      </ul>
+      <p><strong>At final configuration:</strong></p>
+      <ul>
+        <li>$q_{k_2}(t_{f_2}) = q_{k_f}$ (final position)</li>
+        <li>$\dot{q}_{k_2}(t_{f_2}) = 0$ (stops at end)</li>
+      </ul>
+      <p><strong>Matching conditions at via:</strong></p>
+      <ul>
+        <li>$\dot{q}_{k_1}(t_{f_1}) = \dot{q}_{k_2}(0)$ (velocity continuity)</li>
+        <li>$\ddot{q}_{k_1}(t_{f_1}) = \ddot{q}_{k_2}(0)$ (acceleration continuity)</li>
+      </ul>
+    </div>
+
+    <!-- Matrix form -->
+    <p><strong>Matrix form</strong> $\mathbf{A}\mathbf{x} = \mathbf{b}$:
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=34" target="_blank">PDF p.34</a>
+    </p>
+
+    $$\begin{bmatrix} 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 1 & t_{f_1} & t_{f_1}^2 & t_{f_1}^3 & 0 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & t_{f_2} & t_{f_2}^2 & t_{f_2}^3 \\ 0 & 0 & 0 & 0 & 0 & 1 & 2t_{f_2} & 3t_{f_2}^2 \\ 0 & 1 & 2t_{f_1} & 3t_{f_1}^2 & 0 & -1 & 0 & 0 \\ 0 & 0 & 2 & 6t_{f_1} & 0 & 0 & -2 & 0 \end{bmatrix} \begin{bmatrix} a_{10} \\ a_{11} \\ a_{12} \\ a_{13} \\ a_{20} \\ a_{21} \\ a_{22} \\ a_{23} \end{bmatrix} = \begin{bmatrix} q_{k_0} \\ q_{k_v} \\ 0 \\ q_{k_v} \\ q_{k_f} \\ 0 \\ 0 \\ 0 \end{bmatrix}$$
+
+    <p><strong>Closed-form solution</strong> when $t_f = t_{f_1} = t_{f_2}$:
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=34" target="_blank">PDF p.34</a>
+    </p>
+
+    $$a_{10} = \theta_0, \qquad a_{20} = \theta_v$$
+    $$a_{11} = 0, \qquad a_{21} = \frac{3\theta_g - 3\theta_0}{4t_f}$$
+    $$a_{12} = \frac{12\theta_v - 3\theta_g - 9\theta_0}{4t_f^2}, \qquad a_{22} = \frac{-12\theta_v + 6\theta_g + 6\theta_0}{4t_f^2}$$
+    $$a_{13} = \frac{-8\theta_v + 3\theta_g + 5\theta_0}{4t_f^3}, \qquad a_{23} = \frac{8\theta_v - 5\theta_g - 3\theta_0}{4t_f^3}$$
+
+    <!-- Worked Example: Matching -->
+    <h3 id="sec-7-12-example">Worked Example: Matching Velocities and Accelerations
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=35" target="_blank">PDF p.35</a>
+    </h3>
+
+    <div class="callout callout-example">
+      <div class="callout-label">Worked Example</div>
+      <p><strong>Problem</strong>: Let $\theta_0 = 5°$, $\theta_v = 15°$, and $\theta_f = -10°$. Match velocities and accelerations at the via. Duration per segment is 2 seconds.</p>
+    </div>
+
+    <button class="solution-toggle" data-target="sol-ch7-match">Show Solution</button>
+    <div id="sol-ch7-match" class="solution-content">
+      <p><strong>Segment 1</strong> ($\dot{\theta}_0 = 0$):</p>
+      $$a_{10} = 5, \quad a_{11} = 0$$
+      $$a_{12} = \frac{12(15) - 3(-10) - 9(5)}{4(2^2)} = 10.31$$
+      $$a_{13} = \frac{-8(15) + 3(-10) + 5(5)}{4(2^3)} = -3.91$$
+
+      <p><strong>Segment 2</strong> ($\dot{\theta}_g = 0$):</p>
+      $$a_{20} = 15, \quad a_{21} = \frac{3(-10) - 3(5)}{4(2)} = -5.63$$
+      $$a_{22} = \frac{-12(15) + 6(-10) + 6(5)}{4(2^2)} = -13.13$$
+      $$a_{23} = \frac{8(15) - 5(-10) - 3(5)}{4(2^3)} = 4.84$$
+
+      <p><strong>Result</strong>: The acceleration profile is now <strong>continuous at the via point</strong>, unlike the prescribed velocity method.</p>
+    </div>
+
+    <div class="figure-desc">Figure (page 36): Single plot with position, velocity, and acceleration vs. time. Velocity and acceleration are both continuous at the via point ($t = 2$ s).
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=36" target="_blank">PDF p.36</a>
+    </div>
+
+    <!-- Enrichment: Prescribed vs Matching comparison -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Prescribed Velocity vs. Matching &mdash; A Trade-Off Summary</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>Prescribed Velocity (Section 7.11):</strong></p>
+          <ul>
+            <li><strong>Advantage</strong>: Each segment can be solved independently (decoupled). Computationally simple.</li>
+            <li><strong>Disadvantage</strong>: Acceleration is discontinuous at via points.</li>
+            <li><strong>When to use</strong>: Slow motions where jerk is not a concern.</li>
+          </ul>
+          <p><strong>Matching Velocities and Accelerations (Section 7.12):</strong></p>
+          <ul>
+            <li><strong>Advantage</strong>: Both velocity <em>and</em> acceleration are continuous, producing smoother motion.</li>
+            <li><strong>Disadvantage</strong>: Segments are <em>coupled</em> &mdash; all 8 coefficients must be solved simultaneously. You lose the ability to independently prescribe via-point velocity.</li>
+            <li><strong>When to use</strong>: High-speed operations, delicate payloads, or vibration-sensitive processes.</li>
+          </ul>
+          <p><strong>Generalization</strong>: For $n$ via points with $n+1$ segments, the matching approach produces a $(4(n+1)) \times (4(n+1))$ linear system. It remains a <em>banded</em> matrix system, making it efficient even for many via points.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Quiz: Matching -->
+    <div class="quiz">
+      <div class="quiz-header">Self-Test</div>
+      <div class="quiz-question">
+        <p>In the matching velocities and accelerations method with 2 cubic segments, how many coefficients and boundary conditions are there?</p>
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">4 coefficients and 4 conditions</button>
+        <button class="quiz-option" data-correct="false">6 coefficients and 6 conditions</button>
+        <button class="quiz-option" data-correct="true">8 coefficients and 8 conditions</button>
+        <button class="quiz-option" data-correct="false">12 coefficients and 12 conditions</button>
+      </div>
+      <div class="quiz-feedback" data-correct="Correct! Two cubic polynomials have $2 \times 4 = 8$ coefficients. The 8 conditions are: 2 at the start (position, velocity), 4 at the via point (position from each segment, velocity matching, acceleration matching), and 2 at the end (position, velocity)." data-incorrect="Each cubic polynomial has 4 coefficients, and there are 2 segments, giving 8 total coefficients requiring 8 boundary conditions."></div>
+    </div>
+
+    <div class="concept-check" data-concept="matching-vel-acc">
+      <span class="concept-check-label">How well do you understand matching velocities and accelerations?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 7.13 CARTESIAN SCHEME -->
+    <!-- ============================================================ -->
+    <h2 id="sec-7-13">7.13 Cartesian Scheme (CP)
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=37" target="_blank">PDF p.37</a>
+    </h2>
+
+    <div class="callout callout-definition">
+      <div class="callout-label">Definition</div>
+      <p><strong>Cartesian Scheme</strong>: A method to establish the motion of a desired path of the end-effector by generating the trajectory in the task space, ${}^{0}_{ee}\mathbf{T}_0 \to {}^{0}_{ee}\mathbf{T}_f$.</p>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-label">Warning &mdash; Rotation Matrix Limitation</div>
+      <p>One <strong>cannot</strong> generate a trajectory of a rotation matrix ${}^{0}_{ee}\mathbf{R}$ directly, because generating a trajectory for each element independently does not ensure that the resulting matrix maintains the properties of $\mathbf{R}$ (orthogonality, unit determinant).</p>
+    </div>
+
+    <p><strong>Independent parameters for trajectory</strong>: The trajectory is generated with the independent elements of the position vector ($x, y, z$) and the Euler angles ($\alpha, \beta, \gamma$), or the parameters of the equivalent angle/axis method or quaternions.</p>
+
+    <p><strong>Inverse kinematics requirement</strong>: Since the joint variables are the input variables of a manipulator, the inverse kinematics and the inverse velocity/acceleration problems must be solved at each moment:</p>
+    $$\dot{\boldsymbol{q}} = \mathbf{J}^{-1} \dot{\boldsymbol{x}}$$
+    <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=37" target="_blank">PDF p.37</a>
+
+    <div class="callout callout-warning">
+      <div class="callout-label">Warning &mdash; Singularity</div>
+      <p>This solution fails in case the manipulator is in a singular configuration ($\det(\mathbf{J}) = 0$). Near singularities, joint velocities become very large.</p>
+    </div>
+
+    <p><strong>Trapezoidal scheme in Cartesian space</strong>: A common scheme adopted for the Cartesian space is the trapezoidal scheme. The main advantage is that during the constant velocity phase, the inverse velocity has to be solved only once.
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=38" target="_blank">PDF p.38</a>
+    </p>
+
+    <div class="figure-desc">Figure (page 38): Three side-by-side plots showing the trapezoidal scheme in Cartesian space &mdash; Time vs Displacement, Time vs Velocity (trapezoidal), Time vs Acceleration (step functions).
+      <a class="source-link" href="../Slides/MSE492 - Chapter7.pdf#page=38" target="_blank">PDF p.38</a>
+    </div>
+
+    <!-- Enrichment: Rotation matrix interpolation -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: Why You Cannot Interpolate Rotation Matrices Directly</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p>A rotation matrix $\mathbf{R} \in SO(3)$ must satisfy: $\mathbf{R}^\mathsf{T}\mathbf{R} = \mathbf{I}$ and $\det(\mathbf{R}) = +1$.</p>
+          <p>If you linearly interpolate element-by-element:</p>
+          $$\mathbf{R}(t) = (1 - s(t))\,\mathbf{R}_0 + s(t)\,\mathbf{R}_f$$
+          <p>the intermediate matrices will generally <em>not</em> be valid rotation matrices &mdash; they represent deformation, not rotation.</p>
+          <p><strong>Correct approaches:</strong></p>
+          <ol>
+            <li><strong>Euler angle interpolation</strong>: Simple but suffers from gimbal lock when $\beta = \pm 90°$.</li>
+            <li><strong>Angle-axis interpolation</strong>: Compute relative rotation, extract angle/axis, interpolate the angle.</li>
+            <li><strong>Quaternion interpolation (SLERP)</strong>: The preferred method &mdash; singularity-free, constant angular velocity, numerically stable.</li>
+          </ol>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Enrichment: Singularity problem -->
+    <div class="collapsible">
+      <div class="collapsible-header">Enrichment: The Singularity Problem in Cartesian Trajectories</div>
+      <div class="collapsible-body"><div class="collapsible-body-inner">
+        <div class="callout callout-enrichment">
+          <div class="callout-label">Enrichment &mdash; Explanation</div>
+          <p><strong>What happens at a singularity</strong>: The Jacobian $\mathbf{J}$ loses rank ($\det(\mathbf{J}) = 0$). Since $\dot{\boldsymbol{q}} = \mathbf{J}^{-1}\dot{\boldsymbol{x}}$, the inverse does not exist.</p>
+          <ul>
+            <li><strong>Near a singularity</strong>: $\mathbf{J}^{-1}$ has very large entries &mdash; small Cartesian velocities require enormous joint velocities.</li>
+            <li><strong>At a singularity</strong>: One or more joint velocities become infinite.</li>
+          </ul>
+          <p><strong>Mitigation strategies</strong>:</p>
+          <ul>
+            <li>Plan Cartesian paths that avoid singular configurations</li>
+            <li>Use the <em>damped least-squares</em> pseudo-inverse: $\mathbf{J}^{\dagger} = \mathbf{J}^\mathsf{T}(\mathbf{J}\mathbf{J}^\mathsf{T} + \lambda^2\mathbf{I})^{-1}$</li>
+            <li>Use redundant manipulators with extra freedom to avoid singular postures</li>
+          </ul>
+          <p><strong>Reference</strong>: <a href="https://robodk.com/blog/robot-singularities/" target="_blank">RoboDK Blog on Robot Singularities</a></p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="concept-check" data-concept="cartesian-scheme">
+      <span class="concept-check-label">How well do you understand the Cartesian trajectory scheme?</span>
+      <button class="confidence-btn" data-level="yes">Got it</button>
+      <button class="confidence-btn" data-level="review">Need review</button>
+      <button class="confidence-btn" data-level="no">Not yet</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CHAPTER SUMMARY -->
+    <!-- ============================================================ -->
+    <div class="chapter-summary">
+      <h3>Chapter 7 Summary</h3>
+      <p>Trajectory generation converts geometric paths into time-parameterized motion plans. The key PTP schemes are:</p>
+      <ul>
+        <li><strong>Cubic</strong>: 4 coefficients, matches position and velocity, but acceleration is discontinuous</li>
+        <li><strong>Quintic</strong>: 6 coefficients, additionally matches acceleration, smooth everywhere</li>
+        <li><strong>Trapezoidal (LSPB)</strong>: 3 phases, piecewise equations, popular in industry for simplicity</li>
+      </ul>
+      <p>For continuous paths, via-point methods (prescribed velocity or matched vel/acc) connect segments, and the Cartesian scheme plans directly in task space but requires solving inverse kinematics at each step.</p>
+      <div class="summary-stats">
+        <div class="summary-stat">
+          <div class="summary-stat-num">3</div>
+          <div class="summary-stat-label">PTP Schemes</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-num">2</div>
+          <div class="summary-stat-label">Via-Point Methods</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-num">1</div>
+          <div class="summary-stat-label">Cartesian Scheme</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- FLASHCARD DECK -->
+    <!-- ============================================================ -->
+    <div class="flashcard-deck">
+      <div class="flashcard-deck-header">Key Concept Flashcards</div>
+      <div class="flashcard-container">
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Trajectory vs. Path</div>
+            <div class="flashcard-text">What is the difference between a path and a trajectory?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">A <strong>path</strong> is purely geometric &mdash; the set of configurations with no timing. A <strong>trajectory</strong> is a path combined with a time law: it specifies position, velocity, and acceleration as functions of time. $\theta(t) = \theta(s(t))$</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Cubic Polynomial Coefficients</div>
+            <div class="flashcard-text">What are the cubic polynomial coefficients for the zero-velocity case?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$a_0 = q_{k_0}$, $a_1 = 0$<br>$a_2 = \frac{3}{t_f^2}(q_{k_f} - q_{k_0})$<br>$a_3 = -\frac{2}{t_f^3}(q_{k_f} - q_{k_0})$</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Cubic vs. Quintic</div>
+            <div class="flashcard-text">What is the key smoothness difference between cubic and quintic trajectory schemes?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">Cubic: 4 coefficients, matches position and velocity at endpoints. <strong>Acceleration is discontinuous</strong> (infinite jerk).<br><br>Quintic: 6 coefficients, additionally matches acceleration. <strong>Acceleration is continuous</strong> (finite jerk everywhere).</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Trapezoidal Blend Time</div>
+            <div class="flashcard-text">What is the quadratic equation for blend time $t_b$ in the trapezoidal scheme?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">$\ddot{\theta}_{k_b} \, t_b^2 - \ddot{\theta}_{k_b} \, t_f \, t_b + (\theta_{k_f} - \theta_{k_0}) = 0$<br><br>Solve with quadratic formula, taking the minus sign to ensure $t_b < t_f/2$.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Via Points: Prescribed vs. Matching</div>
+            <div class="flashcard-text">What is the key trade-off between prescribed velocity and matching vel/acc at via points?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text"><strong>Prescribed</strong>: Segments solved independently (simple), but acceleration is discontinuous at via points.<br><br><strong>Matching</strong>: Segments coupled in one system (8x8 for 2 segments), but both velocity and acceleration are continuous.</div>
+          </div>
+        </div>
+        <div class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-label">Cartesian Trajectory Requirement</div>
+            <div class="flashcard-text">What must be solved at each time step for a Cartesian trajectory, and when does it fail?</div>
+            <div class="flashcard-hint">Click to flip</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-label">Answer</div>
+            <div class="flashcard-text">Inverse kinematics and inverse velocity must be solved at each moment: $\dot{\boldsymbol{q}} = \mathbf{J}^{-1} \dot{\boldsymbol{x}}$.<br><br>It <strong>fails at singularities</strong> where $\det(\mathbf{J}) = 0$ and $\mathbf{J}^{-1}$ does not exist.</div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="flashcard-btn flashcard-prev">Prev</button>
+        <span class="flashcard-counter">1 / 6</span>
+        <button class="flashcard-btn flashcard-next">Next</button>
+        <button class="flashcard-shuffle">Shuffle</button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- QUIZ SCORE -->
+    <!-- ============================================================ -->
+    <div class="quiz-score"></div>
+
+    <!-- ============================================================ -->
+    <!-- QUICK REFERENCE PANEL -->
+    <!-- ============================================================ -->
+    <button class="quick-ref-toggle" title="Quick Reference">&Sigma;</button>
+    <div class="quick-ref-panel">
+      <h3>Ch 7 Quick Reference</h3>
+      <div class="ref-item">
+        <div class="ref-name">Cubic Position</div>
+        <div class="ref-eq">$q_k(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Cubic Coefficients (zero vel.)</div>
+        <div class="ref-eq">$a_2 = \frac{3}{t_f^2}(q_{k_f} - q_{k_0})$, $a_3 = -\frac{2}{t_f^3}(q_{k_f} - q_{k_0})$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Quintic Position</div>
+        <div class="ref-eq">$q_k(t) = a_0 + a_1 t + a_2 t^2 + a_3 t^3 + a_4 t^4 + a_5 t^5$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Trapezoidal Blend Time</div>
+        <div class="ref-eq">$\ddot{\theta}_{k_b} t_b^2 - \ddot{\theta}_{k_b} t_f t_b + (\theta_{k_f} - \theta_{k_0}) = 0$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Acceleration Factor</div>
+        <div class="ref-eq">$\ddot{\theta}_{k_b} = \frac{4(\theta_{k_f} - \theta_{k_0})}{t_f^2} f_b$, $f_b \geq 1$</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Cartesian Inverse Velocity</div>
+        <div class="ref-eq">$\dot{\boldsymbol{q}} = \mathbf{J}^{-1} \dot{\boldsymbol{x}}$</div>
+      </div>
+    </div>
+
+    <!-- Page navigation -->
+    <nav class="page-nav"></nav>
+
+  </main>
+
+  <script src="assets/nav.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>
